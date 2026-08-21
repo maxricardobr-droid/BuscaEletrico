@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carro PCD — Comparador de elétricos e híbridos</title>
+<style>
+  :root {
+    --bg: #0b131e; --bg-alt: #0f1826;
+    --panel: #121d2c; --border: #263349; --border-strong: #34445e;
+    --text: #dfe6ee; --text-muted: #8a9ab0;
+    --cyan: #5ad0e8; --cyan-bg: rgba(90,208,232,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    background:
+      linear-gradient(var(--bg), var(--bg)),
+      repeating-linear-gradient(0deg, rgba(90,208,232,0.035) 0px, rgba(90,208,232,0.035) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(90deg, rgba(90,208,232,0.035) 0px, rgba(90,208,232,0.035) 1px, transparent 1px, transparent 40px);
+    color: var(--text); margin: 0; padding: 0 16px 60px; line-height: 1.5;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  header { padding: 40px 4px 24px; border-bottom: 2px solid var(--border-strong); margin-bottom: 28px; }
+  header h1 { font-size: 24px; font-weight: 800; margin: 0; color: #fff; text-transform: uppercase; letter-spacing: 0.05em; }
+  header p { color: var(--text-muted); font-size: 13.5px; margin: 8px 0 0; max-width: 620px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  a.card {
+    display: block; background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    padding: 22px; text-decoration: none; color: var(--text); transition: border-color .15s, transform .15s;
+  }
+  a.card:hover { border-color: var(--cyan); transform: translateY(-2px); }
+  a.card .tag {
+    display: inline-block; font-size: 10.5px; font-weight: 700; color: var(--cyan); background: var(--cyan-bg);
+    padding: 3px 9px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;
+  }
+  a.card h2 { font-size: 16px; margin: 0 0 8px; color: #fff; }
+  a.card p { font-size: 13px; color: var(--text-muted); margin: 0; }
+  footer { margin-top: 40px; font-size: 11.5px; color: var(--text-muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Carro PCD</h1>
+    <p>Ferramentas para comparar carros elétricos e híbridos entre R$100mil e R$200mil, com foco em compra com desconto/isenção PCD — preço, custo total de propriedade, histórico FIPE e ficha técnica.</p>
+  </header>
+  <div class="cards">
+    <a class="card" href="CustoReal.html">
+      <span class="tag">Comparador</span>
+      <h2>CustoReal</h2>
+      <p>Ranking de custo total de propriedade (TCO) por modelo, com filtro por marca, faixa de preço, categoria e desconto PCD.</p>
+    </a>
+    <a class="card" href="fipe-historico.html">
+      <span class="tag">Histórico</span>
+      <h2>Histórico FIPE</h2>
+      <p>Evolução mensal do valor FIPE por veículo, com gráfico e comparação entre vários modelos ao mesmo tempo.</p>
+    </a>
+    <a class="card" href="especificacoes.html">
+      <span class="tag">Ficha técnica</span>
+      <h2>Especificações técnicas</h2>
+      <p>Potência, bateria, autonomia, recarga e dimensões de cada versão — coletadas dos sites dos fabricantes.</p>
+    </a>
+  </div>
+  <footer>Dados: Tabela FIPE oficial + pesquisa manual nos sites dos fabricantes. Uso pessoal/informativo.</footer>
+</div>
+</body>
+</html>

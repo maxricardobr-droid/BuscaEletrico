@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha Técnica — Elétricos e Híbridos</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#171a21;
+    --panel-2:#1e222b;
+    --border:#2a2f3a;
+    --text:#e7e9ee;
+    --muted:#9aa3b2;
+    --orange:#ffb454;
+    --orange-dim:#8a5f1f;
+    --green:#3ecf8e;
+    --blue:#5b9cff;
+    --purple:#b18aff;
+    --red:#ff6b6b;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(1200px 800px at 10% -10%, #3a2a12 0%, transparent 55%),
+               radial-gradient(1000px 700px at 100% 0%, #10202f 0%, transparent 50%),
+               var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  header .logo{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(135deg,var(--orange),var(--orange-dim));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#2a1a05;font-size:18px;
+    flex:none;
+  }
+  header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+  header a.back{margin-left:auto;color:var(--muted);font-size:12.5px;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:7px 12px;white-space:nowrap;}
+  header a.back:hover{color:var(--text);border-color:var(--orange);}
+
+  .search-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px;position:relative;
+  }
+  .search-box{position:relative;}
+  .search-box input{
+    width:100%;padding:13px 44px 13px 16px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:15px;outline:none;transition:border-color .15s;
+  }
+  .search-box input:focus{border-color:var(--orange);}
+  .search-box .icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px;padding-left:2px;}
+
+  .results{
+    margin-top:10px;max-height:340px;overflow-y:auto;border-radius:10px;
+    border:1px solid var(--border);display:none;background:var(--panel-2);
+  }
+  .results.open{display:block;}
+  .result-item{
+    padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .result-item:last-child{border-bottom:none;}
+  .result-item:hover, .result-item.active{background:#232833;}
+  .result-item .ri-main{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .result-item .ri-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .result-item .ri-sub{font-size:12px;color:var(--muted);}
+  .badge{
+    font-size:10.5px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;letter-spacing:.02em;flex:none;
+  }
+  .badge.BEV{background:rgba(62,207,142,.15);color:var(--green);}
+  .badge.HEV{background:rgba(91,156,255,.15);color:var(--blue);}
+  .badge.PHEV{background:rgba(177,138,255,.15);color:var(--purple);}
+
+  .empty-state{
+    text-align:center;color:var(--muted);padding:70px 20px;font-size:14px;
+  }
+  .empty-state .big{font-size:34px;margin-bottom:10px;}
+
+  #content{display:none;margin-top:22px;}
+  #content.open{display:block;}
+  #groupHeading{font-size:15px;color:var(--muted);margin:0 0 14px;}
+  #groupHeading strong{color:var(--text);}
+
+  .cards{display:flex;flex-direction:column;gap:16px;}
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;
+  }
+  .card.highlight{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange) inset;}
+  .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .card-title{font-size:17px;font-weight:700;margin:0;}
+  .card-sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .card-price{text-align:right;flex:none;}
+  .card-price .value{font-size:22px;font-weight:800;color:var(--orange);}
+  .card-price .label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+
+  .spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:6px;}
+  .spec-section{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+  .spec-section h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--orange);font-weight:700;}
+  .spec-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;border-bottom:1px dashed var(--border);}
+  .spec-row:last-child{border-bottom:none;}
+  .spec-row .k{color:var(--muted);}
+  .spec-row .v{font-weight:600;text-align:right;}
+
+  .note-box{
+    margin-top:14px;background:rgba(255,180,84,.08);border:1px solid rgba(255,180,84,.3);
+    border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text);line-height:1.55;
+  }
+  .note-box .nb-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--orange);font-weight:700;margin-bottom:4px;}
+
+  .sources{margin-top:12px;font-size:12px;color:var(--muted);}
+  .sources a{color:var(--blue);margin-right:10px;white-space:nowrap;}
+  .card-foot{margin-top:12px;font-size:11px;color:var(--muted);}
+
+  .footer-note{color:var(--muted);font-size:11.5px;margin-top:26px;line-height:1.6;text-align:center;}
+  a{color:var(--blue);}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#2c313d;border-radius:20px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">FT</div>
+    <div>
+      <h1>Ficha Técnica — Elétricos &amp; Híbridos</h1>
+      <p>Especificações completas dos modelos com preço de tabela entre R$100mil e R$200mil</p>
+    </div>
+    <a class="back" href="CustoReal.html">← voltar ao comparador</a>
+  </header>
+
+  <div class="search-card">
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Digite marca, modelo ou versão… ex: BYD Dolphin, Aion Y, King DM-i" autocomplete="off">
+      <span class="icon">⌕</span>
+    </div>
+    <div id="results" class="results"></div>
+    <div class="hint" id="hint">Carregando ficha técnica…</div>
+  </div>
+
+  <div id="emptyState" class="empty-state">
+    <div class="big">📄</div>
+    Busque um modelo acima para ver a ficha técnica completa de todas as versões salvas.
+  </div>
+
+  <div id="content">
+    <p id="groupHeading"></p>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <div class="footer-note">
+    Especificações coletadas manualmente via pesquisa web (site do fabricante + imprensa especializada), sem
+    verificação humana das fichas técnicas — confirme o preço e as configurações exatas na concessionária antes de
+    decidir. Ver observações em cada versão para divergências entre fontes.
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Configuração Supabase --------------------------------------------
+  const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
+  const REST = SUPABASE_URL + "/rest/v1";
+  const HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY };
+
+  const currencyFmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  const numFmt = (v, suffix) => (v === null || v === undefined ? null : (Number(v).toLocaleString("pt-BR") + (suffix || "")));
+
+  function normalize(s) {
+    return (s || "").toString().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  }
+  function escapeHtml(s) {
+    return (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+  function fmtDate(d) {
+    if (!d) return null;
+    const [y, m, day] = d.split("-");
+    return day + "/" + m + "/" + y;
+  }
+
+  let catalogo = [];       // todas as 52 linhas de especificacoes_tecnicas
+  let activeResultIndex = -1;
+  let currentMatches = [];
+
+  const els = {
+    searchInput: document.getElementById("searchInput"),
+    results: document.getElementById("results"),
+    hint: document.getElementById("hint"),
+    emptyState: document.getElementById("emptyState"),
+    content: document.getElementById("content"),
+    groupHeading: document.getElementById("groupHeading"),
+    cards: document.getElementById("cards"),
+  };
+
+  // ---- Carrega catálogo completo (dataset pequeno, cabe tudo em uma chamada) --
+  async function carregarCatalogo() {
+    try {
+      const url = REST + "/especificacoes_tecnicas?select=*&order=marca.asc,modelo.asc,preco_tabela.asc";
+      const resp = await fetch(url, { headers: HEADERS });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      catalogo = await resp.json();
+      els.hint.textContent = catalogo.length.toLocaleString("pt-BR") + " versões/trims monitorados — digite para buscar.";
+    } catch (err) {
+      els.hint.textContent = "Não foi possível carregar a ficha técnica (" + err.message + "). Verifique a conexão com o Supabase.";
+      els.hint.style.color = "var(--red)";
+      console.error(err);
+    }
+  }
+
+  // ---- Busca -------------------------------------------------------------
+  function buscar(q) {
+    const nq = normalize(q).trim();
+    if (!nq) return [];
+    const termos = nq.split(/\s+/);
+    return catalogo.filter((v) => {
+      const alvo = normalize(v.marca + " " + v.modelo + " " + v.versao + " " + v.ano_modelo);
+      return termos.every((t) => alvo.indexOf(t) !== -1);
+    }).slice(0, 40);
+  }
+
+  function renderResults(matches) {
+    currentMatches = matches;
+    activeResultIndex = -1;
+    if (!matches.length) {
+      els.results.classList.remove("open");
+      els.results.innerHTML = "";
+      return;
+    }
+    els.results.innerHTML = matches.map((v, i) => {
+      return '<div class="result-item" data-idx="' + i + '">' +
+        '<div class="ri-main">' +
+          '<div class="ri-title">' + escapeHtml(v.marca) + " " + escapeHtml(v.versao) + '</div>' +
+          '<div class="ri-sub">' + escapeHtml(v.ano_modelo || "") + (v.preco_tabela ? " · " + currencyFmt.format(v.preco_tabela) : "") + '</div>' +
+        '</div>' +
+        '<span class="badge ' + v.tipo_motorizacao + '">' + v.tipo_motorizacao + '</span>' +
+      '</div>';
+    }).join("");
+    els.results.classList.add("open");
+  }
+
+  els.searchInput.addEventListener("input", () => renderResults(buscar(els.searchInput.value)));
+  els.searchInput.addEventListener("focus", () => { if (els.searchInput.value.trim()) renderResults(buscar(els.searchInput.value)); });
+  els.searchInput.addEventListener("keydown", (e) => {
+    if (!currentMatches.length) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); activeResultIndex = Math.min(activeResultIndex + 1, currentMatches.length - 1); highlightActive(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); activeResultIndex = Math.max(activeResultIndex - 1, 0); highlightActive(); }
+    else if (e.key === "Enter") { e.preventDefault(); const v = currentMatches[activeResultIndex] || currentMatches[0]; if (v) mostrarGrupo(v.marca, v.modelo, v.versao); }
+    else if (e.key === "Escape") { els.results.classList.remove("open"); }
+  });
+  function highlightActive() {
+    Array.from(els.results.children).forEach((el, i) => el.classList.toggle("active", i === activeResultIndex));
+  }
+  els.results.addEventListener("click", (e) => {
+    const item = e.target.closest(".result-item");
+    if (!item) return;
+    const v = currentMatches[parseInt(item.dataset.idx, 10)];
+    if (v) mostrarGrupo(v.marca, v.modelo, v.versao);
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-card")) els.results.classList.remove("open");
+  });
+
+  function specRow(label, value) {
+    if (value === null || value === undefined || value === "") return "";
+    return '<div class="spec-row"><span class="k">' + label + '</span><span class="v">' + escapeHtml(value.toString()) + '</span></div>';
+  }
+
+  function renderCard(v, versaoDestaque, idx) {
+    idx = idx === undefined ? "" : idx;
+    const highlight = versaoDestaque && normalize(v.versao) === normalize(versaoDestaque);
+
+    const desempenho = [
+      specRow("Potência", numFmt(v.potencia_motor_cv, " cv")),
+      specRow("Torque", numFmt(v.torque_nm, " Nm")),
+      specRow("0–100 km/h", v.aceleracao_0_100_s !== null ? v.aceleracao_0_100_s + " s" : null),
+      specRow("Velocidade máxima", numFmt(v.velocidade_max_kmh, " km/h")),
+      specRow("Tração", v.tracao),
+    ].join("");
+
+    const bateria = [
+      specRow("Capacidade da bateria", v.capacidade_bateria_kwh !== null ? v.capacidade_bateria_kwh + " kWh" : null),
+      specRow("Autonomia elétrica", numFmt(v.autonomia_eletrica_km, " km")),
+      specRow("Autonomia total", numFmt(v.autonomia_total_km, " km")),
+      specRow("Garantia da bateria", v.garantia_bateria),
+    ].join("");
+
+    const recarga = [
+      specRow("Potência AC", v.potencia_carregamento_ac_kw !== null ? v.potencia_carregamento_ac_kw + " kW" : null),
+      specRow("Potência DC", v.potencia_carregamento_dc_kw !== null ? v.potencia_carregamento_dc_kw + " kW" : null),
+      specRow("Tempo de recarga", v.tempo_recarga_resumo),
+    ].join("");
+
+    const dimensoes = [
+      specRow("Comprimento", numFmt(v.comprimento_mm, " mm")),
+      specRow("Largura", numFmt(v.largura_mm, " mm")),
+      specRow("Altura", numFmt(v.altura_mm, " mm")),
+      specRow("Entre-eixos", numFmt(v.entre_eixos_mm, " mm")),
+      specRow("Porta-malas", numFmt(v.porta_malas_litros, " L")),
+      specRow("Peso", numFmt(v.peso_kg, " kg")),
+      specRow("Tanque de combustível", v.capacidade_tanque_litros !== null ? v.capacidade_tanque_litros + " L" : null),
+    ].join("");
+
+    const sections = [
+      desempenho ? '<div class="spec-section"><h4>Desempenho</h4>' + desempenho + '</div>' : "",
+      bateria ? '<div class="spec-section"><h4>Bateria &amp; autonomia</h4>' + bateria + '</div>' : "",
+      recarga ? '<div class="spec-section"><h4>Recarga</h4>' + recarga + '</div>' : "",
+      dimensoes ? '<div class="spec-section"><h4>Dimensões &amp; capacidade</h4>' + dimensoes + '</div>' : "",
+    ].join("");
+
+    const obsHtml = v.observacoes
+      ? '<div class="note-box"><div class="nb-label">Observações</div>' + escapeHtml(v.observacoes) + '</div>'
+      : "";
+
+    const fontes = Array.isArray(v.fontes) ? v.fontes : [];
+    const sourcesHtml = fontes.length
+      ? '<div class="sources">Fontes: ' + fontes.map((u, i) => '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener">[' + (i + 1) + ']</a>').join("") + '</div>'
+      : "";
+
+    const coleta = fmtDate(v.data_coleta);
+
+    return '<div class="card' + (highlight ? " highlight" : "") + '" id="card-' + idx + '">' +
+      '<div class="card-head">' +
+        '<div>' +
+          '<h3 class="card-title">' + escapeHtml(v.versao) + '<span class="badge ' + v.tipo_motorizacao + '" style="margin-left:8px;">' + v.tipo_motorizacao + '</span></h3>' +
+          '<div class="card-sub">' + escapeHtml(v.marca) + " " + escapeHtml(v.modelo) + (v.ano_modelo ? " · ano-modelo " + escapeHtml(v.ano_modelo) : "") + '</div>' +
+        '</div>' +
+        '<div class="card-price"><div class="label">Preço de tabela</div><div class="value">' + (v.preco_tabela ? currencyFmt.format(v.preco_tabela) : "—") + '</div></div>' +
+      '</div>' +
+      '<div class="spec-grid">' + sections + '</div>' +
+      obsHtml +
+      sourcesHtml +
+      (coleta ? '<div class="card-foot">Dados coletados em ' + coleta + '</div>' : "") +
+    '</div>';
+  }
+
+  // fix: precisa do índice real na lista pro scroll funcionar — sobrescreve renderCard com wrapper
+  function renderCards(grupo, versaoDestaque) {
+    return grupo.map((v, i) => renderCard(v, versaoDestaque, i)).join("");
+  }
+
+  // ---- Deep-link via URL: ?marca=X&modelo=Y[&versao=Z] -------------------
+  function aplicarSelecaoViaURL() {
+    const params = new URLSearchParams(window.location.search);
+    const marca = params.get("marca");
+    const modelo = params.get("modelo");
+    if (!marca || !modelo) return;
+    const versao = params.get("versao");
+    mostrarGrupo(marca, modelo, versao);
+  }
+
+  function mostrarGrupo(marca, modelo, versaoDestaque) {
+    els.searchInput.value = "";
+    els.results.classList.remove("open");
+
+    const grupo = catalogo.filter((v) =>
+      normalize(v.marca) === normalize(marca) && normalize(v.modelo) === normalize(modelo)
+    );
+    if (!grupo.length) {
+      els.emptyState.style.display = "block";
+      els.emptyState.innerHTML = '<div class="big">🤷</div>Nenhuma ficha técnica encontrada para "' + escapeHtml(marca) + " " + escapeHtml(modelo) + '".';
+      els.content.classList.remove("open");
+      return;
+    }
+    els.emptyState.style.display = "none";
+    els.content.classList.add("open");
+    els.groupHeading.innerHTML = grupo.length + (grupo.length === 1 ? " versão salva para " : " versões salvas para ") +
+      "<strong>" + escapeHtml(marca) + " " + escapeHtml(modelo) + "</strong>";
+    els.cards.innerHTML = renderCards(grupo, versaoDestaque);
+
+    if (versaoDestaque) {
+      const idx = grupo.findIndex((v) => normalize(v.versao) === normalize(versaoDestaque));
+      const alvo = idx >= 0 ? document.getElementById("card-" + idx) : null;
+      if (alvo) setTimeout(() => alvo.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
+    }
+  }
+
+  // ---- Início ----------------------------------------------------------
+  carregarCatalogo().then(aplicarSelecaoViaURL);
+})();
+</script>
+</body>
+</html>

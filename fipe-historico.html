@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Histórico FIPE — Carros Elétricos e Híbridos</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#171a21;
+    --panel-2:#1e222b;
+    --border:#2a2f3a;
+    --text:#e7e9ee;
+    --muted:#9aa3b2;
+    --green:#3ecf8e;
+    --green-dim:#1f7a54;
+    --blue:#5b9cff;
+    --orange:#ffb454;
+    --pink:#ff7ab6;
+    --purple:#b18aff;
+    --red:#ff6b6b;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(1200px 800px at 10% -10%, #12331f 0%, transparent 55%),
+               radial-gradient(1000px 700px at 100% 0%, #10202f 0%, transparent 50%),
+               var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  header .logo{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(135deg,var(--green),var(--green-dim));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#08150f;font-size:18px;
+    flex:none;
+  }
+  header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+
+  .search-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px;position:relative;
+  }
+  .search-box{position:relative;}
+  .search-box input{
+    width:100%;padding:13px 44px 13px 16px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:15px;outline:none;transition:border-color .15s;
+  }
+  .search-box input:focus{border-color:var(--green);}
+  .search-box .icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px;padding-left:2px;}
+
+  .results{
+    margin-top:10px;max-height:340px;overflow-y:auto;border-radius:10px;
+    border:1px solid var(--border);display:none;background:var(--panel-2);
+  }
+  .results.open{display:block;}
+  .result-item{
+    padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .result-item:last-child{border-bottom:none;}
+  .result-item:hover, .result-item.active{background:#232833;}
+  .result-item .ri-main{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .result-item .ri-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .result-item .ri-sub{font-size:12px;color:var(--muted);}
+  .badge{
+    font-size:10.5px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;letter-spacing:.02em;
+  }
+  .badge.eletrico{background:rgba(62,207,142,.15);color:var(--green);}
+  .badge.hibrido{background:rgba(91,156,255,.15);color:var(--blue);}
+  .badge.hibrido_plugin{background:rgba(177,138,255,.15);color:var(--purple);}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .chip{
+    display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--border);
+    border-radius:20px;padding:6px 8px 6px 12px;font-size:12.5px;
+  }
+  .chip .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .chip button{
+    background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;
+    padding:2px 4px;border-radius:50%;
+  }
+  .chip button:hover{color:var(--text);background:#2c313d;}
+  .chip.primary{border-color:var(--green);}
+
+  .empty-state{
+    text-align:center;color:var(--muted);padding:70px 20px;font-size:14px;
+  }
+  .empty-state .big{font-size:34px;margin-bottom:10px;}
+
+  #content{display:none;}
+  #content.open{display:block;}
+
+  .summary{
+    margin-top:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;
+  }
+  .stat{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;
+  }
+  .stat .label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .stat .value{font-size:20px;font-weight:700;}
+  .stat .value.pos{color:var(--green);}
+  .stat .value.neg{color:var(--red);}
+  .stat .sub{font-size:11.5px;color:var(--muted);margin-top:4px;}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px;margin-top:16px;
+  }
+  .panel-title{font-size:14px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .panel-title .muted{font-weight:400;color:var(--muted);font-size:12px;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 4px;}
+  .legend .li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+  .legend .li .dot{width:9px;height:9px;border-radius:50%;}
+
+  .chart-wrap{width:100%;overflow-x:auto;}
+  svg{display:block;font-family:inherit;}
+  .axis-label{fill:var(--muted);font-size:10.5px;}
+  .grid-line{stroke:var(--border);stroke-width:1;}
+  .series-line{fill:none;stroke-width:2.4;}
+  .series-dot{stroke:var(--panel);stroke-width:1.5;}
+  .hover-line{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;}
+
+  .tooltip{
+    position:absolute;pointer-events:none;background:#0c0e12;border:1px solid var(--border);
+    border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+    opacity:0;transition:opacity .1s;white-space:nowrap;z-index:5;
+  }
+  .tooltip .tt-date{color:var(--muted);margin-bottom:3px;}
+  .tooltip .tt-row{display:flex;align-items:center;gap:6px;}
+  .tooltip .tt-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;
+    letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);
+  }
+  tbody td{padding:9px 10px;border-bottom:1px solid var(--border);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--panel-2);}
+  .table-scroll{max-height:420px;overflow-y:auto;border-radius:8px;}
+  .mono{font-variant-numeric:tabular-nums;}
+  .delta-pos{color:var(--green);}
+  .delta-neg{color:var(--red);}
+  .delta-zero{color:var(--muted);}
+
+  .footer-note{color:var(--muted);font-size:11.5px;margin-top:26px;line-height:1.6;text-align:center;}
+  a{color:var(--blue);}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#2c313d;border-radius:20px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  @media (max-width:640px){
+    .summary{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">FI</div>
+    <div>
+      <h1>Histórico FIPE — Elétricos &amp; Híbridos</h1>
+      <p>Busque um carro para ver a evolução mensal do valor FIPE</p>
+    </div>
+  </header>
+
+  <div class="search-card">
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Digite marca, modelo ou versão… ex: BYD Dolphin, Model 3, Corolla Hybrid" autocomplete="off">
+      <span class="icon">⌕</span>
+    </div>
+    <div id="results" class="results"></div>
+    <div class="hint" id="hint">Carregando catálogo…</div>
+    <div id="chips" class="chips"></div>
+  </div>
+
+  <div id="emptyState" class="empty-state">
+    <div class="big">🔎</div>
+    Busque um veículo acima para ver a tabela e o gráfico de preços FIPE.
+  </div>
+
+  <div id="content">
+    <div class="summary" id="summary"></div>
+
+    <div class="panel">
+      <div class="panel-title">
+        <span>Evolução do valor FIPE</span>
+        <span class="muted" id="chartRange"></span>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="chart-wrap">
+        <svg id="chart" width="100%" height="320"></svg>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">
+        <span id="tableTitle">Tabela detalhada</span>
+        <span class="muted" id="tableCount"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Mês de referência</th><th>Valor FIPE</th><th>Variação no mês</th><th>Combustível</th></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Dados: Tabela FIPE (coleta mensal automática) + histórico complementar via
+    <a href="https://github.com/fipex-labs/dataset" target="_blank" rel="noopener">fipex-labs/dataset</a> (CC0).
+    Catálogo restrito a veículos elétricos e híbridos monitorados.
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Configuração Supabase --------------------------------------------
+  const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
+  const REST = SUPABASE_URL + "/rest/v1";
+  const HEADERS = {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: "Bearer " + SUPABASE_ANON_KEY
+  };
+
+  const COLORS = ["#3ecf8e", "#5b9cff", "#ffb454", "#ff7ab6", "#b18aff", "#ff6b6b"];
+  const MOTOR_LABEL = { eletrico: "Elétrico", hibrido: "Híbrido", hibrido_plugin: "Híbrido plug-in" };
+  const currencyFmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  const pctFmt = (v) => (v > 0 ? "+" : "") + v.toFixed(1).replace(".", ",") + "%";
+
+  function normalize(s) {
+    return (s || "").toString().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  }
+  function monthLabel(dateStr) {
+    const [y, m] = dateStr.split("-");
+    const meses = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+    return meses[parseInt(m, 10) - 1] + "/" + y.slice(2);
+  }
+  function fullMonthLabel(dateStr) {
+    const [y, m] = dateStr.split("-");
+    const meses = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+    return meses[parseInt(m, 10) - 1] + " de " + y;
+  }
+  // A FIPE usa o ano-código "32000" como sentinela para "0 KM" (lançamento
+  // sem ano-modelo definido) — mostrar isso como texto, não como "32000".
+  function anoLabel(ano) {
+    return ano === 32000 ? "0 km" : ano;
+  }
+
+  // ---- Estado --------------------------------------------------------------
+  let catalogo = [];               // todo o catálogo (marca/modelo/ano)
+  let selecionados = [];           // veículos escolhidos p/ comparação [{id, label, motorizacao, color, series}]
+  let veiculoPrincipal = null;     // id do veículo cuja tabela é exibida
+  let activeResultIndex = -1;
+  let currentMatches = [];
+
+  const els = {
+    searchInput: document.getElementById("searchInput"),
+    results: document.getElementById("results"),
+    hint: document.getElementById("hint"),
+    chips: document.getElementById("chips"),
+    emptyState: document.getElementById("emptyState"),
+    content: document.getElementById("content"),
+    summary: document.getElementById("summary"),
+    chartRange: document.getElementById("chartRange"),
+    legend: document.getElementById("legend"),
+    chart: document.getElementById("chart"),
+    tableTitle: document.getElementById("tableTitle"),
+    tableCount: document.getElementById("tableCount"),
+    tableBody: document.getElementById("tableBody"),
+    tooltip: document.getElementById("tooltip")
+  };
+
+  // ---- Carrega catálogo ------------------------------------------------
+  // O PostgREST limita a 1000 linhas por chamada por padrão — pagina até
+  // esgotar o catálogo (mesma lógica usada na Edge Function coletar-precos-mensal).
+  async function carregarCatalogo() {
+    try {
+      const PAGE = 1000;
+      let de = 0;
+      catalogo = [];
+      while (true) {
+        const url = REST + "/veiculos_eletrificados?select=id,marca_nome,modelo_nome,ano_modelo,motorizacao,codigo_fipe&ativo=eq.true&order=marca_nome.asc,modelo_nome.asc,ano_modelo.asc";
+        const resp = await fetch(url, { headers: Object.assign({}, HEADERS, { Range: de + "-" + (de + PAGE - 1) }) });
+        if (!resp.ok && resp.status !== 206) throw new Error("HTTP " + resp.status);
+        const pagina = await resp.json();
+        catalogo.push(...pagina);
+        if (!pagina.length || pagina.length < PAGE) break;
+        de += PAGE;
+      }
+      els.hint.textContent = catalogo.length.toLocaleString("pt-BR") + " veículos monitorados — digite para buscar.";
+    } catch (err) {
+      els.hint.textContent = "Não foi possível carregar o catálogo (" + err.message + "). Verifique a conexão com o Supabase.";
+      els.hint.style.color = "var(--red)";
+      console.error(err);
+    }
+  }
+
+  // ---- Busca -------------------------------------------------------------
+  function buscar(q) {
+    const nq = normalize(q).trim();
+    if (!nq) return [];
+    const termos = nq.split(/\s+/);
+    return catalogo.filter((v) => {
+      const alvo = normalize(v.marca_nome + " " + v.modelo_nome + " " + v.ano_modelo);
+      return termos.every((t) => alvo.indexOf(t) !== -1);
+    }).slice(0, 40);
+  }
+
+  function renderResults(matches) {
+    currentMatches = matches;
+    activeResultIndex = -1;
+    if (!matches.length) {
+      els.results.classList.remove("open");
+      els.results.innerHTML = "";
+      return;
+    }
+    els.results.innerHTML = matches.map((v, i) => {
+      const cls = v.motorizacao === "eletrico" ? "eletrico" : (v.motorizacao === "hibrido_plugin" ? "hibrido_plugin" : "hibrido");
+      const label = MOTOR_LABEL[v.motorizacao] || v.motorizacao;
+      return '<div class="result-item" data-idx="' + i + '">' +
+        '<div class="ri-main">' +
+          '<div class="ri-title">' + escapeHtml(v.marca_nome) + " " + escapeHtml(v.modelo_nome) + '</div>' +
+          '<div class="ri-sub">Ano modelo ' + anoLabel(v.ano_modelo) + (v.codigo_fipe ? " · código FIPE " + v.codigo_fipe : "") + '</div>' +
+        '</div>' +
+        '<span class="badge ' + cls + '">' + label + '</span>' +
+      '</div>';
+    }).join("");
+    els.results.classList.add("open");
+  }
+
+  function escapeHtml(s) {
+    return (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  els.searchInput.addEventListener("input", () => {
+    renderResults(buscar(els.searchInput.value));
+  });
+  els.searchInput.addEventListener("focus", () => {
+    if (els.searchInput.value.trim()) renderResults(buscar(els.searchInput.value));
+  });
+  els.searchInput.addEventListener("keydown", (e) => {
+    if (!currentMatches.length) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); activeResultIndex = Math.min(activeResultIndex + 1, currentMatches.length - 1); highlightActive(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); activeResultIndex = Math.max(activeResultIndex - 1, 0); highlightActive(); }
+    else if (e.key === "Enter") { e.preventDefault(); const v = currentMatches[activeResultIndex] || currentMatches[0]; if (v) escolherVeiculo(v); }
+    else if (e.key === "Escape") { els.results.classList.remove("open"); }
+  });
+  function highlightActive() {
+    Array.from(els.results.children).forEach((el, i) => el.classList.toggle("active", i === activeResultIndex));
+  }
+  els.results.addEventListener("click", (e) => {
+    const item = e.target.closest(".result-item");
+    if (!item) return;
+    const v = currentMatches[parseInt(item.dataset.idx, 10)];
+    if (v) escolherVeiculo(v);
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-card")) els.results.classList.remove("open");
+  });
+
+  // ---- Seleção de veículo -------------------------------------------------
+  async function escolherVeiculo(v) {
+    els.searchInput.value = "";
+    els.results.classList.remove("open");
+    veiculoPrincipal = v.id;
+
+    let entry = selecionados.find((s) => s.id === v.id);
+    if (!entry) {
+      if (selecionados.length >= 6) selecionados.shift();
+      entry = {
+        id: v.id,
+        marca: v.marca_nome,
+        modelo: v.modelo_nome,
+        ano: v.ano_modelo,
+        motorizacao: v.motorizacao,
+        color: COLORS[selecionados.length % COLORS.length],
+        series: null
+      };
+      selecionados.push(entry);
+    }
+    renderChips();
+    await garantirSerie(entry);
+    render();
+  }
+
+  function removerVeiculo(id) {
+    selecionados = selecionados.filter((s) => s.id !== id);
+    selecionados.forEach((s, i) => (s.color = COLORS[i % COLORS.length]));
+    if (veiculoPrincipal === id) veiculoPrincipal = selecionados.length ? selecionados[selecionados.length - 1].id : null;
+    renderChips();
+    render();
+  }
+
+  function renderChips() {
+    els.chips.innerHTML = selecionados.map((s) => {
+      const primary = s.id === veiculoPrincipal ? " primary" : "";
+      return '<div class="chip' + primary + '" data-id="' + s.id + '">' +
+        '<span class="dot" style="background:' + s.color + '"></span>' +
+        '<span>' + escapeHtml(s.marca) + " " + escapeHtml(s.modelo) + " (" + anoLabel(s.ano) + ")</span>" +
+        '<button data-remove="' + s.id + '" title="Remover">×</button>' +
+      '</div>';
+    }).join("");
+  }
+  els.chips.addEventListener("click", (e) => {
+    const rm = e.target.closest("[data-remove]");
+    if (rm) { removerVeiculo(parseInt(rm.dataset.remove, 10)); return; }
+    const chip = e.target.closest(".chip");
+    if (chip) { veiculoPrincipal = parseInt(chip.dataset.id, 10); renderChips(); render(); }
+  });
+
+  async function garantirSerie(entry) {
+    if (entry.series) return;
+    const url = REST + "/fipe_precos_historico?veiculo_id=eq." + entry.id +
+      "&select=mes_referencia_data,valor,combustivel&order=mes_referencia_data.asc";
+    const resp = await fetch(url, { headers: HEADERS });
+    entry.series = resp.ok ? await resp.json() : [];
+  }
+
+  // ---- Render geral --------------------------------------------------------
+  function render() {
+    if (!selecionados.length) {
+      els.emptyState.style.display = "block";
+      els.content.classList.remove("open");
+      return;
+    }
+    els.emptyState.style.display = "none";
+    els.content.classList.add("open");
+
+    renderSummary();
+    renderChart();
+    renderLegend();
+    renderTable();
+  }
+
+  function renderSummary() {
+    const principal = selecionados.find((s) => s.id === veiculoPrincipal) || selecionados[0];
+    const serie = (principal && principal.series) || [];
+    els.summary.innerHTML = "";
+    if (!serie.length) {
+      els.summary.innerHTML = '<div class="stat"><div class="label">Sem dados</div><div class="value">—</div></div>';
+      return;
+    }
+    const atual = serie[serie.length - 1];
+    const anterior = serie.length > 1 ? serie[serie.length - 2] : null;
+    const doze = serie.length > 12 ? serie[serie.length - 13] : null;
+    const primeiro = serie[0];
+
+    const stats = [];
+    stats.push({ label: "Valor atual (" + monthLabel(atual.mes_referencia_data) + ")", value: currencyFmt.format(atual.valor), sub: principal.marca + " " + principal.modelo + " · " + anoLabel(principal.ano) });
+
+    if (anterior) {
+      const variMes = ((atual.valor - anterior.valor) / anterior.valor) * 100;
+      stats.push({ label: "Variação no último mês", value: pctFmt(variMes), cls: variMes > 0 ? "pos" : (variMes < 0 ? "neg" : ""), sub: currencyFmt.format(atual.valor - anterior.valor) });
+    }
+    if (doze) {
+      const vari12 = ((atual.valor - doze.valor) / doze.valor) * 100;
+      stats.push({ label: "Variação em 12 meses", value: pctFmt(vari12), cls: vari12 > 0 ? "pos" : (vari12 < 0 ? "neg" : ""), sub: "desde " + monthLabel(doze.mes_referencia_data) });
+    }
+    if (primeiro !== atual) {
+      const variTotal = ((atual.valor - primeiro.valor) / primeiro.valor) * 100;
+      stats.push({ label: "Variação no histórico", value: pctFmt(variTotal), cls: variTotal > 0 ? "pos" : (variTotal < 0 ? "neg" : ""), sub: "desde " + monthLabel(primeiro.mes_referencia_data) });
+    }
+    const valores = serie.map((p) => p.valor);
+    stats.push({ label: "Mínimo / Máximo no período", value: currencyFmt.format(Math.min(...valores)) + " / " + currencyFmt.format(Math.max(...valores)), sub: serie.length + " meses de histórico" });
+
+    els.summary.innerHTML = stats.map((s) =>
+      '<div class="stat"><div class="label">' + s.label + '</div>' +
+      '<div class="value' + (s.cls ? " " + s.cls : "") + '">' + s.value + '</div>' +
+      (s.sub ? '<div class="sub">' + s.sub + '</div>' : "") + '</div>'
+    ).join("");
+  }
+
+  function renderLegend() {
+    els.legend.innerHTML = selecionados.map((s) =>
+      '<div class="li"><span class="dot" style="background:' + s.color + '"></span>' +
+      escapeHtml(s.marca) + " " + escapeHtml(s.modelo) + " (" + anoLabel(s.ano) + ")</div>"
+    ).join("");
+  }
+
+  // ---- Gráfico SVG -----------------------------------------------------
+  function renderChart() {
+    const svg = els.chart;
+    const seriesList = selecionados.filter((s) => s.series && s.series.length);
+    svg.innerHTML = "";
+    if (!seriesList.length) return;
+
+    const rect = svg.getBoundingClientRect();
+    const W = Math.max(rect.width, 640);
+    const H = 320;
+    const padL = 70, padR = 20, padT = 20, padB = 34;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+    let allDates = [], allValores = [];
+    seriesList.forEach((s) => s.series.forEach((p) => { allDates.push(p.mes_referencia_data); allValores.push(p.valor); }));
+    allDates = Array.from(new Set(allDates)).sort();
+    const minV = Math.min(...allValores), maxV = Math.max(...allValores);
+    const span = (maxV - minV) || 1;
+    const yMin = minV - span * 0.08, yMax = maxV + span * 0.08;
+
+    els.chartRange.textContent = allDates.length ? (monthLabel(allDates[0]) + " – " + monthLabel(allDates[allDates.length - 1])) : "";
+
+    const x = (dateStr) => padL + (allDates.indexOf(dateStr) / Math.max(allDates.length - 1, 1)) * (W - padL - padR);
+    const y = (v) => padT + (1 - (v - yMin) / (yMax - yMin)) * (H - padT - padB);
+
+    const ns = "http://www.w3.org/2000/svg";
+    function el(tag, attrs) {
+      const e = document.createElementNS(ns, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    // grid horizontal + labels eixo Y
+    const gridN = 5;
+    for (let i = 0; i <= gridN; i++) {
+      const v = yMin + (i / gridN) * (yMax - yMin);
+      const yy = y(v);
+      svg.appendChild(el("line", { x1: padL, x2: W - padR, y1: yy, y2: yy, class: "grid-line" }));
+      const label = el("text", { x: padL - 10, y: yy + 4, class: "axis-label", "text-anchor": "end" });
+      label.textContent = (v >= 1000 ? (v / 1000).toFixed(0) + "k" : v.toFixed(0));
+      svg.appendChild(label);
+    }
+
+    // labels eixo X (até ~8 marcações)
+    const step = Math.max(Math.ceil(allDates.length / 8), 1);
+    allDates.forEach((d, i) => {
+      if (i % step !== 0 && i !== allDates.length - 1) return;
+      const xx = x(d);
+      const label = el("text", { x: xx, y: H - padB + 18, class: "axis-label", "text-anchor": "middle" });
+      label.textContent = monthLabel(d);
+      svg.appendChild(label);
+    });
+
+    // linhas por série
+    seriesList.forEach((s) => {
+      const pts = s.series.map((p) => x(p.mes_referencia_data) + "," + y(p.valor)).join(" ");
+      svg.appendChild(el("polyline", { points: pts, class: "series-line", stroke: s.color }));
+      s.series.forEach((p) => {
+        svg.appendChild(el("circle", { cx: x(p.mes_referencia_data), cy: y(p.valor), r: 2.6, fill: s.color, class: "series-dot", "data-veiculo": s.id, "data-date": p.mes_referencia_data }));
+      });
+    });
+
+    // hover interativo
+    const hoverLine = el("line", { x1: 0, x2: 0, y1: padT, y2: H - padB, class: "hover-line", visibility: "hidden" });
+    svg.appendChild(hoverLine);
+    const overlay = el("rect", { x: padL, y: padT, width: Math.max(W - padL - padR, 1), height: Math.max(H - padT - padB, 1), fill: "transparent" });
+    svg.appendChild(overlay);
+
+    overlay.addEventListener("mousemove", (e) => {
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const ratio = Math.min(Math.max((loc.x - padL) / (W - padL - padR), 0), 1);
+      const idx = Math.round(ratio * (allDates.length - 1));
+      const d = allDates[idx];
+      if (d === undefined) return;
+      hoverLine.setAttribute("x1", x(d)); hoverLine.setAttribute("x2", x(d)); hoverLine.setAttribute("visibility", "visible");
+
+      const rows = seriesList.map((s) => {
+        const p = s.series.find((pp) => pp.mes_referencia_data === d);
+        if (!p) return "";
+        return '<div class="tt-row"><span class="tt-dot" style="background:' + s.color + '"></span>' +
+          escapeHtml(s.marca) + " " + escapeHtml(s.modelo) + ": <strong style=\"margin-left:auto\">" + currencyFmt.format(p.valor) + "</strong></div>";
+      }).join("");
+      els.tooltip.innerHTML = '<div class="tt-date">' + fullMonthLabel(d) + '</div>' + rows;
+      const svgBox = svg.getBoundingClientRect();
+      els.tooltip.style.left = (svgBox.left + x(d) + 14 + window.scrollX) + "px";
+      els.tooltip.style.top = (svgBox.top + padT + window.scrollY) + "px";
+      els.tooltip.style.opacity = "1";
+    });
+    overlay.addEventListener("mouseleave", () => {
+      hoverLine.setAttribute("visibility", "hidden");
+      els.tooltip.style.opacity = "0";
+    });
+  }
+
+  // ---- Tabela --------------------------------------------------------------
+  function renderTable() {
+    const principal = selecionados.find((s) => s.id === veiculoPrincipal) || selecionados[0];
+    const serie = (principal && principal.series) || [];
+    els.tableTitle.textContent = principal ? ("Tabela detalhada — " + principal.marca + " " + principal.modelo + " (" + anoLabel(principal.ano) + ")") : "Tabela detalhada";
+    els.tableCount.textContent = serie.length ? (serie.length + " meses") : "";
+
+    const rows = serie.slice().reverse();
+    els.tableBody.innerHTML = rows.map((p, i) => {
+      const anterior = rows[i + 1];
+      let deltaHtml = '<span class="delta-zero">—</span>';
+      if (anterior) {
+        const d = ((p.valor - anterior.valor) / anterior.valor) * 100;
+        const cls = d > 0 ? "delta-pos" : (d < 0 ? "delta-neg" : "delta-zero");
+        deltaHtml = '<span class="' + cls + '">' + pctFmt(d) + '</span>';
+      }
+      return "<tr><td>" + fullMonthLabel(p.mes_referencia_data) + '</td><td class="mono">' + currencyFmt.format(p.valor) +
+        "</td><td>" + deltaHtml + "</td><td>" + (p.combustivel || "—") + "</td></tr>";
+    }).join("");
+  }
+
+  // ---- Redesenha o gráfico ao redimensionar a janela --------------------
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { if (selecionados.length) renderChart(); }, 150);
+  });
+
+  // ---- Início ----------------------------------------------------------
+  carregarCatalogo();
+})();
+</script>
+</body>
+</html>
