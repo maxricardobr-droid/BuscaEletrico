@@ -121,12 +121,28 @@
   .badge-conf-manual { background: var(--cyan-bg); color: var(--cyan); }
   .pos-neg { color: var(--red); }
   .pos-pos { color: var(--green); }
-  .tco-cell { font-weight: 800; font-size: 13.5px; color: #fff; }
+  .custoreal-cell { font-weight: 800; font-size: 13.5px; color: #fff; }
   .price-active { font-weight: 800; color: #fff; }
   .price-inactive { color: var(--text-muted); }
   .table-scroll { overflow-x: auto; }
   .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px; }
   .foot-note { font-size: 11px; color: var(--text-muted); margin-top: 16px; line-height: 1.6; }
+  .badge-estimativa { background: var(--amber-bg); color: var(--amber); }
+  .badge-cotacao { background: var(--green-bg); color: var(--green); }
+  .sem-dado { color: var(--text-muted); }
+  details.calc-hint { margin-top: 10px; }
+  details.calc-hint summary {
+    cursor: pointer; font-size: 11px; font-weight: 700; color: var(--cyan);
+    text-transform: uppercase; letter-spacing: 0.05em; list-style: none;
+  }
+  details.calc-hint summary::-webkit-details-marker { display: none; }
+  details.calc-hint summary::before { content: "ⓘ "; }
+  details.calc-hint[open] summary::before { content: "▾ "; }
+  details.calc-hint .foot-note { margin-top: 8px; }
+  .panel h2 .hint-icon {
+    font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-muted);
+    font-size: 11px; cursor: help; margin-left: 4px;
+  }
   .hist-link {
     display: inline-block; margin-top: 3px; font-size: 10.5px; font-weight: 700; color: var(--cyan);
     text-decoration: none; text-transform: uppercase; letter-spacing: 0.04em;
@@ -213,34 +229,35 @@
     <img id="logoImg" alt="CustoReal">
     <div class="brandText">
       <h1>CustoReal</h1>
-      <p class="subtitle" id="subtitleText">Comparador de custo-benefício (TCO) de carros elétricos, híbridos plug-in e híbridos plenos — ranking do menor para o maior, com depreciação calculada a partir do histórico real da Tabela FIPE.</p>
+      <p class="subtitle" id="subtitleText" title="Custo real = perda de valor do carro + energia/combustível + seguro + IPVA no período que você escolher. Ranking do mais barato para o mais caro.">Compare quanto cada carro elétrico ou híbrido custa de verdade — do mais barato ao mais caro.</p>
     </div>
   </div>
 
   <div class="panel">
-    <h2>Escopo dos dados</h2>
+    <h2>Quais carros comparar</h2>
     <div class="seg-toggle">
-      <label id="labelEscopoTodos"><input type="radio" name="escopo" id="escopoTodos" value="todos" checked> Todos os elétricos/híbridos do mercado (195 modelos 0km com código FIPE 32000 confirmado — nunca retorna carro usado)</label>
-      <label id="labelEscopoPcd"><input type="radio" name="escopo" id="escopoPcd" value="pcd"> Somente os 15 modelos com desconto/isenção PCD confirmado (preço de tabela + PCD pesquisados)</label>
+      <label id="labelEscopoTodos"><input type="radio" name="escopo" id="escopoTodos" value="todos" checked> Todos os modelos do mercado</label>
+      <label id="labelEscopoPcd"><input type="radio" name="escopo" id="escopoPcd" value="pcd"> Só os modelos com desconto PCD já confirmado</label>
     </div>
+    <span class="hint">"Todos os modelos" traz mais opções (0km, preço de tabela). "Desconto PCD confirmado" traz só os modelos onde já pesquisamos o preço com desconto/isenção PCD numa concessionária.</span>
   </div>
 
   <div class="panel" id="painelCondicaoVeiculo">
-    <h2>Condição do veículo (escopo "todos os modelos")</h2>
+    <h2>Carro novo ou usado?</h2>
     <div class="seg-toggle">
-      <label id="labelCondNovo"><input type="radio" name="condicao" id="condNovo" value="novo" checked> Só novos (0km — ano FIPE 32000)</label>
-      <label id="labelCondUsado"><input type="radio" name="condicao" id="condUsado" value="usado"> Incluir usados (todos os anos-modelo com histórico FIPE)</label>
+      <label id="labelCondNovo"><input type="radio" name="condicao" id="condNovo" value="novo" checked> Só novos (0km)</label>
+      <label id="labelCondUsado"><input type="radio" name="condicao" id="condUsado" value="usado"> Incluir usados</label>
     </div>
-    <p class="results-note" id="condDisabledNote" style="display:none; margin-top:10px;">No escopo "PCD confirmado" o comparador sempre usa preço de carro novo (o desconto PCD é um benefício de compra na concessionária).</p>
+    <p class="results-note" id="condDisabledNote" style="display:none; margin-top:10px;">No escopo "desconto PCD confirmado" sempre usamos o preço de carro novo — o desconto PCD é um benefício da compra na concessionária.</p>
   </div>
 
   <div class="panel">
-    <h2>Condição de compra</h2>
+    <h2>Você é comprador PCD?</h2>
     <div class="pcd-toggle" id="pcdToggleWrap">
-      <label id="labelPcdSim"><input type="radio" name="pcd" id="pcdSim" value="sim" checked> Sou comprador PCD — uso o preço com desconto/isenção PCD</label>
-      <label id="labelPcdNao"><input type="radio" name="pcd" id="pcdNao" value="nao"> Não sou PCD — uso o preço de tabela cheio, sem desconto</label>
+      <label id="labelPcdSim"><input type="radio" name="pcd" id="pcdSim" value="sim" checked> Sim — usar o preço PCD (com desconto/isenção)</label>
+      <label id="labelPcdNao"><input type="radio" name="pcd" id="pcdNao" value="nao"> Não — usar o preço de tabela (cheio, sem desconto)</label>
     </div>
-    <p class="results-note" id="pcdDisabledNote" style="display:none; margin-top:10px;">No escopo "todos os modelos" não há dado de desconto PCD pesquisado — o preço usado é sempre a referência de tabela (FIPE atual).</p>
+    <p class="results-note" id="pcdDisabledNote" style="display:none; margin-top:10px;">No escopo "todos os modelos" não temos preço PCD pesquisado — o preço usado é sempre o de tabela (referência FIPE atual).</p>
   </div>
 
   <div class="panel">
@@ -273,9 +290,24 @@
   <div class="panel">
     <h2>Faixa de preço do carro</h2>
     <div class="grid">
-      <div class="field"><label for="precoMin">Preço mínimo</label><input type="number" id="precoMin" value="100000" min="0" step="1000"><span class="hint">R$ — preço efetivamente pago (PCD ou tabela, conforme a opção escolhida)</span></div>
+      <div class="field"><label for="precoMin">Preço mínimo</label><input type="number" id="precoMin" value="100000" min="0" step="1000"><span class="hint">R$ — preço que você efetivamente paga (PCD ou tabela, conforme a opção acima)</span></div>
       <div class="field"><label for="precoMax">Preço máximo</label><input type="number" id="precoMax" value="200000" min="0" step="1000"><span class="hint">R$</span></div>
     </div>
+  </div>
+
+  <div class="panel">
+    <h2>Seguro e IPVA</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="ufSelecionada">Estado onde você vai emplacar</label>
+        <select id="ufSelecionada"><option value="">Não calcular IPVA</option></select>
+        <span class="hint">Opcional. Selecione para somar o IPVA anual estimado ao custo real.</span>
+      </div>
+    </div>
+    <details class="calc-hint">
+      <summary>De onde vem o valor de seguro e IPVA?</summary>
+      <p class="foot-note">Seguro: cotação real da versão quando temos (marcado "cotação"), ou uma estimativa por categoria — 3,7% do preço de tabela para elétricos, 3,2% para híbridos plug-in e 2,7% para híbridos plenos, com base no índice IPSA (Serasa Experian) — quando não achamos cotação específica (marcado "estimativa"). IPVA: alíquota do seu estado sobre o preço de tabela do carro, respeitando isenções e tetos de valor quando existem. <strong>Nem seguro nem IPVA aqui são valor oficial</strong> — são estimativas de pesquisa. Cote o seguro com uma seguradora e confirme o IPVA na SEFAZ/DETRAN do seu estado antes de decidir.</p>
+    </details>
   </div>
 
   <div class="panel">
@@ -314,15 +346,19 @@
 
   <div class="panel" style="margin-top:24px;">
     <div class="results-head">
-      <h2 style="font-size:16px;">Ranking de custo total de propriedade</h2>
+      <h2 style="font-size:16px;">Ranking de custo real</h2>
       <span class="results-note" id="resultsNote"></span>
     </div>
     <div class="table-scroll" id="resultsTable">
       <div class="empty-state">Aguardando dados…</div>
     </div>
     <p class="foot-note" id="footNote">
-      A tabela mostra sempre os dois preços (com e sem desconto PCD) lado a lado quando disponível; o valor em destaque (negrito) é o que está sendo usado no cálculo. TCO = perda de valor em relação ao preço efetivamente pago mais o custo de energia acumulado no período escolhido. A depreciação de cada modelo é uma mistura estatística (shrinkage bayesiano) entre a taxa própria do modelo — de preferência via gradiente de preço por ano-modelo na própria Tabela FIPE — e a curva média da categoria (BEV/PHEV/HEV), ponderada pela quantidade de histórico FIPE disponível; modelos com pouco histórico próprio dependem mais da média da categoria (confiança "Baixa"/"Média"), modelos com histórico robusto usam principalmente a taxa própria (confiança "Alta"). Song Pro GL usa correção manual (ver detalhe na tabela) por lançamento de nova geração. No escopo "todos os modelos", specs de bateria/autonomia não estão disponíveis individualmente, então o custo de energia usa premissas médias por categoria (ver nota abaixo da tabela). Não inclui manutenção, seguro ou IPVA, salvo se informado no ajuste opcional. Preços e descontos PCD levantados em agosto/2026 e sujeitos a mudança; confirme com a concessionária antes de decidir.
+      Custo real = perda de valor do carro + energia/combustível + seguro + IPVA no período escolhido. O valor em destaque (negrito) nas colunas de preço é o que entra na conta.
     </p>
+    <details class="calc-hint">
+      <summary>Como calculamos o custo real?</summary>
+      <p class="foot-note">Perda de valor: preço efetivamente pago menos o valor de revenda estimado ao fim do período, usando a depreciação anual de cada modelo — uma mistura estatística entre a taxa própria do modelo (de preferência calculada no histórico real da Tabela FIPE) e a média da categoria (elétrico/híbrido plug-in/híbrido pleno); modelos com pouco histórico próprio dependem mais da média da categoria (confiança "Baixa"/"Média"), modelos com histórico robusto usam principalmente a taxa própria (confiança "Alta"). Song Pro GL usa correção manual por lançamento de nova geração. Energia: no escopo "desconto PCD confirmado" usamos a ficha técnica real do carro (bateria, autonomia, consumo); no escopo "todos os modelos" usamos uma premissa média por categoria, porque o catálogo FIPE não traz specs por versão. Seguro e IPVA: ver detalhe no painel "Seguro e IPVA" acima. Preços e descontos PCD levantados em agosto/2026 e sujeitos a mudança — confirme com a concessionária antes de decidir.</p>
+    </details>
   </div>
 
 </div>
@@ -367,9 +403,16 @@ const GENERIC_SPECS = {
   PHEV: { pctEletricoGenerico: 0.55, consumoEletricoKwh100km: 17, fuelKmL: 14 },
 };
 
+// Percentual anual de seguro por categoria (fallback quando não há cotação
+// específica da versão) — baseado no IPSA (Serasa Experian, jun/2026),
+// aplicado sobre o preço de tabela. Ver metodologia no painel "Seguro e IPVA".
+const GENERIC_SEGURO_PCT = { BEV: 0.037, PHEV: 0.032, HEV: 0.027 };
+
 let CARS = [];
 let DATA_READY = false;
 let SPECS_INDEX = [];
+let SEGURO_BY_ESPEC_ID = {};
+let IPVA_POR_UF = {};
 let MARCAS_DISPONIVEIS = [];
 let marcasSelecionadas = [];
 
@@ -385,13 +428,17 @@ function tokenize(s) {
   return normTxt(s).replace(/\(.*?\)/g, " ").replace(/[^a-z0-9]+/g, " ").trim().split(/\s+/).filter(Boolean);
 }
 function buildSpecsIndex(rows) {
-  const seen = new Set();
+  const seen = new Map();
   const idx = [];
   (rows || []).forEach(r => {
     const key = normTxt(r.marca) + "||" + normTxt(r.modelo);
-    if (seen.has(key)) return;
-    seen.add(key);
-    idx.push({ marca: r.marca, modelo: r.modelo, marcaNorm: normTxt(r.marca), modeloTokens: tokenize(r.modelo) });
+    let entry = seen.get(key);
+    if (!entry) {
+      entry = { marca: r.marca, modelo: r.modelo, marcaNorm: normTxt(r.marca), modeloTokens: tokenize(r.modelo), versions: [] };
+      seen.set(key, entry);
+      idx.push(entry);
+    }
+    if (r.id != null) entry.versions.push({ id: r.id, precoTabela: r.preco_tabela != null ? Number(r.preco_tabela) : null });
   });
   return idx;
 }
@@ -409,6 +456,49 @@ function findSpecsMatch(marca, modelo) {
     if (!best || entry.modeloTokens.length > best.modeloTokens.length) best = entry;
   });
   return best;
+}
+
+// ---- Seguro estimado: casa o carro com a versão mais próxima em preço
+// dentro do mesmo marca+modelo (via findSpecsMatch) e usa a cotação daquela
+// versão em seguro_estimado; se não achar nenhuma versão com cotação, cai
+// para o percentual médio da categoria sobre o preço de tabela.
+function estimarSeguro(car) {
+  const group = findSpecsMatch(car.marca, car.modelo);
+  if (group && group.versions.length) {
+    const comCotacao = group.versions.filter(v => SEGURO_BY_ESPEC_ID[v.id]);
+    if (comCotacao.length) {
+      const alvo = car.tabela;
+      let melhor = comCotacao[0];
+      let melhorDist = Infinity;
+      comCotacao.forEach(v => {
+        const dist = (v.precoTabela != null && alvo != null) ? Math.abs(v.precoTabela - alvo) : Infinity;
+        if (dist < melhorDist) { melhorDist = dist; melhor = v; }
+      });
+      const info = SEGURO_BY_ESPEC_ID[melhor.id];
+      return { valorAnual: info.valor, fonte: info.metodo === "cotacao_especifica" ? "cotacao" : "estimativa" };
+    }
+  }
+  const pct = GENERIC_SEGURO_PCT[car.cat];
+  if (!pct || car.tabela == null) return { valorAnual: null, fonte: "estimativa" };
+  return { valorAnual: car.tabela * pct, fonte: "estimativa" };
+}
+
+// ---- IPVA anual estimado: alíquota do estado sobre o preço de tabela,
+// respeitando isenção e teto de valor quando existem. PHEV e HEV usam a
+// mesma alíquota de "híbrido" (as fontes raramente diferenciam os dois).
+function calcularIpvaAnual(car, ufRow) {
+  if (!ufRow || car.tabela == null) return null;
+  const isEletrico = car.cat === "BEV";
+  const isento = isEletrico ? ufRow.isentoEletrico : ufRow.isentoHibrido;
+  const teto = isEletrico ? ufRow.tetoEletrico : ufRow.tetoHibrido;
+  const aliqIsencao = isEletrico ? ufRow.aliqEletrico : ufRow.aliqHibrido;
+  if (isento) {
+    if (teto == null || car.tabela <= teto) return 0;
+    // Acima do teto de isenção, a regra geral deixa de valer -- usa a
+    // alíquota de veículo convencional do estado como estimativa conservadora.
+    return ufRow.aliqConvencional != null ? car.tabela * (ufRow.aliqConvencional / 100) : null;
+  }
+  return aliqIsencao != null ? car.tabela * (aliqIsencao / 100) : null;
 }
 
 function fmtBRL(v) {
@@ -431,19 +521,52 @@ function confBadge(conf, motivo) {
 async function carregarDados() {
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const [todosRes, usadosRes, pcdRes, specsRes] = await Promise.all([
+  const [todosRes, usadosRes, pcdRes, specsRes, seguroRes, ipvaRes] = await Promise.all([
     client.from("mercado_completo").select("*"),
     client.from("mercado_completo_usados").select("*"),
     client.from("pcd_confirmado_completo").select("*"),
-    client.from("especificacoes_tecnicas").select("marca,modelo"),
+    client.from("especificacoes_tecnicas").select("id,marca,modelo,preco_tabela"),
+    client.from("seguro_estimado").select("especificacao_id,valor_seguro_anual_estimado,metodo"),
+    client.from("ipva_aliquotas_estados").select("*"),
   ]);
 
   if (todosRes.error) throw todosRes.error;
   if (usadosRes.error) throw usadosRes.error;
   if (pcdRes.error) throw pcdRes.error;
-  // ficha técnica é um extra (link no nome) — se falhar, o app continua funcionando sem ele.
+  // ficha técnica, seguro e IPVA são extras (link no nome / colunas de custo) —
+  // se algum falhar, o app continua funcionando sem aquele pedaço.
   if (!specsRes.error) SPECS_INDEX = buildSpecsIndex(specsRes.data);
   else console.warn("Não foi possível carregar especificacoes_tecnicas:", specsRes.error);
+
+  if (!seguroRes.error) {
+    SEGURO_BY_ESPEC_ID = {};
+    (seguroRes.data || []).forEach(r => {
+      SEGURO_BY_ESPEC_ID[r.especificacao_id] = { valor: Number(r.valor_seguro_anual_estimado), metodo: r.metodo };
+    });
+  } else console.warn("Não foi possível carregar seguro_estimado:", seguroRes.error);
+
+  if (!ipvaRes.error) {
+    IPVA_POR_UF = {};
+    (ipvaRes.data || []).forEach(r => {
+      IPVA_POR_UF[r.uf] = {
+        uf: r.uf, nome: r.estado_nome,
+        aliqEletrico: r.aliquota_eletrico_pct != null ? Number(r.aliquota_eletrico_pct) : null,
+        isentoEletrico: !!r.isento_eletrico,
+        tetoEletrico: r.teto_valor_isencao_eletrico != null ? Number(r.teto_valor_isencao_eletrico) : null,
+        aliqHibrido: r.aliquota_hibrido_pct != null ? Number(r.aliquota_hibrido_pct) : null,
+        isentoHibrido: !!r.isento_hibrido,
+        tetoHibrido: r.teto_valor_isencao_hibrido != null ? Number(r.teto_valor_isencao_hibrido) : null,
+        aliqConvencional: r.aliquota_convencional_pct != null ? Number(r.aliquota_convencional_pct) : null,
+      };
+    });
+    const elUf = document.getElementById("ufSelecionada");
+    Object.values(IPVA_POR_UF).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")).forEach(row => {
+      const opt = document.createElement("option");
+      opt.value = row.uf;
+      opt.textContent = row.nome + " (" + row.uf + ")";
+      elUf.appendChild(opt);
+    });
+  } else console.warn("Não foi possível carregar ipva_aliquotas_estados:", ipvaRes.error);
 
   const todos = todosRes.data.map(r => ({
     name: r.marca_nome + " " + r.modelo_nome, marca: r.marca_nome, modelo: r.modelo_nome, cat: r.categoria, tipo: r.tipo_veiculo,
@@ -509,6 +632,7 @@ document.getElementById("escopoPcd").addEventListener("change", () => { atualiza
 document.getElementById("condNovo").addEventListener("change", () => { atualizaToggleCondicao(); if (DATA_READY) calcular(); });
 document.getElementById("condUsado").addEventListener("change", () => { atualizaToggleCondicao(); if (DATA_READY) calcular(); });
 document.querySelectorAll(".tipoChk").forEach(el => el.addEventListener("change", () => { if (DATA_READY) calcular(); }));
+document.getElementById("ufSelecionada").addEventListener("change", () => { if (DATA_READY) calcular(); });
 
 // ---- Autocomplete de marcas -------------------------------------------
 // Substitui o antigo campo de texto livre (que exigia digitar a marca certinho)
@@ -634,6 +758,8 @@ function calcular() {
   const precoMin = parseFloat(document.getElementById("precoMin").value);
   const precoMax = parseFloat(document.getElementById("precoMax").value);
   const marcasFiltroNorm = marcasSelecionadas.map(m => normTxt(m));
+  const ufValor = document.getElementById("ufSelecionada").value;
+  const ufRow = ufValor ? IPVA_POR_UF[ufValor] : null;
 
   if (!kmMes || kmMes <= 0 || !consumoAtual || consumoAtual <= 0 || !precoGasolina || precoGasolina <= 0 || !anos || anos <= 0) {
     errEl.textContent = "Preencha quilometragem, consumo do carro atual, preço da gasolina e anos de uso com valores maiores que zero.";
@@ -704,30 +830,40 @@ function calcular() {
     const perdaValor = precoCompra - valorRevenda;
     const custoEnergiaPeriodo = custoEnergiaMes * meses;
     const custoManutencaoPeriodo = manutencaoExtra * anos;
-    const tco = perdaValor + custoEnergiaPeriodo + custoManutencaoPeriodo;
+
+    const seguroInfo = estimarSeguro(c);
+    const seguroAnual = seguroInfo.valorAnual;
+    const seguroPeriodo = seguroAnual != null ? seguroAnual * anos : 0;
+
+    const ipvaAnual = ufRow ? calcularIpvaAnual(c, ufRow) : null;
+    const ipvaPeriodo = ipvaAnual != null ? ipvaAnual * anos : 0;
+
+    const custoReal = perdaValor + custoEnergiaPeriodo + custoManutencaoPeriodo + seguroPeriodo + ipvaPeriodo;
 
     const economiaMes = custoAtualMes - custoEnergiaMes;
     const descontoPct = c.pcd !== null ? (c.tabela - c.pcd) / c.tabela : null;
 
     return {
       name: c.name, marca: c.marca, modelo: c.modelo, cat: c.cat, precoCompra, tabela: c.tabela, pcd: c.pcd, descontoPct,
-      custoEnergiaMes, economiaMes, perdaValor, custoEnergiaPeriodo, tco,
+      custoEnergiaMes, economiaMes, perdaValor, custoEnergiaPeriodo, custoReal,
+      seguroAnual, seguroFonte: seguroInfo.fonte, ipvaAnual,
       confianca: c.confianca, motivoOverride: c.motivoOverride, hasSpecs: c.hasSpecs,
       codigoFipe: c.codigoFipe, anoModelo: c.anoModelo,
     };
   });
 
-  rows.sort((a, b) => a.tco - b.tco);
+  rows.sort((a, b) => a.custoReal - b.custoReal);
 
   const note = document.getElementById("resultsNote");
   const escopoLabel = escopoTodos
     ? ("Todos os modelos, " + (condUsado ? "usados (preço FIPE do ano-modelo)" : "novos (0km, preço = referência FIPE atual)"))
     : (isPcd ? "Preço PCD" : "Preço de tabela cheio, sem desconto");
   const marcasLabel = marcasSelecionadas.length > 0 ? (" · marcas: " + marcasSelecionadas.join(", ")) : "";
+  const ufLabel = ufRow ? (" · IPVA: " + ufRow.nome) : " · IPVA não incluído (selecione seu estado acima)";
   note.textContent = escopoLabel
     + " · faixa " + fmtBRL(precoMin) + " – " + fmtBRL(precoMax)
     + " · " + anos + (anos === 1 ? " ano" : " anos") + " de uso · " + kmMes.toLocaleString("pt-BR") + " km/mês · tarifa de recarga: R$ " + tarifaEletrica.toFixed(2) + "/kWh"
-    + marcasLabel;
+    + marcasLabel + ufLabel;
 
   const container = document.getElementById("resultsTable");
   if (rows.length === 0) {
@@ -741,20 +877,21 @@ function calcular() {
   const showPcdCols = !escopoTodos;
 
   let html = "<table><thead><tr>" +
-    "<th>TCO (" + anos + "a)</th><th>Modelo</th>" +
+    "<th title='Perda de valor + energia + seguro + IPVA no período escolhido'>Custo real (" + anos + "a)</th><th>Modelo</th>" +
     (showPcdCols
-      ? "<th>Preço com desconto PCD</th><th>Preço sem desconto (tabela)</th><th>Desconto PCD vs tabela</th>"
+      ? "<th>Preço PCD</th><th>Preço de tabela</th><th title='Quanto o preço PCD é menor que o de tabela'>Desconto PCD</th>"
       : "<th>Preço (ref. FIPE atual)</th>") +
-    "<th>Perda de valor (" + anos + "a)</th><th>Energia/mês</th><th>Economia/mês vs atual</th>" +
+    "<th>Perda de valor (" + anos + "a)</th><th>Energia/mês</th><th>Economia/mês vs. seu carro atual</th>" +
+    "<th title='Cotação real da versão quando temos; senão, estimativa por categoria — ver detalhe no painel Seguro e IPVA'>Seguro/ano</th>" +
+    "<th title='Estimativa com base na alíquota do estado selecionado; confirme na SEFAZ/DETRAN'>IPVA/ano</th>" +
     "</tr></thead><tbody>";
 
   rows.forEach((r, i) => {
     const rankClass = i === 0 ? " rank1" : "";
     const perdaClass = r.perdaValor < 0 ? "pos-pos" : "";
-    const tcoClass = r.tco < 0 ? "pos-pos" : "";
+    const crClass = r.custoReal < 0 ? "pos-pos" : "";
     const melhorBadge = i === 0 ? "<span class='badge badge-best'>melhor opção</span>" : "";
     const confBadgeHtml = confBadge(r.confianca, r.motivoOverride);
-    const specsBadge = (!escopoTodos && !r.hasSpecs) ? "" : "";
 
     let priceCols;
     if (showPcdCols) {
@@ -768,7 +905,7 @@ function calcular() {
     }
 
     const historicoHtml = r.codigoFipe
-      ? "<a class='hist-link' target='_blank' rel='noopener' href='fipe-historico.html?codigo_fipe=" + encodeURIComponent(r.codigoFipe) + (r.anoModelo ? "&ano=" + encodeURIComponent(r.anoModelo) : "") + "'>histórico FIPE ↗</a>"
+      ? "<a class='hist-link' target='_blank' rel='noopener' href='fipe-historico.html?codigo_fipe=" + encodeURIComponent(r.codigoFipe) + "&marca=" + encodeURIComponent(r.marca) + "&modelo=" + encodeURIComponent(r.modelo) + (r.anoModelo ? "&ano=" + encodeURIComponent(r.anoModelo) : "") + "'>histórico FIPE ↗</a>"
       : "<span class='hist-none'>sem histórico FIPE</span>";
 
     const specMatch = findSpecsMatch(r.marca, r.modelo);
@@ -776,13 +913,23 @@ function calcular() {
       ? "<a class='spec-name-link' target='_blank' rel='noopener' title='Ver ficha técnica completa' href='especificacoes.html?marca=" + encodeURIComponent(specMatch.marca) + "&modelo=" + encodeURIComponent(specMatch.modelo) + "'>" + r.name + "</a>"
       : r.name;
 
+    const seguroHtml = r.seguroAnual != null
+      ? fmtBRL(r.seguroAnual) + " <span class='badge " + (r.seguroFonte === "cotacao" ? "badge-cotacao" : "badge-estimativa") + "' title='" + (r.seguroFonte === "cotacao" ? "Cotação de mercado para essa versão" : "Estimativa por categoria (sem cotação específica desse modelo)") + "'>" + (r.seguroFonte === "cotacao" ? "cotação" : "estimativa") + "</span>"
+      : "<span class='sem-dado'>—</span>";
+
+    const ipvaHtml = r.ipvaAnual != null
+      ? fmtBRL(r.ipvaAnual)
+      : (ufRow ? "<span class='sem-dado' title='Sem alíquota confiável para essa categoria nesse estado'>sem dado</span>" : "<span class='sem-dado' title='Selecione seu estado no painel Seguro e IPVA'>—</span>");
+
     html += "<tr class='" + rankClass + "'>" +
-      "<td class='tco-cell " + tcoClass + "'>" + fmtBRL(r.tco) + melhorBadge + "</td>" +
+      "<td class='custoreal-cell " + crClass + "'>" + fmtBRL(r.custoReal) + melhorBadge + "</td>" +
       "<td>" + nameHtml + "<span class='badge badge-cat'>" + CAT_LABEL[r.cat] + "</span>" + confBadgeHtml + "<br>" + historicoHtml + "</td>" +
       priceCols +
       "<td class='" + perdaClass + "'>" + fmtBRL(r.perdaValor) + "</td>" +
       "<td>" + fmtBRL(r.custoEnergiaMes) + "</td>" +
       "<td>" + fmtBRL(r.economiaMes) + "</td>" +
+      "<td>" + seguroHtml + "</td>" +
+      "<td>" + ipvaHtml + "</td>" +
       "</tr>";
   });
 
@@ -843,7 +990,7 @@ function chatSetTyping(show) {
 }
 
 // Aplica os argumentos vindos da function call do Gemini nos campos do formulario existente
-// e dispara o calculo, reaproveitando a logica de TCO ja validada.
+// e dispara o calculo, reaproveitando a logica de custo real ja validada.
 function aplicarPreenchimentoFormulario(args) {
   if (typeof args.escopo === "string") {
     document.getElementById(args.escopo === "pcd" ? "escopoPcd" : "escopoTodos").checked = true;
@@ -874,6 +1021,10 @@ function aplicarPreenchimentoFormulario(args) {
   }
   if (typeof args.precoMin === "number") document.getElementById("precoMin").value = args.precoMin;
   if (typeof args.precoMax === "number") document.getElementById("precoMax").value = args.precoMax;
+  if (typeof args.uf === "string") {
+    const elUf = document.getElementById("ufSelecionada");
+    if (Array.from(elUf.options).some(o => o.value === args.uf.toUpperCase())) elUf.value = args.uf.toUpperCase();
+  }
   if (Array.isArray(args.marcas)) {
     marcasSelecionadas = MARCAS_DISPONIVEIS.filter(disp =>
       args.marcas.some(pedida => normTxt(disp).indexOf(normTxt(pedida)) !== -1)
@@ -955,7 +1106,7 @@ carregarDados().then(data => {
   MARCAS_DISPONIVEIS = Array.from(todasMarcas).sort((a, b) => a.localeCompare(b, "pt-BR"));
   document.getElementById("loadMsg").style.display = "none";
   document.getElementById("btnCalc").disabled = false;
-  document.getElementById("btnCalc").textContent = "Calcular ranking de TCO";
+  document.getElementById("btnCalc").textContent = "Calcular ranking de custo real";
   calcular();
 }).catch(err => {
   document.getElementById("loadMsg").textContent = "Erro ao carregar dados do Supabase: " + (err.message || err);

@@ -619,8 +619,64 @@
     resizeTimer = setTimeout(() => { if (selecionados.length) renderChart(); }, 150);
   });
 
+  // ---- Deep-link via URL: ?codigo_fipe=XXXXXX-X[&marca=&modelo=][&ano=2026] --
+  // Usado pelo CustoReal para abrir esta pagina ja com o veiculo (e demais
+  // anos-modelo do mesmo codigo FIPE, para mostrar a curva de depreciacao
+  // completa) selecionado. Sem parametros, comporta-se como antes (busca manual).
+  // Casamento por codigo_fipe é exato (string igual, sem espaços/caixa) e pode
+  // falhar se o catálogo mudar entre o CustoReal e aqui — nesse caso caímos
+  // para busca por marca+modelo (mesma lógica do campo de busca manual).
+  async function aplicarSelecaoViaURL() {
+    const params = new URLSearchParams(window.location.search);
+    const codigoFipe = params.get("codigo_fipe");
+    const marcaParam = params.get("marca");
+    const modeloParam = params.get("modelo");
+    if (!codigoFipe && !(marcaParam && modeloParam)) return;
+    const anoParam = params.get("ano") ? parseInt(params.get("ano"), 10) : null;
+
+    let doMesmoCodigo = [];
+    if (codigoFipe) {
+      const codigoNorm = normalize(codigoFipe).trim();
+      doMesmoCodigo = catalogo.filter((v) => normalize(v.codigo_fipe || "").trim() === codigoNorm);
+    }
+
+    if (!doMesmoCodigo.length && marcaParam && modeloParam) {
+      // Fallback: mesmo casamento usado na busca manual (buscar()), mas
+      // restrito a marca+modelo exatos vindos do CustoReal.
+      const alvoNorm = normalize(marcaParam + " " + modeloParam);
+      const termos = alvoNorm.split(/\s+/).filter(Boolean);
+      doMesmoCodigo = catalogo.filter((v) => {
+        const texto = normalize(v.marca_nome + " " + v.modelo_nome);
+        return termos.every((t) => texto.indexOf(t) !== -1);
+      });
+      // se ainda sobrar mais de um modelo diferente (não só anos-modelo do
+      // mesmo carro), prioriza o que tiver o mesmo código FIPE do 1º achado
+      if (doMesmoCodigo.length) {
+        const codigoAlvo = doMesmoCodigo[0].codigo_fipe;
+        const restrito = doMesmoCodigo.filter((v) => v.codigo_fipe === codigoAlvo);
+        if (restrito.length) doMesmoCodigo = restrito;
+      }
+    }
+
+    if (!doMesmoCodigo.length) {
+      const descricao = marcaParam && modeloParam ? (marcaParam + " " + modeloParam) : ("código FIPE " + codigoFipe);
+      els.hint.textContent = "Nenhum veículo encontrado no catálogo para " + descricao + ". Use a busca abaixo para localizar manualmente.";
+      els.hint.style.color = "var(--red)";
+      return;
+    }
+    // ordena do ano mais antigo pro mais novo, adiciona todos como comparacao
+    doMesmoCodigo.sort((a, b) => (a.ano_modelo === 32000 ? 9999 : a.ano_modelo) - (b.ano_modelo === 32000 ? 9999 : b.ano_modelo));
+    for (const v of doMesmoCodigo) {
+      await escolherVeiculo(v);
+    }
+    if (anoParam) {
+      const alvo = selecionados.find((s) => s.ano === anoParam);
+      if (alvo) { veiculoPrincipal = alvo.id; renderChips(); render(); }
+    }
+  }
+
   // ---- Início ----------------------------------------------------------
-  carregarCatalogo();
+  carregarCatalogo().then(aplicarSelecaoViaURL);
 })();
 </script>
 </body>
