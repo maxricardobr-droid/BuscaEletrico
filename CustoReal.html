@@ -186,6 +186,39 @@
   .marcas-chip button:hover { color: #fff; background: rgba(255,255,255,0.15); }
   @media (max-width: 640px) { .panel { padding: 16px; } }
 
+  .marcas-fixas { display: flex; gap: 10px; flex-wrap: wrap; }
+  .marcas-fixas label {
+    display: flex; align-items: center; gap: 7px; border: 1px solid var(--border-strong); border-radius: 3px;
+    padding: 8px 14px; font-size: 13px; cursor: pointer; background: var(--bg-alt);
+  }
+  .marcas-fixas input { width: 15px; height: 15px; accent-color: var(--cyan); }
+
+  .price-slider { padding-top: 2px; }
+  .price-slider-values {
+    display: flex; justify-content: space-between; font-family: var(--mono); font-size: 15px;
+    font-weight: 800; color: #fff; margin-bottom: 12px;
+  }
+  .price-slider-track { position: relative; height: 30px; }
+  .price-slider-track::before {
+    content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 4px; transform: translateY(-50%);
+    background: var(--border-strong); border-radius: 2px;
+  }
+  .price-slider-range { position: absolute; top: 50%; height: 4px; transform: translateY(-50%); background: var(--cyan); border-radius: 2px; }
+  .price-slider-track input[type=range] {
+    position: absolute; top: 0; left: 0; width: 100%; height: 30px; margin: 0; background: none;
+    -webkit-appearance: none; appearance: none; pointer-events: none;
+  }
+  .price-slider-track input[type=range]::-webkit-slider-runnable-track { background: none; }
+  .price-slider-track input[type=range]::-moz-range-track { background: none; }
+  .price-slider-track input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; pointer-events: all; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--cyan); border: 3px solid #06202a; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.4); margin-top: 0;
+  }
+  .price-slider-track input[type=range]::-moz-range-thumb {
+    pointer-events: all; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--cyan); border: 3px solid #06202a; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+
   #chatFab {
     position: fixed; right: 22px; bottom: 22px; z-index: 40;
     background: var(--cyan); color: #06202a; border: none; border-radius: 3px;
@@ -234,38 +267,44 @@
   </div>
 
   <div class="panel">
-    <h2>Quais carros comparar</h2>
-    <div class="seg-toggle">
-      <label id="labelEscopoTodos"><input type="radio" name="escopo" id="escopoTodos" value="todos" checked> Todos os modelos do mercado</label>
-      <label id="labelEscopoPcd"><input type="radio" name="escopo" id="escopoPcd" value="pcd"> Só os modelos com desconto PCD já confirmado</label>
-    </div>
-    <span class="hint">"Todos os modelos" traz mais opções (0km, preço de tabela). "Desconto PCD confirmado" traz só os modelos onde já pesquisamos o preço com desconto/isenção PCD numa concessionária.</span>
-  </div>
-
-  <div class="panel" id="painelCondicaoVeiculo">
-    <h2>Carro novo ou usado?</h2>
-    <div class="seg-toggle">
-      <label id="labelCondNovo"><input type="radio" name="condicao" id="condNovo" value="novo" checked> Só novos (0km)</label>
-      <label id="labelCondUsado"><input type="radio" name="condicao" id="condUsado" value="usado"> Incluir usados</label>
-    </div>
-    <p class="results-note" id="condDisabledNote" style="display:none; margin-top:10px;">No escopo "desconto PCD confirmado" sempre usamos o preço de carro novo — o desconto PCD é um benefício da compra na concessionária.</p>
-  </div>
-
-  <div class="panel">
-    <h2>Você é comprador PCD?</h2>
+    <h2>1. Você é comprador PCD?</h2>
     <div class="pcd-toggle" id="pcdToggleWrap">
       <label id="labelPcdSim"><input type="radio" name="pcd" id="pcdSim" value="sim" checked> Sim — usar o preço PCD (com desconto/isenção)</label>
       <label id="labelPcdNao"><input type="radio" name="pcd" id="pcdNao" value="nao"> Não — usar o preço de tabela (cheio, sem desconto)</label>
     </div>
-    <p class="results-note" id="pcdDisabledNote" style="display:none; margin-top:10px;">No escopo "todos os modelos" não temos preço PCD pesquisado — o preço usado é sempre o de tabela (referência FIPE atual).</p>
+    <span class="hint">Só comparamos carros novos (0km). No "sim" usamos os modelos com desconto PCD já confirmado numa concessionária; no "não", o catálogo geral do mercado com preço de tabela.</span>
+  </div>
+
+  <div class="panel">
+    <h2>2. Faixa de preço do carro</h2>
+    <div class="price-slider">
+      <div class="price-slider-values">
+        <span id="precoMinLabel">R$ 100.000</span>
+        <span id="precoMaxLabel">R$ 200.000</span>
+      </div>
+      <div class="price-slider-track">
+        <div class="price-slider-range" id="precoSliderRange"></div>
+        <input type="range" id="precoMin" min="80000" max="500000" step="1000" value="100000">
+        <input type="range" id="precoMax" min="80000" max="500000" step="1000" value="200000">
+      </div>
+    </div>
+    <span class="hint">Arraste as duas alças para ajustar o mínimo e o máximo.</span>
+  </div>
+
+  <div class="panel">
+    <h2>Quer comparar com o consumo do seu carro atual?</h2>
+    <div class="seg-toggle">
+      <label id="labelCompararSim"><input type="radio" name="comparar" id="compararSim" value="sim" checked> Sim — quero ver a economia mensal</label>
+      <label id="labelCompararNao"><input type="radio" name="comparar" id="compararNao" value="nao"> Não — só quero o custo do carro novo</label>
+    </div>
   </div>
 
   <div class="panel">
     <h2>Seu uso e carro atual</h2>
     <div class="grid">
       <div class="field"><label for="kmMes">Quilometragem média por mês</label><input type="number" id="kmMes" value="1500" min="1" step="1"><span class="hint">km/mês</span></div>
-      <div class="field"><label for="consumoAtual">Consumo do seu carro atual</label><input type="number" id="consumoAtual" value="10" min="0.1" step="0.1"><span class="hint">km/l</span></div>
-      <div class="field"><label for="precoGasolina">Preço médio da gasolina na sua região</label><input type="number" id="precoGasolina" value="7.00" min="0.1" step="0.01"><span class="hint">R$/litro</span></div>
+      <div class="field" id="campoConsumoAtual"><label for="consumoAtual">Consumo do seu carro atual</label><input type="number" id="consumoAtual" value="10" min="0.1" step="0.1"><span class="hint">km/l</span></div>
+      <div class="field" id="campoPrecoGasolina"><label for="precoGasolina">Preço médio da gasolina na sua região</label><input type="number" id="precoGasolina" value="7.00" min="0.1" step="0.01"><span class="hint">R$/litro</span></div>
       <div class="field"><label for="anos">Quantos anos você deve ficar com o carro</label><input type="number" id="anos" value="2" min="0.5" max="15" step="0.5"><span class="hint">anos</span></div>
     </div>
   </div>
@@ -288,37 +327,6 @@
   </div>
 
   <div class="panel">
-    <h2>Faixa de preço do carro</h2>
-    <div class="grid">
-      <div class="field"><label for="precoMin">Preço mínimo</label><input type="number" id="precoMin" value="100000" min="0" step="1000"><span class="hint">R$ — preço que você efetivamente paga (PCD ou tabela, conforme a opção acima)</span></div>
-      <div class="field"><label for="precoMax">Preço máximo</label><input type="number" id="precoMax" value="200000" min="0" step="1000"><span class="hint">R$</span></div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <h2>Seguro e IPVA</h2>
-    <div class="grid">
-      <div class="field">
-        <label for="ufSelecionada">Estado onde você vai emplacar</label>
-        <select id="ufSelecionada"><option value="">Não calcular IPVA</option></select>
-        <span class="hint">Opcional. Selecione para somar o IPVA anual estimado ao custo real.</span>
-      </div>
-    </div>
-    <details class="calc-hint">
-      <summary>De onde vem o valor de seguro e IPVA?</summary>
-      <p class="foot-note">Seguro: cotação real da versão quando temos (marcado "cotação"), ou uma estimativa por categoria — 3,7% do preço de tabela para elétricos, 3,2% para híbridos plug-in e 2,7% para híbridos plenos, com base no índice IPSA (Serasa Experian) — quando não achamos cotação específica (marcado "estimativa"). IPVA: alíquota do seu estado sobre o preço de tabela do carro, respeitando isenções e tetos de valor quando existem. <strong>Nem seguro nem IPVA aqui são valor oficial</strong> — são estimativas de pesquisa. Cote o seguro com uma seguradora e confirme o IPVA na SEFAZ/DETRAN do seu estado antes de decidir.</p>
-    </details>
-  </div>
-
-  <div class="panel">
-    <h2>Tipo de veículo</h2>
-    <div class="cat-toggle">
-      <label><input type="checkbox" class="tipoChk" value="passeio" checked> Passeio (sedã, hatch, SUV)</label>
-      <label><input type="checkbox" class="tipoChk" value="utilitario"> Utilitário (picape/carga)</label>
-    </div>
-  </div>
-
-  <div class="panel">
     <h2>Categorias de carro desejadas</h2>
     <div class="cat-toggle">
       <label><input type="checkbox" class="catChk" value="BEV" checked> Elétrico (BEV)</label>
@@ -329,15 +337,39 @@
 
   <div class="panel">
     <h2>Marcas de interesse</h2>
-    <div class="field marcas-autocomplete">
-      <label for="marcasFiltro">Filtrar por marca (opcional)</label>
+    <div class="marcas-fixas" id="marcasFixasWrap">
+      <label><input type="checkbox" class="marcaFixaChk" value="BYD" checked> BYD</label>
+      <label><input type="checkbox" class="marcaFixaChk" value="Chery" checked> Chery</label>
+      <label><input type="checkbox" class="marcaFixaChk" value="GAC" checked> GAC</label>
+      <label><input type="checkbox" class="marcaFixaChk" value="Geely" checked> Geely</label>
+      <label><input type="checkbox" class="marcaFixaChk" value="GWM" checked> GWM</label>
+      <label><input type="checkbox" class="marcaFixaChk" value="LeapMotor" checked> LeapMotor</label>
+      <label><input type="checkbox" class="marcaFixaChk" value="MG Motors" checked> MG Motors</label>
+    </div>
+    <div class="field marcas-autocomplete" style="margin-top:14px;">
+      <label for="marcasFiltro">Outras marcas (opcional)</label>
       <div class="marcas-box">
-        <input type="text" id="marcasFiltro" placeholder="Digite ou clique para ver todas as marcas…" autocomplete="off">
+        <input type="text" id="marcasFiltro" placeholder="Digite ou clique para ver as demais marcas…" autocomplete="off">
         <div id="marcasResults" class="marcas-results"></div>
       </div>
       <div id="marcasChips" class="marcas-chips"></div>
-      <span class="hint">Deixe em branco para ver todas as marcas. Escolha uma ou mais na lista — não precisa digitar certinho.</span>
+      <span class="hint">As 7 marcas acima já vêm marcadas — desmarque as que não quiser. Use este campo para incluir marcas fora dessa lista.</span>
     </div>
+  </div>
+
+  <div class="panel">
+    <h2>Seguro e IPVA</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="ufSelecionada">Seu estado (para calcular o IPVA)</label>
+        <select id="ufSelecionada"><option value="">Selecione seu estado</option></select>
+        <span class="hint" id="ufStatusHint">Detectando sua localização automaticamente…</span>
+      </div>
+    </div>
+    <details class="calc-hint">
+      <summary>De onde vem o valor de seguro e IPVA?</summary>
+      <p class="foot-note">Localização: tentamos detectar seu estado automaticamente pelo navegador (geolocalização); se você não permitir ou não conseguirmos identificar, é só escolher na lista — o IPVA é calculado de qualquer forma, mesmo sem estado escolhido. Seguro: cotação real da versão quando temos (selo verde "cotação"), ou uma estimativa por categoria — 3,7% do preço de tabela para elétricos, 3,2% para híbridos plug-in e 2,7% para híbridos plenos, com base no índice IPSA (Serasa Experian) (selo âmbar "estimativa"). IPVA: alíquota pesquisada do seu estado sobre o preço de tabela do carro, respeitando isenções e tetos de valor quando existem. Quando não há cotação/percentual de categoria pro seguro, ou não há alíquota pesquisada pro seu estado/categoria (ou nenhum estado foi escolhido ainda) pro IPVA, aplicamos um valor genérico fixo — 2,5% ao ano pro seguro, 4% ao ano pro IPVA — e marcamos esses casos com o selo vermelho "baixa confiabilidade". <strong>Nem seguro nem IPVA aqui são valor oficial, em nenhum dos casos</strong> — são estimativas de pesquisa. Cote o seguro com uma seguradora e confirme o IPVA na SEFAZ/DETRAN do seu estado antes de decidir.</p>
+    </details>
   </div>
 
   <button id="btnCalc" onclick="calcular()" disabled>Carregando dados do Supabase…</button>
@@ -427,6 +459,27 @@ function normTxt(s) {
 function tokenize(s) {
   return normTxt(s).replace(/\(.*?\)/g, " ").replace(/[^a-z0-9]+/g, " ").trim().split(/\s+/).filter(Boolean);
 }
+
+// Marcas fixas de interesse (checkboxes pré-marcadas). O nome de exibição
+// nem sempre bate 100% com o nome usado no catálogo (ex.: "Chery" aqui vs.
+// "Caoa Chery" na FIPE, "MG Motors" aqui vs. "MG" na FIPE) — por isso o
+// casamento usa um alias explícito por marca, não um token genérico da
+// label inteira (ex.: tokenizar "MG Motors" faria "motors" bater com
+// "Kia Motors", que é outra marca).
+const MARCAS_FIXAS = ["BYD", "Chery", "GAC", "Geely", "GWM", "LeapMotor", "MG Motors"];
+const MARCAS_FIXAS_ALIASES = {
+  "BYD": ["byd"], "Chery": ["chery"], "GAC": ["gac"], "Geely": ["geely"],
+  "GWM": ["gwm"], "LeapMotor": ["leapmotor"], "MG Motors": ["mg"],
+};
+function carroCombinaMarcasFixas(marcaCarro, marcasFixasAtivas) {
+  if (!marcasFixasAtivas || !marcasFixasAtivas.length) return false;
+  const tokensCarro = tokenize(marcaCarro);
+  return marcasFixasAtivas.some(fx => (MARCAS_FIXAS_ALIASES[fx] || tokenize(fx)).some(t => tokensCarro.indexOf(t) !== -1));
+}
+function marcaEhFixa(marca) {
+  const tokensCarro = tokenize(marca);
+  return MARCAS_FIXAS.some(fx => (MARCAS_FIXAS_ALIASES[fx] || tokenize(fx)).some(t => tokensCarro.indexOf(t) !== -1));
+}
 function buildSpecsIndex(rows) {
   const seen = new Map();
   const idx = [];
@@ -434,7 +487,20 @@ function buildSpecsIndex(rows) {
     const key = normTxt(r.marca) + "||" + normTxt(r.modelo);
     let entry = seen.get(key);
     if (!entry) {
-      entry = { marca: r.marca, modelo: r.modelo, marcaNorm: normTxt(r.marca), modeloTokens: tokenize(r.modelo), versions: [] };
+      let modeloTokens = tokenize(r.modelo);
+      const marcaTokens = tokenize(r.marca);
+      // Alguns cadastros repetem o nome da marca dentro do modelo (ex.: marca
+      // "MG", modelo "MG S5"), mas os catálogos FIPE/PCD não repetem — só "S5
+      // Luxury". Sem isso o prefixo não bate e o carro perde o link de ficha
+      // técnica e a cotação de seguro real, caindo pro fallback genérico.
+      if (marcaTokens.length && modeloTokens.length > marcaTokens.length) {
+        let prefixoIgualMarca = true;
+        for (let i = 0; i < marcaTokens.length; i++) {
+          if (modeloTokens[i] !== marcaTokens[i]) { prefixoIgualMarca = false; break; }
+        }
+        if (prefixoIgualMarca) modeloTokens = modeloTokens.slice(marcaTokens.length);
+      }
+      entry = { marca: r.marca, modelo: r.modelo, marcaNorm: normTxt(r.marca), modeloTokens, versions: [] };
       seen.set(key, entry);
       idx.push(entry);
     }
@@ -461,7 +527,11 @@ function findSpecsMatch(marca, modelo) {
 // ---- Seguro estimado: casa o carro com a versão mais próxima em preço
 // dentro do mesmo marca+modelo (via findSpecsMatch) e usa a cotação daquela
 // versão em seguro_estimado; se não achar nenhuma versão com cotação, cai
-// para o percentual médio da categoria sobre o preço de tabela.
+// para o percentual médio da categoria (pesquisa IPSA/Serasa Experian); sem
+// nenhum dado de categoria, usa 2,5% fixo — marcado como baixa confiabilidade.
+// fonte: "cotacao" (cotação de mercado da versão) | "categoria" (percentual
+// IPSA por categoria) | "generica" (2,5% fixo, sem nenhum dado específico).
+const SEGURO_PCT_FALLBACK = 0.025;
 function estimarSeguro(car) {
   const group = findSpecsMatch(car.marca, car.modelo);
   if (group && group.versions.length) {
@@ -475,30 +545,40 @@ function estimarSeguro(car) {
         if (dist < melhorDist) { melhorDist = dist; melhor = v; }
       });
       const info = SEGURO_BY_ESPEC_ID[melhor.id];
-      return { valorAnual: info.valor, fonte: info.metodo === "cotacao_especifica" ? "cotacao" : "estimativa" };
+      return { valorAnual: info.valor, fonte: info.metodo === "cotacao_especifica" ? "cotacao" : "categoria" };
     }
   }
-  const pct = GENERIC_SEGURO_PCT[car.cat];
-  if (!pct || car.tabela == null) return { valorAnual: null, fonte: "estimativa" };
-  return { valorAnual: car.tabela * pct, fonte: "estimativa" };
+  if (car.tabela == null) return { valorAnual: null, fonte: "generica" };
+  const pctCategoria = GENERIC_SEGURO_PCT[car.cat];
+  if (pctCategoria) return { valorAnual: car.tabela * pctCategoria, fonte: "categoria" };
+  return { valorAnual: car.tabela * SEGURO_PCT_FALLBACK, fonte: "generica" };
 }
 
 // ---- IPVA anual estimado: alíquota do estado sobre o preço de tabela,
 // respeitando isenção e teto de valor quando existem. PHEV e HEV usam a
 // mesma alíquota de "híbrido" (as fontes raramente diferenciam os dois).
+// Sem estado escolhido, ou sem alíquota pesquisada pra esse estado/categoria,
+// usa 4% fixo — marcado como baixa confiabilidade (fonte: "generica"); com
+// alíquota pesquisada do estado, fonte: "aliquota_estado".
+const IPVA_PCT_FALLBACK = 0.04;
 function calcularIpvaAnual(car, ufRow) {
-  if (!ufRow || car.tabela == null) return null;
+  if (car.tabela == null) return { valor: null, fonte: "generica" };
+  if (!ufRow) return { valor: car.tabela * IPVA_PCT_FALLBACK, fonte: "generica" };
   const isEletrico = car.cat === "BEV";
   const isento = isEletrico ? ufRow.isentoEletrico : ufRow.isentoHibrido;
   const teto = isEletrico ? ufRow.tetoEletrico : ufRow.tetoHibrido;
   const aliqIsencao = isEletrico ? ufRow.aliqEletrico : ufRow.aliqHibrido;
   if (isento) {
-    if (teto == null || car.tabela <= teto) return 0;
+    if (teto == null || car.tabela <= teto) return { valor: 0, fonte: "aliquota_estado" };
     // Acima do teto de isenção, a regra geral deixa de valer -- usa a
     // alíquota de veículo convencional do estado como estimativa conservadora.
-    return ufRow.aliqConvencional != null ? car.tabela * (ufRow.aliqConvencional / 100) : null;
+    return ufRow.aliqConvencional != null
+      ? { valor: car.tabela * (ufRow.aliqConvencional / 100), fonte: "aliquota_estado" }
+      : { valor: car.tabela * IPVA_PCT_FALLBACK, fonte: "generica" };
   }
-  return aliqIsencao != null ? car.tabela * (aliqIsencao / 100) : null;
+  return aliqIsencao != null
+    ? { valor: car.tabela * (aliqIsencao / 100), fonte: "aliquota_estado" }
+    : { valor: car.tabela * IPVA_PCT_FALLBACK, fonte: "generica" };
 }
 
 function fmtBRL(v) {
@@ -521,9 +601,8 @@ function confBadge(conf, motivo) {
 async function carregarDados() {
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const [todosRes, usadosRes, pcdRes, specsRes, seguroRes, ipvaRes] = await Promise.all([
+  const [todosRes, pcdRes, specsRes, seguroRes, ipvaRes] = await Promise.all([
     client.from("mercado_completo").select("*"),
-    client.from("mercado_completo_usados").select("*"),
     client.from("pcd_confirmado_completo").select("*"),
     client.from("especificacoes_tecnicas").select("id,marca,modelo,preco_tabela"),
     client.from("seguro_estimado").select("especificacao_id,valor_seguro_anual_estimado,metodo"),
@@ -531,7 +610,6 @@ async function carregarDados() {
   ]);
 
   if (todosRes.error) throw todosRes.error;
-  if (usadosRes.error) throw usadosRes.error;
   if (pcdRes.error) throw pcdRes.error;
   // ficha técnica, seguro e IPVA são extras (link no nome / colunas de custo) —
   // se algum falhar, o app continua funcionando sem aquele pedaço.
@@ -566,22 +644,17 @@ async function carregarDados() {
       opt.textContent = row.nome + " (" + row.uf + ")";
       elUf.appendChild(opt);
     });
+    detectarLocalizacao();
   } else console.warn("Não foi possível carregar ipva_aliquotas_estados:", ipvaRes.error);
 
+  // Só carros novos (0km) — mercado_completo/pcd_confirmado_completo já são
+  // as duas fontes "novos" do banco (a fonte de usados não é mais consultada).
   const todos = todosRes.data.map(r => ({
     name: r.marca_nome + " " + r.modelo_nome, marca: r.marca_nome, modelo: r.modelo_nome, cat: r.categoria, tipo: r.tipo_veiculo,
     tabela: Number(r.preco_fipe_atual), pcd: null, pcdConfirmado: false,
     depAnual: Number(r.depreciacao_anual_pct), confianca: r.confianca, motivoOverride: r.motivo_override,
     battery: null, evRange: null, fuelKmL: null, hasSpecs: false,
     codigoFipe: r.codigo_fipe || null, anoModelo: null,
-  }));
-
-  const todosUsados = usadosRes.data.map(r => ({
-    name: r.marca_nome + " " + r.modelo_nome + " (" + r.ano_modelo + ")", marca: r.marca_nome, modelo: r.modelo_nome, cat: r.categoria, tipo: r.tipo_veiculo,
-    tabela: Number(r.preco_fipe_atual), pcd: null, pcdConfirmado: false,
-    depAnual: Number(r.depreciacao_anual_pct), confianca: r.confianca, motivoOverride: r.motivo_override,
-    battery: null, evRange: null, fuelKmL: null, hasSpecs: false,
-    codigoFipe: r.codigo_fipe || null, anoModelo: r.ano_modelo || null,
   }));
 
   const pcd = pcdRes.data.map(r => ({
@@ -595,7 +668,41 @@ async function carregarDados() {
     codigoFipe: r.codigo_fipe || null, anoModelo: null,
   }));
 
-  return { todos, todosUsados, pcd };
+  return { todos, pcd };
+}
+
+// ---- Geolocalização: tenta detectar o estado automaticamente pelo navegador;
+// se não conseguir (sem permissão, sem suporte, API fora do ar), o combo de
+// estado já populado acima continua disponível pra escolha manual.
+function detectarLocalizacao() {
+  const hint = document.getElementById("ufStatusHint");
+  const elUf = document.getElementById("ufSelecionada");
+  if (!navigator.geolocation) {
+    hint.textContent = "Seu navegador não suporta localização automática — selecione seu estado acima.";
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const resp = await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + latitude + "&longitude=" + longitude + "&localityLanguage=pt");
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const data = await resp.json();
+        const code = ((data.principalSubdivisionCode || "").split("-").pop() || "").toUpperCase();
+        if (code && IPVA_POR_UF[code]) {
+          elUf.value = code;
+          hint.textContent = "📍 Localização detectada: " + IPVA_POR_UF[code].nome + " (" + code + "). Pode trocar acima se preferir.";
+          if (DATA_READY) calcular();
+        } else {
+          hint.textContent = "Não conseguimos identificar seu estado automaticamente — selecione acima.";
+        }
+      } catch (e) {
+        hint.textContent = "Não conseguimos detectar sua localização — selecione seu estado acima.";
+      }
+    },
+    () => { hint.textContent = "Localização não autorizada — selecione seu estado acima."; },
+    { timeout: 8000, maximumAge: 600000 }
+  );
 }
 
 function atualizaTogglePcd() {
@@ -604,34 +711,55 @@ function atualizaTogglePcd() {
   document.getElementById("labelPcdNao").classList.toggle("active", !isPcd);
 }
 
-function atualizaToggleEscopo() {
-  const isTodos = document.getElementById("escopoTodos").checked;
-  document.getElementById("labelEscopoTodos").classList.toggle("active", isTodos);
-  document.getElementById("labelEscopoPcd").classList.toggle("active", !isTodos);
-  document.getElementById("pcdToggleWrap").classList.toggle("disabled", isTodos);
-  document.getElementById("pcdDisabledNote").style.display = isTodos ? "block" : "none";
-  document.getElementById("painelCondicaoVeiculo").querySelector(".seg-toggle").classList.toggle("disabled", !isTodos);
-  document.getElementById("condDisabledNote").style.display = isTodos ? "none" : "block";
-  if (!isTodos) document.getElementById("condNovo").checked = true;
-  atualizaToggleCondicao();
+function atualizaToggleComparar() {
+  const comparar = document.getElementById("compararSim").checked;
+  document.getElementById("labelCompararSim").classList.toggle("active", comparar);
+  document.getElementById("labelCompararNao").classList.toggle("active", !comparar);
+  document.getElementById("campoConsumoAtual").style.display = comparar ? "" : "none";
+  document.getElementById("campoPrecoGasolina").style.display = comparar ? "" : "none";
 }
 
-function atualizaToggleCondicao() {
-  const isNovo = document.getElementById("condNovo").checked;
-  document.getElementById("labelCondNovo").classList.toggle("active", isNovo);
-  document.getElementById("labelCondUsado").classList.toggle("active", !isNovo);
+// ---- Slider de faixa de preço (dois <input type=range> sobrepostos) -----
+function atualizaPriceSliderVisual() {
+  const elMin = document.getElementById("precoMin");
+  const elMax = document.getElementById("precoMax");
+  const min = parseFloat(elMin.min), max = parseFloat(elMin.max);
+  const vMin = parseFloat(elMin.value), vMax = parseFloat(elMax.value);
+  const pctMin = ((vMin - min) / (max - min)) * 100;
+  const pctMax = ((vMax - min) / (max - min)) * 100;
+  document.getElementById("precoSliderRange").style.left = pctMin + "%";
+  document.getElementById("precoSliderRange").style.right = (100 - pctMax) + "%";
+  document.getElementById("precoMinLabel").textContent = fmtBRL(vMin);
+  document.getElementById("precoMaxLabel").textContent = fmtBRL(vMax);
 }
+function clampPriceRange(changedId) {
+  const elMin = document.getElementById("precoMin");
+  const elMax = document.getElementById("precoMax");
+  const gap = 1000;
+  let vMin = parseFloat(elMin.value), vMax = parseFloat(elMax.value);
+  if (vMax - vMin < gap) {
+    if (changedId === "precoMin") vMin = Math.max(parseFloat(elMin.min), vMax - gap);
+    else vMax = Math.min(parseFloat(elMax.max), vMin + gap);
+    elMin.value = vMin;
+    elMax.value = vMax;
+  }
+}
+document.getElementById("precoMin").addEventListener("input", function () {
+  clampPriceRange("precoMin"); atualizaPriceSliderVisual(); if (DATA_READY) calcular();
+});
+document.getElementById("precoMax").addEventListener("input", function () {
+  clampPriceRange("precoMax"); atualizaPriceSliderVisual(); if (DATA_READY) calcular();
+});
+atualizaPriceSliderVisual();
 
 document.getElementById("carregaCasa").addEventListener("change", function () {
   document.getElementById("blocoSolar").classList.toggle("show", this.checked);
 });
-document.getElementById("pcdSim").addEventListener("change", atualizaTogglePcd);
-document.getElementById("pcdNao").addEventListener("change", atualizaTogglePcd);
-document.getElementById("escopoTodos").addEventListener("change", () => { atualizaToggleEscopo(); if (DATA_READY) calcular(); });
-document.getElementById("escopoPcd").addEventListener("change", () => { atualizaToggleEscopo(); if (DATA_READY) calcular(); });
-document.getElementById("condNovo").addEventListener("change", () => { atualizaToggleCondicao(); if (DATA_READY) calcular(); });
-document.getElementById("condUsado").addEventListener("change", () => { atualizaToggleCondicao(); if (DATA_READY) calcular(); });
-document.querySelectorAll(".tipoChk").forEach(el => el.addEventListener("change", () => { if (DATA_READY) calcular(); }));
+document.getElementById("pcdSim").addEventListener("change", () => { atualizaTogglePcd(); if (DATA_READY) calcular(); });
+document.getElementById("pcdNao").addEventListener("change", () => { atualizaTogglePcd(); if (DATA_READY) calcular(); });
+document.getElementById("compararSim").addEventListener("change", () => { atualizaToggleComparar(); if (DATA_READY) calcular(); });
+document.getElementById("compararNao").addEventListener("change", () => { atualizaToggleComparar(); if (DATA_READY) calcular(); });
+document.querySelectorAll(".marcaFixaChk").forEach(el => el.addEventListener("change", () => { if (DATA_READY) calcular(); }));
 document.getElementById("ufSelecionada").addEventListener("change", () => { if (DATA_READY) calcular(); });
 
 // ---- Autocomplete de marcas -------------------------------------------
@@ -732,19 +860,18 @@ document.addEventListener("click", (e) => {
   if (!e.target.closest(".marcas-autocomplete")) elMarcasResults.classList.remove("open");
 });
 atualizaTogglePcd();
-atualizaToggleEscopo();
+atualizaToggleComparar();
 
 function calcular() {
   const errEl = document.getElementById("errorMsg");
   errEl.style.display = "none";
   if (!DATA_READY) return;
 
-  const escopoTodos = document.getElementById("escopoTodos").checked;
-  const condUsado = escopoTodos && document.getElementById("condUsado").checked;
-  const isPcd = escopoTodos ? false : document.getElementById("pcdSim").checked;
+  const isPcd = document.getElementById("pcdSim").checked;
+  const comparar = document.getElementById("compararSim").checked;
   const kmMes = parseFloat(document.getElementById("kmMes").value);
-  const consumoAtual = parseFloat(document.getElementById("consumoAtual").value);
-  const precoGasolina = parseFloat(document.getElementById("precoGasolina").value);
+  const consumoAtual = comparar ? parseFloat(document.getElementById("consumoAtual").value) : null;
+  const precoGasolina = comparar ? parseFloat(document.getElementById("precoGasolina").value) : null;
   const anos = parseFloat(document.getElementById("anos").value);
   const carregaCasa = document.getElementById("carregaCasa").checked;
   const temSolar = document.getElementById("temSolar").checked;
@@ -754,25 +881,25 @@ function calcular() {
   const manutencaoExtra = parseFloat(document.getElementById("manutencaoExtra").value) || 0;
 
   const cats = Array.from(document.querySelectorAll(".catChk:checked")).map(c => c.value);
-  const tipos = Array.from(document.querySelectorAll(".tipoChk:checked")).map(c => c.value);
   const precoMin = parseFloat(document.getElementById("precoMin").value);
   const precoMax = parseFloat(document.getElementById("precoMax").value);
+  const marcasFixasAtivas = Array.from(document.querySelectorAll(".marcaFixaChk:checked")).map(c => c.value);
   const marcasFiltroNorm = marcasSelecionadas.map(m => normTxt(m));
   const ufValor = document.getElementById("ufSelecionada").value;
   const ufRow = ufValor ? IPVA_POR_UF[ufValor] : null;
 
-  if (!kmMes || kmMes <= 0 || !consumoAtual || consumoAtual <= 0 || !precoGasolina || precoGasolina <= 0 || !anos || anos <= 0) {
-    errEl.textContent = "Preencha quilometragem, consumo do carro atual, preço da gasolina e anos de uso com valores maiores que zero.";
+  if (!kmMes || kmMes <= 0 || !anos || anos <= 0) {
+    errEl.textContent = "Preencha quilometragem e anos de uso com valores maiores que zero.";
+    errEl.style.display = "block";
+    return;
+  }
+  if (comparar && (!consumoAtual || consumoAtual <= 0 || !precoGasolina || precoGasolina <= 0)) {
+    errEl.textContent = "Preencha o consumo do seu carro atual e o preço da gasolina com valores maiores que zero (ou escolha \"não\" em comparar com o carro atual).";
     errEl.style.display = "block";
     return;
   }
   if (cats.length === 0) {
     errEl.textContent = "Selecione ao menos uma categoria de carro.";
-    errEl.style.display = "block";
-    return;
-  }
-  if (tipos.length === 0) {
-    errEl.textContent = "Selecione ao menos um tipo de veículo (passeio e/ou utilitário).";
     errEl.style.display = "block";
     return;
   }
@@ -785,16 +912,16 @@ function calcular() {
   const tarifaEletrica = carregaCasa ? (temSolar ? tarifaComSolar : tarifaSemSolar) : tarifaRua;
   const kmDia = kmMes / 30;
   const meses = anos * 12;
-  const custoAtualMes = (kmMes / consumoAtual) * precoGasolina;
+  const custoAtualMes = comparar ? (kmMes / consumoAtual) * precoGasolina : null;
 
-  const source = escopoTodos ? (condUsado ? CARS.todosUsados : CARS.todos) : CARS.pcd;
+  const source = isPcd ? CARS.pcd : CARS.todos;
 
   const rows = source.filter(c => {
-    if (!cats.includes(c.cat) || !tipos.includes(c.tipo)) return false;
-    if (marcasFiltroNorm.length > 0) {
-      const marcaNorm = normTxt(c.marca);
-      if (marcasFiltroNorm.indexOf(marcaNorm) === -1) return false;
-    }
+    if (!cats.includes(c.cat)) return false;
+    const marcaOk = (marcasFixasAtivas.length === 0 && marcasFiltroNorm.length === 0)
+      ? true
+      : (carroCombinaMarcasFixas(c.marca, marcasFixasAtivas) || marcasFiltroNorm.indexOf(normTxt(c.marca)) !== -1);
+    if (!marcaOk) return false;
     const precoRef = isPcd && c.pcd !== null ? c.pcd : c.tabela;
     return precoRef >= precoMin && precoRef <= precoMax;
   }).map(c => {
@@ -835,18 +962,19 @@ function calcular() {
     const seguroAnual = seguroInfo.valorAnual;
     const seguroPeriodo = seguroAnual != null ? seguroAnual * anos : 0;
 
-    const ipvaAnual = ufRow ? calcularIpvaAnual(c, ufRow) : null;
+    const ipvaInfo = calcularIpvaAnual(c, ufRow);
+    const ipvaAnual = ipvaInfo.valor;
     const ipvaPeriodo = ipvaAnual != null ? ipvaAnual * anos : 0;
 
     const custoReal = perdaValor + custoEnergiaPeriodo + custoManutencaoPeriodo + seguroPeriodo + ipvaPeriodo;
 
-    const economiaMes = custoAtualMes - custoEnergiaMes;
+    const economiaMes = comparar ? (custoAtualMes - custoEnergiaMes) : null;
     const descontoPct = c.pcd !== null ? (c.tabela - c.pcd) / c.tabela : null;
 
     return {
       name: c.name, marca: c.marca, modelo: c.modelo, cat: c.cat, precoCompra, tabela: c.tabela, pcd: c.pcd, descontoPct,
       custoEnergiaMes, economiaMes, perdaValor, custoEnergiaPeriodo, custoReal,
-      seguroAnual, seguroFonte: seguroInfo.fonte, ipvaAnual,
+      seguroAnual, seguroFonte: seguroInfo.fonte, ipvaAnual, ipvaFonte: ipvaInfo.fonte,
       confianca: c.confianca, motivoOverride: c.motivoOverride, hasSpecs: c.hasSpecs,
       codigoFipe: c.codigoFipe, anoModelo: c.anoModelo,
     };
@@ -855,11 +983,12 @@ function calcular() {
   rows.sort((a, b) => a.custoReal - b.custoReal);
 
   const note = document.getElementById("resultsNote");
-  const escopoLabel = escopoTodos
-    ? ("Todos os modelos, " + (condUsado ? "usados (preço FIPE do ano-modelo)" : "novos (0km, preço = referência FIPE atual)"))
-    : (isPcd ? "Preço PCD" : "Preço de tabela cheio, sem desconto");
-  const marcasLabel = marcasSelecionadas.length > 0 ? (" · marcas: " + marcasSelecionadas.join(", ")) : "";
-  const ufLabel = ufRow ? (" · IPVA: " + ufRow.nome) : " · IPVA não incluído (selecione seu estado acima)";
+  const escopoLabel = isPcd ? "Preço PCD (carros novos)" : "Preço de tabela, sem desconto (carros novos)";
+  const marcasExtras = marcasSelecionadas.length > 0 ? marcasSelecionadas.join(", ") : "";
+  const marcasFixasTexto = marcasFixasAtivas.length > 0 ? marcasFixasAtivas.join(", ") : "";
+  const marcasTexto = [marcasFixasTexto, marcasExtras].filter(Boolean).join(", ");
+  const marcasLabel = marcasTexto ? (" · marcas: " + marcasTexto) : " · marcas: todas";
+  const ufLabel = ufRow ? (" · IPVA: " + ufRow.nome) : " · IPVA: estimativa genérica (selecione seu estado para um valor mais preciso)";
   note.textContent = escopoLabel
     + " · faixa " + fmtBRL(precoMin) + " – " + fmtBRL(precoMax)
     + " · " + anos + (anos === 1 ? " ano" : " anos") + " de uso · " + kmMes.toLocaleString("pt-BR") + " km/mês · tarifa de recarga: R$ " + tarifaEletrica.toFixed(2) + "/kWh"
@@ -874,23 +1003,23 @@ function calcular() {
     return;
   }
 
-  const showPcdCols = !escopoTodos;
+  const showPcdCols = isPcd;
 
   let html = "<table><thead><tr>" +
     "<th title='Perda de valor + energia + seguro + IPVA no período escolhido'>Custo real (" + anos + "a)</th><th>Modelo</th>" +
     (showPcdCols
       ? "<th>Preço PCD</th><th>Preço de tabela</th><th title='Quanto o preço PCD é menor que o de tabela'>Desconto PCD</th>"
-      : "<th>Preço (ref. FIPE atual)</th>") +
-    "<th>Perda de valor (" + anos + "a)</th><th>Energia/mês</th><th>Economia/mês vs. seu carro atual</th>" +
+      : "<th>Preço de tabela</th>") +
+    "<th>Perda de valor (" + anos + "a)</th><th>Energia/mês</th>" +
+    (comparar ? "<th>Economia/mês vs. seu carro atual</th>" : "") +
     "<th title='Cotação real da versão quando temos; senão, estimativa por categoria — ver detalhe no painel Seguro e IPVA'>Seguro/ano</th>" +
-    "<th title='Estimativa com base na alíquota do estado selecionado; confirme na SEFAZ/DETRAN'>IPVA/ano</th>" +
+    "<th title='Alíquota pesquisada do estado quando disponível; senão, 4% genérico (baixa confiabilidade) — confirme na SEFAZ/DETRAN'>IPVA/ano</th>" +
     "</tr></thead><tbody>";
 
   rows.forEach((r, i) => {
     const rankClass = i === 0 ? " rank1" : "";
     const perdaClass = r.perdaValor < 0 ? "pos-pos" : "";
     const crClass = r.custoReal < 0 ? "pos-pos" : "";
-    const melhorBadge = i === 0 ? "<span class='badge badge-best'>melhor opção</span>" : "";
     const confBadgeHtml = confBadge(r.confianca, r.motivoOverride);
 
     let priceCols;
@@ -913,21 +1042,32 @@ function calcular() {
       ? "<a class='spec-name-link' target='_blank' rel='noopener' title='Ver ficha técnica completa' href='especificacoes.html?marca=" + encodeURIComponent(specMatch.marca) + "&modelo=" + encodeURIComponent(specMatch.modelo) + "'>" + r.name + "</a>"
       : r.name;
 
+    const SEGURO_BADGE = {
+      cotacao: { cls: "badge-cotacao", label: "cotação", title: "Cotação de mercado para essa versão" },
+      categoria: { cls: "badge-estimativa", label: "estimativa", title: "Estimativa pela categoria (percentual IPSA/Serasa Experian sobre o preço de tabela)" },
+      generica: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Sem cotação nem percentual de categoria para este carro — estimativa genérica de 2,5% ao ano sobre o preço de tabela" },
+    };
+    const seguroBadge = SEGURO_BADGE[r.seguroFonte] || SEGURO_BADGE.generica;
     const seguroHtml = r.seguroAnual != null
-      ? fmtBRL(r.seguroAnual) + " <span class='badge " + (r.seguroFonte === "cotacao" ? "badge-cotacao" : "badge-estimativa") + "' title='" + (r.seguroFonte === "cotacao" ? "Cotação de mercado para essa versão" : "Estimativa por categoria (sem cotação específica desse modelo)") + "'>" + (r.seguroFonte === "cotacao" ? "cotação" : "estimativa") + "</span>"
+      ? fmtBRL(r.seguroAnual) + " <span class='badge " + seguroBadge.cls + "' title='" + seguroBadge.title + "'>" + seguroBadge.label + "</span>"
       : "<span class='sem-dado'>—</span>";
 
+    const IPVA_BADGE = {
+      aliquota_estado: null,
+      generica: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Sem estado escolhido ou sem alíquota pesquisada para esse estado/categoria — estimativa genérica de 4% ao ano sobre o preço de tabela" },
+    };
+    const ipvaBadgeInfo = IPVA_BADGE[r.ipvaFonte];
     const ipvaHtml = r.ipvaAnual != null
-      ? fmtBRL(r.ipvaAnual)
-      : (ufRow ? "<span class='sem-dado' title='Sem alíquota confiável para essa categoria nesse estado'>sem dado</span>" : "<span class='sem-dado' title='Selecione seu estado no painel Seguro e IPVA'>—</span>");
+      ? fmtBRL(r.ipvaAnual) + (ipvaBadgeInfo ? " <span class='badge " + ipvaBadgeInfo.cls + "' title='" + ipvaBadgeInfo.title + "'>" + ipvaBadgeInfo.label + "</span>" : "")
+      : "<span class='sem-dado'>—</span>";
 
     html += "<tr class='" + rankClass + "'>" +
-      "<td class='custoreal-cell " + crClass + "'>" + fmtBRL(r.custoReal) + melhorBadge + "</td>" +
+      "<td class='custoreal-cell " + crClass + "'>" + fmtBRL(r.custoReal) + "</td>" +
       "<td>" + nameHtml + "<span class='badge badge-cat'>" + CAT_LABEL[r.cat] + "</span>" + confBadgeHtml + "<br>" + historicoHtml + "</td>" +
       priceCols +
       "<td class='" + perdaClass + "'>" + fmtBRL(r.perdaValor) + "</td>" +
       "<td>" + fmtBRL(r.custoEnergiaMes) + "</td>" +
-      "<td>" + fmtBRL(r.economiaMes) + "</td>" +
+      (comparar ? "<td>" + fmtBRL(r.economiaMes) + "</td>" : "") +
       "<td>" + seguroHtml + "</td>" +
       "<td>" + ipvaHtml + "</td>" +
       "</tr>";
@@ -992,17 +1132,13 @@ function chatSetTyping(show) {
 // Aplica os argumentos vindos da function call do Gemini nos campos do formulario existente
 // e dispara o calculo, reaproveitando a logica de custo real ja validada.
 function aplicarPreenchimentoFormulario(args) {
-  if (typeof args.escopo === "string") {
-    document.getElementById(args.escopo === "pcd" ? "escopoPcd" : "escopoTodos").checked = true;
-    atualizaToggleEscopo();
-  }
   if (typeof args.isPcd === "boolean") {
     document.getElementById(args.isPcd ? "pcdSim" : "pcdNao").checked = true;
     atualizaTogglePcd();
   }
-  if (typeof args.condicao === "string" && document.getElementById("escopoTodos").checked) {
-    document.getElementById(args.condicao === "usado" ? "condUsado" : "condNovo").checked = true;
-    atualizaToggleCondicao();
+  if (typeof args.comparar === "boolean") {
+    document.getElementById(args.comparar ? "compararSim" : "compararNao").checked = true;
+    atualizaToggleComparar();
   }
   if (typeof args.kmMes === "number") document.getElementById("kmMes").value = args.kmMes;
   if (typeof args.consumoAtual === "number") document.getElementById("consumoAtual").value = args.consumoAtual;
@@ -1016,16 +1152,17 @@ function aplicarPreenchimentoFormulario(args) {
   if (Array.isArray(args.categorias) && args.categorias.length > 0) {
     document.querySelectorAll(".catChk").forEach(chk => { chk.checked = args.categorias.includes(chk.value); });
   }
-  if (Array.isArray(args.tiposVeiculo) && args.tiposVeiculo.length > 0) {
-    document.querySelectorAll(".tipoChk").forEach(chk => { chk.checked = args.tiposVeiculo.includes(chk.value); });
-  }
-  if (typeof args.precoMin === "number") document.getElementById("precoMin").value = args.precoMin;
-  if (typeof args.precoMax === "number") document.getElementById("precoMax").value = args.precoMax;
+  if (typeof args.precoMin === "number") { document.getElementById("precoMin").value = args.precoMin; clampPriceRange("precoMin"); }
+  if (typeof args.precoMax === "number") { document.getElementById("precoMax").value = args.precoMax; clampPriceRange("precoMax"); }
+  atualizaPriceSliderVisual();
   if (typeof args.uf === "string") {
     const elUf = document.getElementById("ufSelecionada");
     if (Array.from(elUf.options).some(o => o.value === args.uf.toUpperCase())) elUf.value = args.uf.toUpperCase();
   }
   if (Array.isArray(args.marcas)) {
+    document.querySelectorAll(".marcaFixaChk").forEach(chk => {
+      chk.checked = args.marcas.some(pedida => tokenize(pedida).some(t => tokenize(chk.value).indexOf(t) !== -1));
+    });
     marcasSelecionadas = MARCAS_DISPONIVEIS.filter(disp =>
       args.marcas.some(pedida => normTxt(disp).indexOf(normTxt(pedida)) !== -1)
     );
@@ -1102,8 +1239,9 @@ carregarDados().then(data => {
   CARS = data;
   DATA_READY = true;
   const todasMarcas = new Set();
-  [...CARS.todos, ...CARS.todosUsados, ...CARS.pcd].forEach(c => { if (c.marca) todasMarcas.add(c.marca); });
-  MARCAS_DISPONIVEIS = Array.from(todasMarcas).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  [...CARS.todos, ...CARS.pcd].forEach(c => { if (c.marca) todasMarcas.add(c.marca); });
+  // As 7 marcas fixas já têm checkbox própria — o autocomplete só oferece as demais.
+  MARCAS_DISPONIVEIS = Array.from(todasMarcas).filter(m => !marcaEhFixa(m)).sort((a, b) => a.localeCompare(b, "pt-BR"));
   document.getElementById("loadMsg").style.display = "none";
   document.getElementById("btnCalc").disabled = false;
   document.getElementById("btnCalc").textContent = "Calcular ranking de custo real";
