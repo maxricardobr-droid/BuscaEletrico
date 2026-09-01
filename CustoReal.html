@@ -102,6 +102,7 @@
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { padding: 10px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; font-family: var(--mono); font-variant-numeric: tabular-nums; }
   th:nth-child(2), td:nth-child(2) { text-align: left; white-space: normal; font-family: -apple-system, "Segoe UI", Arial, sans-serif; }
+  th:nth-child(3), td:nth-child(3) { text-align: left; white-space: normal; font-family: -apple-system, "Segoe UI", Arial, sans-serif; font-variant-numeric: normal; }
   th {
     color: var(--cyan); font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em;
     background: var(--bg-alt); position: sticky; top: 0; border-bottom: 2px solid var(--border-strong);
@@ -157,6 +158,42 @@
     color: var(--text); text-decoration: none; border-bottom: 1px dashed var(--cyan);
   }
   .spec-name-link:hover { color: var(--cyan); border-bottom-style: solid; }
+
+  .row-links { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .row-link, .row-link-btn {
+    font-size: 11px; font-weight: 700; color: var(--cyan); text-decoration: none;
+    text-transform: uppercase; letter-spacing: 0.04em; font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    background: none; border: none; padding: 0; cursor: pointer;
+  }
+  .row-link:hover, .row-link-btn:hover { text-decoration: underline; color: #7cdcf0; }
+  .row-link-off { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(4,9,15,0.72); z-index: 100;
+    align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px;
+    max-width: 560px; width: 100%; padding: 24px 26px; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 16px; background: none; border: none; color: var(--text-muted);
+    font-size: 20px; line-height: 1; cursor: pointer; padding: 4px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-title { margin: 0 28px 4px 0; font-size: 16px; color: #fff; }
+  .modal-sub { font-size: 11.5px; color: var(--text-muted); margin: 0 0 18px; font-family: var(--mono); }
+  .modal-rows { display: flex; flex-direction: column; gap: 0; }
+  .modal-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  }
+  .modal-row .k { color: var(--text-muted); }
+  .modal-row .v { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  .modal-row.total { border-bottom: none; border-top: 2px solid var(--border-strong); margin-top: 4px; padding-top: 14px; }
+  .modal-row.total .k { color: var(--text); font-weight: 700; }
+  .modal-row.total .v { font-size: 16px; font-weight: 800; color: #fff; }
 
   .marcas-autocomplete { position: relative; }
   .marcas-box { position: relative; }
@@ -343,8 +380,10 @@
       <label><input type="checkbox" class="marcaFixaChk" value="GAC" checked> GAC</label>
       <label><input type="checkbox" class="marcaFixaChk" value="Geely" checked> Geely</label>
       <label><input type="checkbox" class="marcaFixaChk" value="GWM" checked> GWM</label>
+      <label><input type="checkbox" class="marcaFixaChk" value="Jaecoo" checked> Jaecoo</label>
       <label><input type="checkbox" class="marcaFixaChk" value="LeapMotor" checked> LeapMotor</label>
       <label><input type="checkbox" class="marcaFixaChk" value="MG Motors" checked> MG Motors</label>
+      <label><input type="checkbox" class="marcaFixaChk" value="Omoda" checked> Omoda</label>
     </div>
     <div class="field marcas-autocomplete" style="margin-top:14px;">
       <label for="marcasFiltro">Outras marcas (opcional)</label>
@@ -385,7 +424,7 @@
       <div class="empty-state">Aguardando dados…</div>
     </div>
     <p class="foot-note" id="footNote">
-      Custo real = perda de valor do carro + energia/combustível + seguro + IPVA no período escolhido. O valor em destaque (negrito) nas colunas de preço é o que entra na conta.
+      Custo real = perda de valor do carro + energia/combustível + seguro + IPVA no período escolhido. Clique em "Detalhes" em qualquer linha pra ver a conta completa (preço, perda de valor, energia, seguro e IPVA).
     </p>
     <details class="calc-hint">
       <summary>Como calculamos o custo real?</summary>
@@ -393,6 +432,13 @@
     </details>
   </div>
 
+</div>
+
+<div class="modal-overlay" id="detalhesOverlay" onclick="if (event.target === this) fecharDetalhes();">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharDetalhes()" aria-label="Fechar">&times;</button>
+    <div id="detalhesConteudo"></div>
+  </div>
 </div>
 
 <button id="chatFab" onclick="abrirChat()"><img id="chatFabIcon" alt="" style="width:26px;height:26px;vertical-align:-8px;margin-right:6px;">Falar com o Voltinho</button>
@@ -466,10 +512,11 @@ function tokenize(s) {
 // casamento usa um alias explícito por marca, não um token genérico da
 // label inteira (ex.: tokenizar "MG Motors" faria "motors" bater com
 // "Kia Motors", que é outra marca).
-const MARCAS_FIXAS = ["BYD", "Chery", "GAC", "Geely", "GWM", "LeapMotor", "MG Motors"];
+const MARCAS_FIXAS = ["BYD", "Chery", "GAC", "Geely", "GWM", "Jaecoo", "LeapMotor", "MG Motors", "Omoda"];
 const MARCAS_FIXAS_ALIASES = {
   "BYD": ["byd"], "Chery": ["chery"], "GAC": ["gac"], "Geely": ["geely"],
-  "GWM": ["gwm"], "LeapMotor": ["leapmotor"], "MG Motors": ["mg"],
+  "GWM": ["gwm"], "Jaecoo": ["jaecoo"], "LeapMotor": ["leapmotor"], "MG Motors": ["mg"],
+  "Omoda": ["omoda"],
 };
 function carroCombinaMarcasFixas(marcaCarro, marcasFixasAtivas) {
   if (!marcasFixasAtivas || !marcasFixasAtivas.length) return false;
@@ -504,11 +551,26 @@ function buildSpecsIndex(rows) {
       seen.set(key, entry);
       idx.push(entry);
     }
-    if (r.id != null) entry.versions.push({ id: r.id, precoTabela: r.preco_tabela != null ? Number(r.preco_tabela) : null });
+    if (r.id != null) {
+      entry.versions.push({
+        id: r.id,
+        precoTabela: r.preco_tabela != null ? Number(r.preco_tabela) : null,
+        tipoMotorizacao: r.tipo_motorizacao || null,
+        versao: r.versao || null,
+      });
+    }
   });
   return idx;
 }
-function findSpecsMatch(marca, modelo) {
+// cat (opcional): categoria do carro (BEV/PHEV/HEV) vindo da FIPE. Uma mesma
+// marca+modelo pode reunir versões de motorização diferente na ficha técnica
+// (ex.: Jaecoo 7 tem trim HEV e trim PHEV com nomes de acabamento parecidos;
+// Leapmotor C10 tem versão BEV e PHEV) — sem filtrar por categoria, um carro
+// HEV da FIPE podia "herdar" seguro/ficha técnica de uma versão PHEV só
+// porque é a única (ou a mais próxima em preço) cadastrada. Quando cat é
+// informado, preferimos só as versões daquela categoria; se nenhuma bater,
+// caímos para o grupo inteiro (mesma marca+modelo) em vez de não achar nada.
+function findSpecsMatch(marca, modelo, cat) {
   if (!SPECS_INDEX.length || !marca || !modelo) return null;
   const marcaNorm = normTxt(marca);
   const modeloTokens = tokenize(modelo);
@@ -521,7 +583,11 @@ function findSpecsMatch(marca, modelo) {
     }
     if (!best || entry.modeloTokens.length > best.modeloTokens.length) best = entry;
   });
-  return best;
+  if (!best) return null;
+  if (!cat) return Object.assign({}, best, { categoriaOk: true });
+  const mesmaCategoria = best.versions.filter(v => v.tipoMotorizacao === cat);
+  if (!mesmaCategoria.length) return Object.assign({}, best, { categoriaOk: false }); // nada na categoria certa: melhor usar o grupo todo (sinalizado) do que nada
+  return Object.assign({}, best, { versions: mesmaCategoria, categoriaOk: true });
 }
 
 // ---- Seguro estimado: casa o carro com a versão mais próxima em preço
@@ -530,10 +596,13 @@ function findSpecsMatch(marca, modelo) {
 // para o percentual médio da categoria (pesquisa IPSA/Serasa Experian); sem
 // nenhum dado de categoria, usa 2,5% fixo — marcado como baixa confiabilidade.
 // fonte: "cotacao" (cotação de mercado da versão) | "categoria" (percentual
-// IPSA por categoria) | "generica" (2,5% fixo, sem nenhum dado específico).
+// IPSA por categoria) | "categoria_diferente" (só achamos cotação de uma
+// versão de OUTRA motorização pra esse modelo, ex.: carro é HEV mas só há
+// ficha PHEV cadastrada — usamos mesmo assim, mas sinalizado) | "generica"
+// (2,5% fixo, sem nenhum dado específico).
 const SEGURO_PCT_FALLBACK = 0.025;
 function estimarSeguro(car) {
-  const group = findSpecsMatch(car.marca, car.modelo);
+  const group = findSpecsMatch(car.marca, car.modelo, car.cat);
   if (group && group.versions.length) {
     const comCotacao = group.versions.filter(v => SEGURO_BY_ESPEC_ID[v.id]);
     if (comCotacao.length) {
@@ -545,6 +614,7 @@ function estimarSeguro(car) {
         if (dist < melhorDist) { melhorDist = dist; melhor = v; }
       });
       const info = SEGURO_BY_ESPEC_ID[melhor.id];
+      if (group.categoriaOk === false) return { valorAnual: info.valor, fonte: "categoria_diferente" };
       return { valorAnual: info.valor, fonte: info.metodo === "cotacao_especifica" ? "cotacao" : "categoria" };
     }
   }
@@ -604,7 +674,7 @@ async function carregarDados() {
   const [todosRes, pcdRes, specsRes, seguroRes, ipvaRes] = await Promise.all([
     client.from("mercado_completo").select("*"),
     client.from("pcd_confirmado_completo").select("*"),
-    client.from("especificacoes_tecnicas").select("id,marca,modelo,preco_tabela"),
+    client.from("especificacoes_tecnicas").select("id,marca,modelo,versao,tipo_motorizacao,preco_tabela"),
     client.from("seguro_estimado").select("especificacao_id,valor_seguro_anual_estimado,metodo"),
     client.from("ipva_aliquotas_estados").select("*"),
   ]);
@@ -1005,77 +1075,117 @@ function calcular() {
 
   const showPcdCols = isPcd;
 
+  // Guarda o resultado deste cálculo pra o modal de Detalhes conseguir
+  // reconstruir a linha inteira depois, sem precisar recalcular nada —
+  // a tabela principal só mostra 3 colunas (custo real, modelo, links);
+  // todo o resto (preço, perda de valor, energia, seguro, IPVA) fica no
+  // modal, aberto pelo link "Detalhes" de cada linha.
+  LAST_CALC = { rows, anos, comparar, showPcdCols, isPcd };
+
   let html = "<table><thead><tr>" +
-    "<th title='Perda de valor + energia + seguro + IPVA no período escolhido'>Custo real (" + anos + "a)</th><th>Modelo</th>" +
-    (showPcdCols
-      ? "<th>Preço PCD</th><th>Preço de tabela</th><th title='Quanto o preço PCD é menor que o de tabela'>Desconto PCD</th>"
-      : "<th>Preço de tabela</th>") +
-    "<th>Perda de valor (" + anos + "a)</th><th>Energia/mês</th>" +
-    (comparar ? "<th>Economia/mês vs. seu carro atual</th>" : "") +
-    "<th title='Cotação real da versão quando temos; senão, estimativa por categoria — ver detalhe no painel Seguro e IPVA'>Seguro/ano</th>" +
-    "<th title='Alíquota pesquisada do estado quando disponível; senão, 4% genérico (baixa confiabilidade) — confirme na SEFAZ/DETRAN'>IPVA/ano</th>" +
+    "<th title='Perda de valor + energia + seguro + IPVA no período escolhido'>Custo real (" + anos + "a)</th><th>Modelo</th><th>Links</th>" +
     "</tr></thead><tbody>";
 
   rows.forEach((r, i) => {
     const rankClass = i === 0 ? " rank1" : "";
-    const perdaClass = r.perdaValor < 0 ? "pos-pos" : "";
     const crClass = r.custoReal < 0 ? "pos-pos" : "";
-    const confBadgeHtml = confBadge(r.confianca, r.motivoOverride);
-
-    let priceCols;
-    if (showPcdCols) {
-      const pcdColClass = isPcd ? "price-active" : "price-inactive";
-      const tabelaColClass = !isPcd ? "price-active" : "price-inactive";
-      priceCols = "<td class='" + pcdColClass + "'>" + fmtBRL(r.pcd) + "</td>" +
-                  "<td class='" + tabelaColClass + "'>" + fmtBRL(r.tabela) + "</td>" +
-                  "<td>" + (r.descontoPct !== null ? (r.descontoPct * 100).toFixed(1) + "%" : "—") + "</td>";
-    } else {
-      priceCols = "<td class='price-active'>" + fmtBRL(r.tabela) + "</td>";
-    }
 
     const historicoHtml = r.codigoFipe
-      ? "<a class='hist-link' target='_blank' rel='noopener' href='fipe-historico.html?codigo_fipe=" + encodeURIComponent(r.codigoFipe) + "&marca=" + encodeURIComponent(r.marca) + "&modelo=" + encodeURIComponent(r.modelo) + (r.anoModelo ? "&ano=" + encodeURIComponent(r.anoModelo) : "") + "'>histórico FIPE ↗</a>"
-      : "<span class='hist-none'>sem histórico FIPE</span>";
+      ? "<a class='row-link' target='_blank' rel='noopener' href='fipe-historico.html?codigo_fipe=" + encodeURIComponent(r.codigoFipe) + "&marca=" + encodeURIComponent(r.marca) + "&modelo=" + encodeURIComponent(r.modelo) + (r.anoModelo ? "&ano=" + encodeURIComponent(r.anoModelo) : "") + "'>Histórico FIPE ↗</a>"
+      : "<span class='row-link-off'>sem histórico FIPE</span>";
 
-    const specMatch = findSpecsMatch(r.marca, r.modelo);
-    const nameHtml = specMatch
-      ? "<a class='spec-name-link' target='_blank' rel='noopener' title='Ver ficha técnica completa' href='especificacoes.html?marca=" + encodeURIComponent(specMatch.marca) + "&modelo=" + encodeURIComponent(specMatch.modelo) + "'>" + r.name + "</a>"
-      : r.name;
-
-    const SEGURO_BADGE = {
-      cotacao: { cls: "badge-cotacao", label: "cotação", title: "Cotação de mercado para essa versão" },
-      categoria: { cls: "badge-estimativa", label: "estimativa", title: "Estimativa pela categoria (percentual IPSA/Serasa Experian sobre o preço de tabela)" },
-      generica: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Sem cotação nem percentual de categoria para este carro — estimativa genérica de 2,5% ao ano sobre o preço de tabela" },
-    };
-    const seguroBadge = SEGURO_BADGE[r.seguroFonte] || SEGURO_BADGE.generica;
-    const seguroHtml = r.seguroAnual != null
-      ? fmtBRL(r.seguroAnual) + " <span class='badge " + seguroBadge.cls + "' title='" + seguroBadge.title + "'>" + seguroBadge.label + "</span>"
-      : "<span class='sem-dado'>—</span>";
-
-    const IPVA_BADGE = {
-      aliquota_estado: null,
-      generica: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Sem estado escolhido ou sem alíquota pesquisada para esse estado/categoria — estimativa genérica de 4% ao ano sobre o preço de tabela" },
-    };
-    const ipvaBadgeInfo = IPVA_BADGE[r.ipvaFonte];
-    const ipvaHtml = r.ipvaAnual != null
-      ? fmtBRL(r.ipvaAnual) + (ipvaBadgeInfo ? " <span class='badge " + ipvaBadgeInfo.cls + "' title='" + ipvaBadgeInfo.title + "'>" + ipvaBadgeInfo.label + "</span>" : "")
-      : "<span class='sem-dado'>—</span>";
+    // categoria=r.cat manda a ficha técnica já filtrada pra motorização certa —
+    // sem isso, um nome de modelo com trims de categorias diferentes (ex.:
+    // Jaecoo 7 HEV e PHEV) mostrava a versão errada junto com a certa.
+    const specMatch = findSpecsMatch(r.marca, r.modelo, r.cat);
+    const specLinkTitle = specMatch && specMatch.categoriaOk === false
+      ? "Não há ficha técnica cadastrada para a versão " + (CAT_LABEL[r.cat] || r.cat) + " deste modelo — mostrando outra motorização cadastrada"
+      : "Ver ficha técnica completa";
+    const especHtml = specMatch
+      ? "<a class='row-link' target='_blank' rel='noopener' title='" + specLinkTitle + "' href='especificacoes.html?marca=" + encodeURIComponent(specMatch.marca) + "&modelo=" + encodeURIComponent(specMatch.modelo) + "&categoria=" + encodeURIComponent(r.cat || "") + "'>Especificações ↗</a>"
+      : "<span class='row-link-off'>sem ficha técnica</span>";
 
     html += "<tr class='" + rankClass + "'>" +
       "<td class='custoreal-cell " + crClass + "'>" + fmtBRL(r.custoReal) + "</td>" +
-      "<td>" + nameHtml + "<span class='badge badge-cat'>" + CAT_LABEL[r.cat] + "</span>" + confBadgeHtml + "<br>" + historicoHtml + "</td>" +
-      priceCols +
-      "<td class='" + perdaClass + "'>" + fmtBRL(r.perdaValor) + "</td>" +
-      "<td>" + fmtBRL(r.custoEnergiaMes) + "</td>" +
-      (comparar ? "<td>" + fmtBRL(r.economiaMes) + "</td>" : "") +
-      "<td>" + seguroHtml + "</td>" +
-      "<td>" + ipvaHtml + "</td>" +
+      "<td>" + r.name + "<span class='badge badge-cat'>" + CAT_LABEL[r.cat] + "</span></td>" +
+      "<td><div class='row-links'>" +
+        "<button type='button' class='row-link-btn' onclick='abrirDetalhes(" + i + ")'>Detalhes</button>" +
+        historicoHtml +
+        especHtml +
+      "</div></td>" +
       "</tr>";
   });
 
   html += "</tbody></table>";
   container.innerHTML = html;
 }
+
+// ---- Badges de seguro/IPVA reaproveitados só pelo modal de Detalhes agora
+// (a tabela principal não mostra mais essas colunas direto).
+const SEGURO_BADGE = {
+  cotacao: { cls: "badge-cotacao", label: "cotação", title: "Cotação de mercado para essa versão" },
+  categoria: { cls: "badge-estimativa", label: "estimativa", title: "Estimativa pela categoria (percentual IPSA/Serasa Experian sobre o preço de tabela)" },
+  categoria_diferente: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Só temos ficha técnica de uma versão de motorização diferente deste modelo (ex.: carro é HEV, ficha cadastrada é PHEV) — usamos a cotação dela mesmo assim, mas confira antes de decidir" },
+  generica: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Sem cotação nem percentual de categoria para este carro — estimativa genérica de 2,5% ao ano sobre o preço de tabela" },
+};
+function seguroHtmlFor(r) {
+  const b = SEGURO_BADGE[r.seguroFonte] || SEGURO_BADGE.generica;
+  return r.seguroAnual != null
+    ? fmtBRL(r.seguroAnual) + " <span class='badge " + b.cls + "' title='" + b.title + "'>" + b.label + "</span>"
+    : "<span class='sem-dado'>—</span>";
+}
+const IPVA_BADGE = {
+  aliquota_estado: null,
+  generica: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Sem estado escolhido ou sem alíquota pesquisada para esse estado/categoria — estimativa genérica de 4% ao ano sobre o preço de tabela" },
+};
+function ipvaHtmlFor(r) {
+  const b = IPVA_BADGE[r.ipvaFonte];
+  return r.ipvaAnual != null
+    ? fmtBRL(r.ipvaAnual) + (b ? " <span class='badge " + b.cls + "' title='" + b.title + "'>" + b.label + "</span>" : "")
+    : "<span class='sem-dado'>—</span>";
+}
+
+// ---- Modal "Detalhes": mostra a ficha de custo completa de uma linha
+// (preço, perda de valor, energia, seguro, IPVA, custo real) sem precisar
+// recalcular nada -- usa o que já foi guardado em LAST_CALC pelo calcular().
+let LAST_CALC = null;
+function abrirDetalhes(i) {
+  if (!LAST_CALC) return;
+  const r = LAST_CALC.rows[i];
+  if (!r) return;
+  const { anos, comparar, showPcdCols, isPcd } = LAST_CALC;
+  const confBadgeHtml = confBadge(r.confianca, r.motivoOverride);
+
+  let priceRows;
+  if (showPcdCols) {
+    priceRows =
+      "<div class='modal-row'><span class='k'>Preço PCD</span><span class='v'>" + fmtBRL(r.pcd) + "</span></div>" +
+      "<div class='modal-row'><span class='k'>Preço de tabela</span><span class='v'>" + fmtBRL(r.tabela) + "</span></div>" +
+      "<div class='modal-row'><span class='k'>Desconto PCD</span><span class='v'>" + (r.descontoPct !== null ? (r.descontoPct * 100).toFixed(1) + "%" : "—") + "</span></div>";
+  } else {
+    priceRows = "<div class='modal-row'><span class='k'>Preço de tabela</span><span class='v'>" + fmtBRL(r.tabela) + "</span></div>";
+  }
+
+  const html =
+    "<h3 class='modal-title'>" + r.name + "</h3>" +
+    "<p class='modal-sub'><span class='badge badge-cat'>" + CAT_LABEL[r.cat] + "</span>" + confBadgeHtml + "</p>" +
+    "<div class='modal-rows'>" +
+      priceRows +
+      "<div class='modal-row'><span class='k'>Perda de valor (" + anos + (anos === 1 ? " ano" : " anos") + ")</span><span class='v'>" + fmtBRL(r.perdaValor) + "</span></div>" +
+      "<div class='modal-row'><span class='k'>Energia/mês</span><span class='v'>" + fmtBRL(r.custoEnergiaMes) + "</span></div>" +
+      (comparar ? "<div class='modal-row'><span class='k'>Economia/mês vs. seu carro atual</span><span class='v'>" + fmtBRL(r.economiaMes) + "</span></div>" : "") +
+      "<div class='modal-row'><span class='k'>Seguro/ano</span><span class='v'>" + seguroHtmlFor(r) + "</span></div>" +
+      "<div class='modal-row'><span class='k'>IPVA/ano</span><span class='v'>" + ipvaHtmlFor(r) + "</span></div>" +
+      "<div class='modal-row total'><span class='k'>Custo real (" + anos + (anos === 1 ? " ano" : " anos") + ")</span><span class='v'>" + fmtBRL(r.custoReal) + "</span></div>" +
+    "</div>";
+
+  document.getElementById("detalhesConteudo").innerHTML = html;
+  document.getElementById("detalhesOverlay").classList.add("open");
+}
+function fecharDetalhes() {
+  document.getElementById("detalhesOverlay").classList.remove("open");
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharDetalhes(); });
 
 const EDGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/gemini-chat";
 
