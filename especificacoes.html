@@ -6,26 +6,24 @@
 <title>Ficha Técnica — Elétricos e Híbridos</title>
 <style>
   :root{
-    --bg:#0f1115;
-    --panel:#171a21;
-    --panel-2:#1e222b;
-    --border:#2a2f3a;
-    --text:#e7e9ee;
-    --muted:#9aa3b2;
-    --orange:#ffb454;
-    --orange-dim:#8a5f1f;
-    --green:#3ecf8e;
-    --blue:#5b9cff;
-    --purple:#b18aff;
-    --red:#ff6b6b;
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#eef3fa;
+    --border:#d7e1ee;
+    --text:#0f2740;
+    --muted:#5c7089;
+    --orange:#123F82;
+    --orange-dim:#0C2E5E;
+    --green:#1E8A5C;
+    --blue:#2F6FE4;
+    --purple:#7A4FD1;
+    --red:#C43D3D;
     --radius:12px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:radial-gradient(1200px 800px at 10% -10%, #3a2a12 0%, transparent 55%),
-               radial-gradient(1000px 700px at 100% 0%, #10202f 0%, transparent 50%),
-               var(--bg);
+    background: var(--bg);
     color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
     min-height:100vh;
@@ -35,7 +33,7 @@
   header .logo{
     width:40px;height:40px;border-radius:10px;
     background:linear-gradient(135deg,var(--orange),var(--orange-dim));
-    display:flex;align-items:center;justify-content:center;font-weight:800;color:#2a1a05;font-size:18px;
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:18px;
     flex:none;
   }
   header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
@@ -66,16 +64,16 @@
     display:flex;justify-content:space-between;align-items:center;gap:10px;
   }
   .result-item:last-child{border-bottom:none;}
-  .result-item:hover, .result-item.active{background:#232833;}
+  .result-item:hover, .result-item.active{background:rgba(18,63,130,0.08);}
   .result-item .ri-main{display:flex;flex-direction:column;gap:2px;min-width:0;}
   .result-item .ri-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .result-item .ri-sub{font-size:12px;color:var(--muted);}
   .badge{
     font-size:10.5px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;letter-spacing:.02em;flex:none;
   }
-  .badge.BEV{background:rgba(62,207,142,.15);color:var(--green);}
-  .badge.HEV{background:rgba(91,156,255,.15);color:var(--blue);}
-  .badge.PHEV{background:rgba(177,138,255,.15);color:var(--purple);}
+  .badge.BEV{background:rgba(30,138,92,.12);color:var(--green);}
+  .badge.HEV{background:rgba(47,111,228,.12);color:var(--blue);}
+  .badge.PHEV{background:rgba(122,79,209,.12);color:var(--purple);}
 
   .empty-state{
     text-align:center;color:var(--muted);padding:70px 20px;font-size:14px;
@@ -109,7 +107,7 @@
   .spec-row .v{font-weight:600;text-align:right;}
 
   .note-box{
-    margin-top:14px;background:rgba(255,180,84,.08);border:1px solid rgba(255,180,84,.3);
+    margin-top:14px;background:rgba(18,63,130,.06);border:1px solid rgba(18,63,130,.30);
     border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text);line-height:1.55;
   }
   .note-box .nb-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--orange);font-weight:700;margin-bottom:4px;}
@@ -122,11 +120,66 @@
   a{color:var(--blue);}
 
   ::-webkit-scrollbar{width:9px;height:9px;}
-  ::-webkit-scrollbar-thumb{background:#2c313d;border-radius:20px;}
+  ::-webkit-scrollbar-thumb{background:#c7d3e2;border-radius:20px;}
   ::-webkit-scrollbar-track{background:transparent;}
+  /* Menu hambúrguer — navegação entre páginas */
+  .hb-btn{
+    position:fixed;top:14px;left:14px;z-index:300;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border-strong, var(--border));
+    background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+  .hb-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+  .hb-btn:hover{border-color:var(--cyan, var(--orange));}
+  .hb-overlay{
+    position:fixed;inset:0;background:rgba(4,9,15,0.6);z-index:290;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .hb-overlay.open{opacity:1;pointer-events:auto;}
+  .hb-drawer{
+    position:fixed;top:0;left:0;bottom:0;width:250px;max-width:82vw;
+    background:var(--panel);border-right:1px solid var(--border-strong, var(--border));
+    z-index:295;transform:translateX(-100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;padding:18px 0;
+  }
+  .hb-drawer.open{transform:translateX(0);}
+  .hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 18px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+  .hb-drawer-title{font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);}
+  .hb-close{background:none;border:none;color:var(--text-muted, var(--muted));font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;}
+  .hb-link{
+    display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:14px;
+    border-left:3px solid transparent;
+  }
+  .hb-link:hover{background:var(--panel-alt, var(--panel-2));}
+  .hb-link.active{border-left-color:var(--cyan, var(--orange));color:var(--cyan-dark, var(--orange-dim));font-weight:700;background:var(--cyan-bg, rgba(18,63,130,0.10));}
 </style>
 </head>
 <body>
+<button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
+<nav class="hb-drawer" id="hbDrawer">
+  <div class="hb-drawer-head">
+    <span class="hb-drawer-title">Carro PCD</span>
+    <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
+  </div>
+  <a href="CustoReal.html" class="hb-link">Custo Real</a>
+  <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
+  <a href="especificacoes.html" class="hb-link active">Especificações</a>
+  <a href="forum.html" class="hb-link">Fórum</a>
+</nav>
+<script>
+  function hbToggle(){
+    document.getElementById('hbDrawer').classList.toggle('open');
+    document.getElementById('hbOverlay').classList.toggle('open');
+  }
+  function hbClose(){
+    document.getElementById('hbDrawer').classList.remove('open');
+    document.getElementById('hbOverlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') hbClose(); });
+</script>
 <div class="wrap">
   <header>
     <div class="logo">FT</div>
@@ -355,16 +408,26 @@
     const modelo = params.get("modelo");
     if (!marca || !modelo) return;
     const versao = params.get("versao");
-    mostrarGrupo(marca, modelo, versao);
+    const categoria = params.get("categoria");
+    mostrarGrupo(marca, modelo, versao, categoria);
   }
 
-  function mostrarGrupo(marca, modelo, versaoDestaque) {
+  // categoria (opcional): quando o link vem de um carro específico (ex.: o
+  // CustoReal linkando um modelo HEV), filtra pra só mostrar trims daquela
+  // motorização — um mesmo nome de modelo pode reunir versões HEV e PHEV
+  // (ex.: Jaecoo 7) e sem esse filtro as duas apareciam juntas, dando a
+  // impressão de que um carro HEV também é "PHEV". Se não sobrar nenhum trim
+  // na categoria pedida, mostramos o grupo inteiro em vez de uma tela vazia.
+  function mostrarGrupo(marca, modelo, versaoDestaque, categoria) {
     els.searchInput.value = "";
     els.results.classList.remove("open");
 
-    const grupo = catalogo.filter((v) =>
+    let grupo = catalogo.filter((v) =>
       normalize(v.marca) === normalize(marca) && normalize(v.modelo) === normalize(modelo)
     );
+    if (categoria && grupo.some((v) => v.tipo_motorizacao === categoria)) {
+      grupo = grupo.filter((v) => v.tipo_motorizacao === categoria);
+    }
     if (!grupo.length) {
       els.emptyState.style.display = "block";
       els.emptyState.innerHTML = '<div class="big">🤷</div>Nenhuma ficha técnica encontrada para "' + escapeHtml(marca) + " " + escapeHtml(modelo) + '".';

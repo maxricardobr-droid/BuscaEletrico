@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fórum — Carro PCD</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#eef3fa;
+    --border:#d7e1ee;
+    --text:#0f2740;
+    --muted:#5c7089;
+    --orange:#123F82;
+    --orange-dim:#0C2E5E;
+    --green:#1E8A5C;
+    --blue:#2F6FE4;
+    --purple:#7A4FD1;
+    --red:#C43D3D;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:28px 20px 80px;}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  header .logo{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(135deg,var(--orange),var(--orange-dim));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px;
+    flex:none;
+  }
+  header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .tab{
+    flex:1 1 150px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:14px 12px;cursor:pointer;text-align:left;color:var(--text);transition:border-color .15s,transform .1s;
+  }
+  .tab:hover{transform:translateY(-1px);}
+  .tab .t-icon{font-size:20px;}
+  .tab .t-label{display:block;font-size:13.5px;font-weight:700;margin-top:6px;}
+  .tab .t-desc{display:block;font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;}
+  .tab.active{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange) inset;background:rgba(18,63,130,0.06);}
+
+  .panel-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+
+  .new-post{margin-bottom:20px;}
+  .new-post h3{margin:0 0 12px;font-size:14px;}
+  .field{margin-bottom:10px;}
+  .field label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;}
+  .field input, .field textarea{
+    width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:14px;outline:none;font-family:inherit;transition:border-color .15s;
+  }
+  .field input:focus, .field textarea:focus{border-color:var(--orange);}
+  .field textarea{resize:vertical;min-height:70px;}
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;background:var(--orange);color:#fff;border:none;border-radius:8px;
+    padding:10px 18px;font-size:13.5px;font-weight:700;cursor:pointer;transition:opacity .15s;
+  }
+  .btn:hover{opacity:.9;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn.secondary{background:var(--panel-2);color:var(--text);border:1px solid var(--border);}
+  .msg-inline{font-size:12.5px;margin-top:8px;}
+  .msg-inline.ok{color:var(--green);}
+  .msg-inline.err{color:var(--red);}
+
+  .posts{display:flex;flex-direction:column;gap:12px;margin-top:18px;}
+  .post-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px;cursor:pointer;transition:border-color .15s;
+  }
+  .post-card:hover{border-color:var(--orange);}
+  .post-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .post-title{font-size:15px;font-weight:700;margin:0;}
+  .post-meta{font-size:11.5px;color:var(--muted);white-space:nowrap;}
+  .post-preview{font-size:13px;color:var(--muted);margin-top:6px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .post-replies-count{font-size:11px;color:var(--orange);margin-top:8px;font-weight:600;}
+
+  .empty-state{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px;}
+  .empty-state .big{font-size:30px;margin-bottom:10px;}
+  .loading{text-align:center;color:var(--muted);padding:30px;font-size:13px;}
+
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(4,9,15,0.72);z-index:400;
+    align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    max-width:640px;width:100%;padding:24px;position:relative;
+  }
+  .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;line-height:1;}
+  .modal-close:hover{color:var(--text);}
+  .modal-cat-badge{
+    display:inline-block;font-size:10.5px;font-weight:700;color:var(--orange);background:rgba(18,63,130,0.10);
+    padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;
+  }
+  .modal-box h3{margin:0 0 6px;font-size:18px;}
+  .modal-meta{font-size:12px;color:var(--muted);margin-bottom:14px;}
+  .modal-msg{font-size:14px;line-height:1.6;white-space:pre-wrap;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+  .replies-title{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 10px;}
+  .reply-item{padding:10px 0;border-bottom:1px dashed var(--border);}
+  .reply-item:last-child{border-bottom:none;}
+  .reply-head{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .reply-head strong{color:var(--text);}
+  .reply-msg{font-size:13.5px;line-height:1.5;white-space:pre-wrap;}
+  .reply-form{margin-top:16px;}
+
+  footer{margin-top:36px;font-size:11.5px;color:var(--muted);text-align:center;}
+
+  /* Menu hambúrguer — navegação entre páginas */
+  .hb-btn{
+    position:fixed;top:14px;left:14px;z-index:300;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border-strong, var(--border));
+    background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+  .hb-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+  .hb-btn:hover{border-color:var(--cyan, var(--orange));}
+  .hb-overlay{
+    position:fixed;inset:0;background:rgba(4,9,15,0.6);z-index:290;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .hb-overlay.open{opacity:1;pointer-events:auto;}
+  .hb-drawer{
+    position:fixed;top:0;left:0;bottom:0;width:250px;max-width:82vw;
+    background:var(--panel);border-right:1px solid var(--border-strong, var(--border));
+    z-index:295;transform:translateX(-100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;padding:18px 0;
+  }
+  .hb-drawer.open{transform:translateX(0);}
+  .hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 18px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+  .hb-drawer-title{font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);}
+  .hb-close{background:none;border:none;color:var(--text-muted, var(--muted));font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;}
+  .hb-link{
+    display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:14px;
+    border-left:3px solid transparent;
+  }
+  .hb-link:hover{background:var(--panel-alt, var(--panel-2));}
+  .hb-link.active{border-left-color:var(--cyan, var(--orange));color:var(--cyan-dark, var(--orange-dim));font-weight:700;background:var(--cyan-bg, rgba(18,63,130,0.10));}
+</style>
+</head>
+<body>
+<button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
+<nav class="hb-drawer" id="hbDrawer">
+  <div class="hb-drawer-head">
+    <span class="hb-drawer-title">Carro PCD</span>
+    <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
+  </div>
+  <a href="CustoReal.html" class="hb-link">Custo Real</a>
+  <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
+  <a href="especificacoes.html" class="hb-link">Especificações</a>
+  <a href="forum.html" class="hb-link active">Fórum</a>
+</nav>
+<script>
+  function hbToggle(){
+    document.getElementById('hbDrawer').classList.toggle('open');
+    document.getElementById('hbOverlay').classList.toggle('open');
+  }
+  function hbClose(){
+    document.getElementById('hbDrawer').classList.remove('open');
+    document.getElementById('hbOverlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') hbClose(); });
+</script>
+<div class="wrap">
+  <header>
+    <div class="logo">FO</div>
+    <div>
+      <h1>Fórum da comunidade</h1>
+      <p>Troque experiências sobre eletropostos, faça reclamações, compartilhe informações ou elogios. Sem cadastro — poste como visitante.</p>
+    </div>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="panel-card new-post">
+    <h3>Novo post em "<span id="newPostCatLabel"></span>"</h3>
+    <div class="field-row">
+      <div class="field">
+        <label for="fAutor">Seu nome (opcional)</label>
+        <input type="text" id="fAutor" placeholder="Anônimo" maxlength="60">
+      </div>
+    </div>
+    <div class="field">
+      <label for="fTitulo">Título</label>
+      <input type="text" id="fTitulo" placeholder="Resuma o assunto em poucas palavras" maxlength="160">
+    </div>
+    <div class="field">
+      <label for="fMensagem">Mensagem</label>
+      <textarea id="fMensagem" placeholder="Escreva os detalhes aqui..." maxlength="4000"></textarea>
+    </div>
+    <button class="btn" id="btnPublicar" onclick="publicarPost()">Publicar</button>
+    <div class="msg-inline" id="newPostMsg"></div>
+  </div>
+
+  <div id="postsArea"></div>
+
+  <footer>Fórum comunitário, moderação leve. Não publique dados pessoais sensíveis ou de terceiros.</footer>
+</div>
+
+<div class="modal-overlay" id="postOverlay" onclick="if (event.target === this) fecharPostModal();">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharPostModal()" aria-label="Fechar">&times;</button>
+    <div id="postModalConteudo"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
+  const REST = SUPABASE_URL + "/rest/v1";
+  const HEADERS = {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": "application/json"
+  };
+
+  const CATS = [
+    { key: "eletropostos", icon: "⚡", label: "Eletropostos", desc: "Localização, fila e experiências em pontos de recarga." },
+    { key: "reclamacoes", icon: "⚠️", label: "Reclamações", desc: "Problemas com concessionárias, montadoras ou isenção PCD." },
+    { key: "informacoes", icon: "ℹ️", label: "Informações", desc: "Dúvidas, dicas e novidades sobre elétricos/híbridos." },
+    { key: "elogios", icon: "👍", label: "Elogios", desc: "Boas experiências para compartilhar com a comunidade." }
+  ];
+  const CAT_MAP = {};
+  CATS.forEach(function (c) { CAT_MAP[c.key] = c; });
+
+  let currentCat = CATS[0].key;
+  let currentPosts = [];
+
+  function esc(s) {
+    return (s || "").toString()
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function fmtData(iso) {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    } catch (e) { return ""; }
+  }
+
+  function renderTabs() {
+    const el = document.getElementById("tabs");
+    el.innerHTML = CATS.map(function (c) {
+      return "<button type='button' class='tab" + (c.key === currentCat ? " active" : "") + "' onclick=\"selecionarCategoria('" + c.key + "')\">" +
+        "<span class='t-icon'>" + c.icon + "</span>" +
+        "<span class='t-label'>" + c.label + "</span>" +
+        "<span class='t-desc'>" + c.desc + "</span>" +
+        "</button>";
+    }).join("");
+    document.getElementById("newPostCatLabel").textContent = CAT_MAP[currentCat].label;
+  }
+
+  window.selecionarCategoria = function (key) {
+    currentCat = key;
+    renderTabs();
+    carregarPosts();
+  };
+
+  function renderPosts() {
+    const el = document.getElementById("postsArea");
+    if (!currentPosts.length) {
+      el.innerHTML = "<div class='empty-state'><div class='big'>💬</div>Nenhum post ainda em \"" + esc(CAT_MAP[currentCat].label) + "\". Seja o primeiro a publicar!</div>";
+      return;
+    }
+    el.innerHTML = "<div class='posts'>" + currentPosts.map(function (p, i) {
+      const preview = (p.mensagem || "").length > 160 ? p.mensagem.slice(0, 160) + "…" : p.mensagem;
+      return "<div class='post-card' onclick='abrirPost(" + i + ")'>" +
+        "<div class='post-head'><h4 class='post-title'>" + esc(p.titulo) + "</h4>" +
+        "<span class='post-meta'>" + esc(p.autor || "Anônimo") + " · " + fmtData(p.criado_em) + "</span></div>" +
+        "<div class='post-preview'>" + esc(preview) + "</div>" +
+        "</div>";
+    }).join("") + "</div>";
+  }
+
+  function carregarPosts() {
+    document.getElementById("postsArea").innerHTML = "<div class='loading'>Carregando posts…</div>";
+    fetch(REST + "/forum_posts?categoria=eq." + encodeURIComponent(currentCat) + "&select=*&order=criado_em.desc", { headers: HEADERS })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        currentPosts = Array.isArray(rows) ? rows : [];
+        renderPosts();
+      })
+      .catch(function () {
+        document.getElementById("postsArea").innerHTML = "<div class='empty-state'>Não foi possível carregar os posts agora. Tente recarregar a página.</div>";
+      });
+  }
+
+  window.publicarPost = function () {
+    const autor = document.getElementById("fAutor").value.trim() || "Anônimo";
+    const titulo = document.getElementById("fTitulo").value.trim();
+    const mensagem = document.getElementById("fMensagem").value.trim();
+    const msgEl = document.getElementById("newPostMsg");
+    msgEl.textContent = ""; msgEl.className = "msg-inline";
+    if (!titulo || !mensagem) {
+      msgEl.textContent = "Preencha título e mensagem.";
+      msgEl.className = "msg-inline err";
+      return;
+    }
+    const btn = document.getElementById("btnPublicar");
+    btn.disabled = true;
+    fetch(REST + "/forum_posts", {
+      method: "POST",
+      headers: Object.assign({}, HEADERS, { Prefer: "return=representation" }),
+      body: JSON.stringify({ categoria: currentCat, autor: autor, titulo: titulo, mensagem: mensagem })
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("falha ao publicar");
+        return r.json();
+      })
+      .then(function () {
+        document.getElementById("fTitulo").value = "";
+        document.getElementById("fMensagem").value = "";
+        msgEl.textContent = "Post publicado!";
+        msgEl.className = "msg-inline ok";
+        carregarPosts();
+      })
+      .catch(function () {
+        msgEl.textContent = "Erro ao publicar. Tente novamente.";
+        msgEl.className = "msg-inline err";
+      })
+      .finally(function () { btn.disabled = false; });
+  };
+
+  window.abrirPost = function (i) {
+    const p = currentPosts[i];
+    if (!p) return;
+    const html =
+      "<span class='modal-cat-badge'>" + esc(CAT_MAP[p.categoria] ? CAT_MAP[p.categoria].label : p.categoria) + "</span>" +
+      "<h3>" + esc(p.titulo) + "</h3>" +
+      "<div class='modal-meta'>" + esc(p.autor || "Anônimo") + " · " + fmtData(p.criado_em) + "</div>" +
+      "<div class='modal-msg'>" + esc(p.mensagem) + "</div>" +
+      "<div class='replies-title'>Respostas</div>" +
+      "<div id='repliesList'><div class='loading'>Carregando respostas…</div></div>" +
+      "<div class='reply-form'>" +
+        "<div class='field-row'><div class='field'><label>Seu nome (opcional)</label><input type='text' id='rAutor' placeholder='Anônimo' maxlength='60'></div></div>" +
+        "<div class='field'><label>Resposta</label><textarea id='rMensagem' placeholder='Escreva sua resposta...' maxlength='4000'></textarea></div>" +
+        "<button class='btn secondary' onclick='publicarResposta(" + p.id + ")'>Responder</button>" +
+        "<div class='msg-inline' id='replyMsg'></div>" +
+      "</div>";
+    document.getElementById("postModalConteudo").innerHTML = html;
+    document.getElementById("postOverlay").classList.add("open");
+    carregarRespostas(p.id);
+  };
+
+  function carregarRespostas(postId) {
+    fetch(REST + "/forum_respostas?post_id=eq." + postId + "&select=*&order=criado_em.asc", { headers: HEADERS })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        const el = document.getElementById("repliesList");
+        if (!el) return;
+        if (!rows || !rows.length) {
+          el.innerHTML = "<div style='font-size:12.5px;color:var(--muted);'>Nenhuma resposta ainda.</div>";
+          return;
+        }
+        el.innerHTML = rows.map(function (r) {
+          return "<div class='reply-item'>" +
+            "<div class='reply-head'><strong>" + esc(r.autor || "Anônimo") + "</strong><span>" + fmtData(r.criado_em) + "</span></div>" +
+            "<div class='reply-msg'>" + esc(r.mensagem) + "</div>" +
+            "</div>";
+        }).join("");
+      })
+      .catch(function () {
+        const el = document.getElementById("repliesList");
+        if (el) el.innerHTML = "<div style='font-size:12.5px;color:var(--muted);'>Não foi possível carregar as respostas.</div>";
+      });
+  }
+
+  window.publicarResposta = function (postId) {
+    const autorEl = document.getElementById("rAutor");
+    const msgEl2 = document.getElementById("rMensagem");
+    const feedback = document.getElementById("replyMsg");
+    const autor = autorEl.value.trim() || "Anônimo";
+    const mensagem = msgEl2.value.trim();
+    feedback.textContent = ""; feedback.className = "msg-inline";
+    if (!mensagem) {
+      feedback.textContent = "Escreva uma resposta antes de enviar.";
+      feedback.className = "msg-inline err";
+      return;
+    }
+    fetch(REST + "/forum_respostas", {
+      method: "POST",
+      headers: Object.assign({}, HEADERS, { Prefer: "return=representation" }),
+      body: JSON.stringify({ post_id: postId, autor: autor, mensagem: mensagem })
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("falha ao responder");
+        return r.json();
+      })
+      .then(function () {
+        msgEl2.value = "";
+        feedback.textContent = "Resposta enviada!";
+        feedback.className = "msg-inline ok";
+        carregarRespostas(postId);
+      })
+      .catch(function () {
+        feedback.textContent = "Erro ao enviar resposta. Tente novamente.";
+        feedback.className = "msg-inline err";
+      });
+  };
+
+  window.fecharPostModal = function () {
+    document.getElementById("postOverlay").classList.remove("open");
+  };
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") fecharPostModal(); });
+
+  renderTabs();
+  carregarPosts();
+})();
+</script>
+</body>
+</html>

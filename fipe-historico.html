@@ -6,27 +6,26 @@
 <title>Histórico FIPE — Carros Elétricos e Híbridos</title>
 <style>
   :root{
-    --bg:#0f1115;
-    --panel:#171a21;
-    --panel-2:#1e222b;
-    --border:#2a2f3a;
-    --text:#e7e9ee;
-    --muted:#9aa3b2;
-    --green:#3ecf8e;
-    --green-dim:#1f7a54;
-    --blue:#5b9cff;
-    --orange:#ffb454;
-    --pink:#ff7ab6;
-    --purple:#b18aff;
-    --red:#ff6b6b;
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#eef3fa;
+    --border:#d7e1ee;
+    --text:#0f2740;
+    --muted:#5c7089;
+    --green:#1E8A5C;
+    --green-dim:#145C3E;
+    --blue:#2F6FE4;
+    --orange:#123F82;
+    --orange-dim:#0C2E5E;
+    --pink:#C23572;
+    --purple:#7A4FD1;
+    --red:#C43D3D;
     --radius:12px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:radial-gradient(1200px 800px at 10% -10%, #12331f 0%, transparent 55%),
-               radial-gradient(1000px 700px at 100% 0%, #10202f 0%, transparent 50%),
-               var(--bg);
+    background: var(--bg);
     color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
     min-height:100vh;
@@ -36,7 +35,7 @@
   header .logo{
     width:40px;height:40px;border-radius:10px;
     background:linear-gradient(135deg,var(--green),var(--green-dim));
-    display:flex;align-items:center;justify-content:center;font-weight:800;color:#08150f;font-size:18px;
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:18px;
     flex:none;
   }
   header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
@@ -65,16 +64,16 @@
     display:flex;justify-content:space-between;align-items:center;gap:10px;
   }
   .result-item:last-child{border-bottom:none;}
-  .result-item:hover, .result-item.active{background:#232833;}
+  .result-item:hover, .result-item.active{background:rgba(18,63,130,0.08);}
   .result-item .ri-main{display:flex;flex-direction:column;gap:2px;min-width:0;}
   .result-item .ri-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .result-item .ri-sub{font-size:12px;color:var(--muted);}
   .badge{
     font-size:10.5px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;letter-spacing:.02em;
   }
-  .badge.eletrico{background:rgba(62,207,142,.15);color:var(--green);}
-  .badge.hibrido{background:rgba(91,156,255,.15);color:var(--blue);}
-  .badge.hibrido_plugin{background:rgba(177,138,255,.15);color:var(--purple);}
+  .badge.eletrico{background:rgba(30,138,92,.12);color:var(--green);}
+  .badge.hibrido{background:rgba(47,111,228,.12);color:var(--blue);}
+  .badge.hibrido_plugin{background:rgba(122,79,209,.12);color:var(--purple);}
 
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
   .chip{
@@ -86,7 +85,7 @@
     background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;
     padding:2px 4px;border-radius:50%;
   }
-  .chip button:hover{color:var(--text);background:#2c313d;}
+  .chip button:hover{color:#fff;background:var(--orange-dim);}
   .chip.primary{border-color:var(--green);}
 
   .empty-state{
@@ -129,11 +128,11 @@
   .hover-line{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;}
 
   .tooltip{
-    position:absolute;pointer-events:none;background:#0c0e12;border:1px solid var(--border);
-    border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+    position:absolute;pointer-events:none;background:#0f2740;color:#fff;border:1px solid var(--border);
+    border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);
     opacity:0;transition:opacity .1s;white-space:nowrap;z-index:5;
   }
-  .tooltip .tt-date{color:var(--muted);margin-bottom:3px;}
+  .tooltip .tt-date{color:#b8c4d6;margin-bottom:3px;}
   .tooltip .tt-row{display:flex;align-items:center;gap:6px;}
   .tooltip .tt-dot{width:8px;height:8px;border-radius:50%;flex:none;}
 
@@ -155,15 +154,70 @@
   a{color:var(--blue);}
 
   ::-webkit-scrollbar{width:9px;height:9px;}
-  ::-webkit-scrollbar-thumb{background:#2c313d;border-radius:20px;}
+  ::-webkit-scrollbar-thumb{background:#c7d3e2;border-radius:20px;}
   ::-webkit-scrollbar-track{background:transparent;}
 
   @media (max-width:640px){
     .summary{grid-template-columns:repeat(2,1fr);}
   }
+  /* Menu hambúrguer — navegação entre páginas */
+  .hb-btn{
+    position:fixed;top:14px;left:14px;z-index:300;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border-strong, var(--border));
+    background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+  .hb-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+  .hb-btn:hover{border-color:var(--cyan, var(--orange));}
+  .hb-overlay{
+    position:fixed;inset:0;background:rgba(4,9,15,0.6);z-index:290;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .hb-overlay.open{opacity:1;pointer-events:auto;}
+  .hb-drawer{
+    position:fixed;top:0;left:0;bottom:0;width:250px;max-width:82vw;
+    background:var(--panel);border-right:1px solid var(--border-strong, var(--border));
+    z-index:295;transform:translateX(-100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;padding:18px 0;
+  }
+  .hb-drawer.open{transform:translateX(0);}
+  .hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 18px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+  .hb-drawer-title{font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);}
+  .hb-close{background:none;border:none;color:var(--text-muted, var(--muted));font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;}
+  .hb-link{
+    display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:14px;
+    border-left:3px solid transparent;
+  }
+  .hb-link:hover{background:var(--panel-alt, var(--panel-2));}
+  .hb-link.active{border-left-color:var(--cyan, var(--orange));color:var(--cyan-dark, var(--orange-dim));font-weight:700;background:var(--cyan-bg, rgba(18,63,130,0.10));}
 </style>
 </head>
 <body>
+<button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
+<nav class="hb-drawer" id="hbDrawer">
+  <div class="hb-drawer-head">
+    <span class="hb-drawer-title">Carro PCD</span>
+    <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
+  </div>
+  <a href="CustoReal.html" class="hb-link">Custo Real</a>
+  <a href="fipe-historico.html" class="hb-link active">Histórico FIPE</a>
+  <a href="especificacoes.html" class="hb-link">Especificações</a>
+  <a href="forum.html" class="hb-link">Fórum</a>
+</nav>
+<script>
+  function hbToggle(){
+    document.getElementById('hbDrawer').classList.toggle('open');
+    document.getElementById('hbOverlay').classList.toggle('open');
+  }
+  function hbClose(){
+    document.getElementById('hbDrawer').classList.remove('open');
+    document.getElementById('hbOverlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') hbClose(); });
+</script>
 <div class="wrap">
   <header>
     <div class="logo">FI</div>
@@ -240,7 +294,7 @@
     Authorization: "Bearer " + SUPABASE_ANON_KEY
   };
 
-  const COLORS = ["#3ecf8e", "#5b9cff", "#ffb454", "#ff7ab6", "#b18aff", "#ff6b6b"];
+  const COLORS = ["#1E8A5C", "#2F6FE4", "#B8860B", "#C23572", "#7A4FD1", "#C43D3D"];
   const MOTOR_LABEL = { eletrico: "Elétrico", hibrido: "Híbrido", hibrido_plugin: "Híbrido plug-in" };
   const currencyFmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
   const pctFmt = (v) => (v > 0 ? "+" : "") + v.toFixed(1).replace(".", ",") + "%";
