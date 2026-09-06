@@ -413,7 +413,7 @@
         <div class="field"><label for="tarifaSemSolar">Tarifa residencial sem solar</label><input type="number" id="tarifaSemSolar" value="0.85" min="0" step="0.01"><span class="hint">R$/kWh</span></div>
         <div class="field"><label for="tarifaComSolar">Custo efetivo com solar (excedente)</label><input type="number" id="tarifaComSolar" value="0.20" min="0" step="0.01"><span class="hint">R$/kWh</span></div>
         <div class="field"><label for="tarifaRua">Recarga fora de casa (rua/posto)</label><input type="number" id="tarifaRua" value="2.00" min="0" step="0.01"><span class="hint">R$/kWh</span></div>
-        <div class="field"><label for="manutencaoExtra">Diferença anual de manutenção/seguro (opcional)</label><input type="number" id="manutencaoExtra" value="0" step="10"><span class="hint">R$/ano — positivo se o carro novo custa mais para manter</span></div>
+        <div class="field"><label for="manutencaoExtra">Manutenção extra, além das revisões (opcional)</label><input type="number" id="manutencaoExtra" value="0" step="10"><span class="hint">R$/ano — pneus, itens de desgaste etc. O custo das revisões programadas de cada modelo já entra automaticamente (ver "Detalhes")</span></div>
       </div>
     </details>
   </div>
@@ -479,21 +479,14 @@
       <div class="empty-state">Aguardando dados…</div>
     </div>
     <p class="foot-note" id="footNote">
-      Custo real = perda de valor do carro + energia/combustível + seguro + IPVA no período escolhido. Clique em "Detalhes" em qualquer linha pra ver a conta completa (preço, perda de valor, energia, seguro e IPVA).
+      Custo real = perda de valor do carro + energia/combustível + manutenção/revisões + seguro + IPVA no período escolhido. Clique em "Detalhes" em qualquer linha pra abrir a conta completa, ano a ano (preço, perda de valor, energia, cada revisão programada, seguro e IPVA).
     </p>
     <details class="calc-hint">
       <summary>Como calculamos o custo real?</summary>
-      <p class="foot-note">Perda de valor: preço efetivamente pago menos o valor de revenda estimado ao fim do período, usando a depreciação anual de cada modelo — uma mistura estatística entre a taxa própria do modelo (de preferência calculada no histórico real da Tabela FIPE) e a média da categoria (elétrico/híbrido plug-in/híbrido pleno); modelos com pouco histórico próprio dependem mais da média da categoria (confiança "Baixa"/"Média"), modelos com histórico robusto usam principalmente a taxa própria (confiança "Alta"). Song Pro GL usa correção manual por lançamento de nova geração. Energia: no escopo "desconto PCD confirmado" usamos a ficha técnica real do carro (bateria, autonomia, consumo); no escopo "todos os modelos" usamos uma premissa média por categoria, porque o catálogo FIPE não traz specs por versão. Seguro e IPVA: ver detalhe no painel "Seguro e IPVA" acima. Preços e descontos PCD levantados em agosto/2026 e sujeitos a mudança — confirme com a concessionária antes de decidir.</p>
+      <p class="foot-note">Perda de valor: preço efetivamente pago menos o valor de revenda estimado ao fim do período, usando a depreciação anual de cada modelo — uma mistura estatística entre a taxa própria do modelo (de preferência calculada no histórico real da Tabela FIPE) e a média da categoria (elétrico/híbrido plug-in/híbrido pleno); modelos com pouco histórico próprio dependem mais da média da categoria (confiança "Baixa"/"Média"), modelos com histórico robusto usam principalmente a taxa própria (confiança "Alta"). Song Pro GL usa correção manual por lançamento de nova geração. Energia: no escopo "desconto PCD confirmado" usamos a ficha técnica real do carro (bateria, autonomia, consumo); no escopo "todos os modelos" usamos uma premissa média por categoria, porque o catálogo FIPE não traz specs por versão. Manutenção/revisão: plano de revisão programada pesquisado por modelo (intervalo, custo por revisão, revisões grátis) quando já coletado; sem coleta ainda, percentual médio por categoria sobre o preço de tabela — nenhum valor é inventado. Seguro e IPVA: ver detalhe no painel "Seguro e IPVA" acima. Preços e descontos PCD levantados em agosto/2026 e sujeitos a mudança — confirme com a concessionária antes de decidir.</p>
     </details>
   </div>
 
-</div>
-
-<div class="modal-overlay" id="detalhesOverlay" onclick="if (event.target === this) fecharDetalhes();">
-  <div class="modal-box">
-    <button class="modal-close" onclick="fecharDetalhes()" aria-label="Fechar">&times;</button>
-    <div id="detalhesConteudo"></div>
-  </div>
 </div>
 
 <button id="chatFab" onclick="abrirChat()"><img id="chatFabIcon" alt="" style="width:26px;height:26px;vertical-align:-8px;margin-right:6px;">Falar com o Voltinho</button>
@@ -525,8 +518,6 @@ const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
 
 const CAT_LABEL = { BEV: "Elétrico", PHEV: "Híbrido plug-in", HEV: "Híbrido pleno" };
-const CONF_CLASS = { "Alta": "badge-conf-alta", "Media": "badge-conf-media", "Baixa": "badge-conf-baixa", "Manual": "badge-conf-manual" };
-const CONF_LABEL = { "Alta": "confiança alta", "Media": "confiança média", "Baixa": "confiança baixa", "Manual": "override manual" };
 
 // Premissas genericas por categoria, usadas SOMENTE quando o modelo nao tem specs proprias
 // (escopo "todos os modelos" -- catalogo FIPE nao traz bateria/autonomia/consumo por trim).
@@ -548,6 +539,7 @@ let SEGURO_BY_ESPEC_ID = {};
 let IPVA_POR_UF = {};
 let MARCAS_DISPONIVEIS = [];
 let marcasSelecionadas = [];
+let MANUTENCAO_POR_FIPE = {};
 
 // ---- Ficha técnica (especificacoes_tecnicas): monta índice marca+modelo p/
 // linkar o nome do carro na tabela pra especificacoes.html. Casamento é por
@@ -706,6 +698,66 @@ function calcularIpvaAnual(car, ufRow) {
     : { valor: car.tabela * IPVA_PCT_FALLBACK, fonte: "generica" };
 }
 
+// ---- Manutenção/revisão estimada: usa a linha específica do modelo em
+// manutencao_estimada quando existe (cotação real de mercado, ou percentual
+// de categoria já registrado pra esse codigo_fipe); pra modelos que a coleta
+// diária ainda não alcançou (a tabela cobre incrementalmente, ver
+// claude/custoreal-manutencao-metodologia.md), cai no mesmo percentual de
+// categoria aplicado dinamicamente sobre o preço de tabela. fonte: "cotacao"
+// (plano de revisão real do fabricante/concessionária) | "categoria"
+// (percentual de categoria, já com linha registrada) | "sem_coleta"
+// (percentual de categoria, modelo ainda não pesquisado pela coleta diária).
+const GENERIC_MANUTENCAO_PCT = { BEV: 0.003, PHEV: 0.009, HEV: 0.008 };
+function estimarManutencao(car) {
+  const m = car.codigoFipe ? MANUTENCAO_POR_FIPE[car.codigoFipe] : null;
+  if (m) {
+    if (m.metodo === "cotacao_especifica" && m.custoAnual != null) {
+      return { valorAnual: m.custoAnual, fonte: "cotacao", dado: m };
+    }
+    if (m.percentualSobrePreco != null && car.tabela != null) {
+      return { valorAnual: car.tabela * m.percentualSobrePreco, fonte: "categoria", dado: m };
+    }
+  }
+  const pct = GENERIC_MANUTENCAO_PCT[car.cat];
+  if (pct != null && car.tabela != null) {
+    return { valorAnual: car.tabela * pct, fonte: "sem_coleta", dado: null };
+  }
+  return { valorAnual: null, fonte: "sem_coleta", dado: null };
+}
+
+// ---- Cronograma de revisões dentro do período escolhido: só é possível
+// reconstruir revisão a revisão quando a coleta achou um intervalo (km/meses)
+// específico do modelo — sem isso (maioria dos casos ainda em
+// "percentual_categoria" sem plano encontrado), a manutenção fica só como
+// estimativa anual agregada, sem itemizar revisão por revisão (nenhum valor
+// é inventado). Revisões cobertas por revisão(ões) grátis de lançamento
+// (n_revisoes_gratuitas) ou por um período de cobertura grátis
+// (anos_cobertura_gratuita) entram com custo R$0, sinalizadas como "grátis".
+function buildRevisoesSchedule(dado, anos) {
+  if (!dado || !dado.intervaloMeses) return null;
+  const totalMeses = anos * 12;
+  const custoPorRevisao = dado.custoRevisaoEstimado != null
+    ? dado.custoRevisaoEstimado
+    : (dado.custoAnual != null ? dado.custoAnual / (12 / dado.intervaloMeses) : null);
+  const lista = [];
+  let k = 1;
+  while (k * dado.intervaloMeses <= totalMeses) {
+    const mes = k * dado.intervaloMeses;
+    const ano = Math.ceil(mes / 12);
+    const dentroCoberturaAnos = dado.anosCoberturaGratuita != null && (mes / 12) <= dado.anosCoberturaGratuita;
+    const dentroCoberturaN = dado.nRevisoesGratuitas != null && k <= dado.nRevisoesGratuitas;
+    const gratis = dentroCoberturaAnos || dentroCoberturaN;
+    lista.push({
+      numero: k, mes: mes, ano: ano,
+      km: dado.intervaloKm != null ? dado.intervaloKm * k : null,
+      custo: gratis ? 0 : custoPorRevisao,
+      gratis: gratis,
+    });
+    k++;
+  }
+  return lista;
+}
+
 function fmtBRL(v) {
   if (v === null || v === undefined || isNaN(v)) return "—";
   const neg = v < 0;
@@ -714,32 +766,46 @@ function fmtBRL(v) {
   return neg ? "(" + s + ")" : s;
 }
 
-function confBadge(conf, motivo) {
-  if (!conf) return "";
-  const key = conf.indexOf("Baixa") === 0 ? "Baixa" : conf;
-  const cls = CONF_CLASS[key] || "badge-conf-baixa";
-  const label = CONF_LABEL[key] || conf;
-  const title = motivo ? ' title="' + motivo.replace(/"/g, "&quot;") + '"' : "";
-  return "<span class='badge " + cls + "'" + title + ">" + label + "</span>";
-}
 
 async function carregarDados() {
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const [todosRes, pcdRes, specsRes, seguroRes, ipvaRes] = await Promise.all([
+  const [todosRes, pcdRes, specsRes, seguroRes, ipvaRes, manutencaoRes] = await Promise.all([
     client.from("mercado_completo").select("*"),
     client.from("pcd_confirmado_completo").select("*"),
     client.from("especificacoes_tecnicas").select("id,marca,modelo,versao,tipo_motorizacao,preco_tabela"),
     client.from("seguro_estimado").select("especificacao_id,valor_seguro_anual_estimado,metodo"),
     client.from("ipva_aliquotas_estados").select("*"),
+    client.from("manutencao_estimada").select("codigo_fipe,custo_revisao_estimado,custo_revisao_min,custo_revisao_max,intervalo_km,intervalo_meses,n_revisoes_gratuitas,anos_cobertura_gratuita,custo_manutencao_anual_estimado,metodo,percentual_sobre_preco,fonte,observacoes,data_coleta"),
   ]);
 
   if (todosRes.error) throw todosRes.error;
   if (pcdRes.error) throw pcdRes.error;
-  // ficha técnica, seguro e IPVA são extras (link no nome / colunas de custo) —
-  // se algum falhar, o app continua funcionando sem aquele pedaço.
+  // ficha técnica, seguro, IPVA e manutenção são extras (link no nome / colunas
+  // de custo) — se algum falhar, o app continua funcionando sem aquele pedaço.
   if (!specsRes.error) SPECS_INDEX = buildSpecsIndex(specsRes.data);
   else console.warn("Não foi possível carregar especificacoes_tecnicas:", specsRes.error);
+
+  if (!manutencaoRes.error) {
+    MANUTENCAO_POR_FIPE = {};
+    (manutencaoRes.data || []).forEach(r => {
+      MANUTENCAO_POR_FIPE[r.codigo_fipe] = {
+        custoRevisaoEstimado: r.custo_revisao_estimado != null ? Number(r.custo_revisao_estimado) : null,
+        custoRevisaoMin: r.custo_revisao_min != null ? Number(r.custo_revisao_min) : null,
+        custoRevisaoMax: r.custo_revisao_max != null ? Number(r.custo_revisao_max) : null,
+        intervaloKm: r.intervalo_km != null ? Number(r.intervalo_km) : null,
+        intervaloMeses: r.intervalo_meses != null ? Number(r.intervalo_meses) : null,
+        nRevisoesGratuitas: r.n_revisoes_gratuitas != null ? Number(r.n_revisoes_gratuitas) : null,
+        anosCoberturaGratuita: r.anos_cobertura_gratuita != null ? Number(r.anos_cobertura_gratuita) : null,
+        custoAnual: r.custo_manutencao_anual_estimado != null ? Number(r.custo_manutencao_anual_estimado) : null,
+        metodo: r.metodo,
+        percentualSobrePreco: r.percentual_sobre_preco != null ? Number(r.percentual_sobre_preco) : null,
+        fonte: r.fonte || [],
+        observacoes: r.observacoes || null,
+        dataColeta: r.data_coleta || null,
+      };
+    });
+  } else console.warn("Não foi possível carregar manutencao_estimada:", manutencaoRes.error);
 
   if (!seguroRes.error) {
     SEGURO_BY_ESPEC_ID = {};
@@ -1081,7 +1147,6 @@ function calcular() {
     const valorRevenda = c.tabela * (1 - depPeriodo);
     const perdaValor = precoCompra - valorRevenda;
     const custoEnergiaPeriodo = custoEnergiaMes * meses;
-    const custoManutencaoPeriodo = manutencaoExtra * anos;
 
     const seguroInfo = estimarSeguro(c);
     const seguroAnual = seguroInfo.valorAnual;
@@ -1091,6 +1156,14 @@ function calcular() {
     const ipvaAnual = ipvaInfo.valor;
     const ipvaPeriodo = ipvaAnual != null ? ipvaAnual * anos : 0;
 
+    const manutInfo = estimarManutencao(c);
+    const manutRevisoes = buildRevisoesSchedule(manutInfo.dado, anos);
+    const manutEstimadoPeriodo = manutRevisoes
+      ? manutRevisoes.reduce((s, rv) => s + (rv.custo || 0), 0)
+      : (manutInfo.valorAnual != null ? manutInfo.valorAnual * anos : 0);
+    const manutExtraPeriodo = manutencaoExtra * anos;
+    const custoManutencaoPeriodo = manutEstimadoPeriodo + manutExtraPeriodo;
+
     const custoReal = perdaValor + custoEnergiaPeriodo + custoManutencaoPeriodo + seguroPeriodo + ipvaPeriodo;
 
     const economiaMes = comparar ? (custoAtualMes - custoEnergiaMes) : null;
@@ -1098,8 +1171,11 @@ function calcular() {
 
     return {
       name: c.name, marca: c.marca, modelo: c.modelo, cat: c.cat, precoCompra, tabela: c.tabela, pcd: c.pcd, descontoPct,
+      depAnualPct: c.depAnual,
       custoEnergiaMes, economiaMes, perdaValor, custoEnergiaPeriodo, custoReal,
       seguroAnual, seguroFonte: seguroInfo.fonte, ipvaAnual, ipvaFonte: ipvaInfo.fonte,
+      manutAnualEstimado: manutInfo.valorAnual, manutFonte: manutInfo.fonte, manutDado: manutInfo.dado,
+      manutRevisoes, manutEstimadoPeriodo, manutExtraAnual: manutencaoExtra, manutExtraPeriodo, custoManutencaoPeriodo,
       confianca: c.confianca, motivoOverride: c.motivoOverride, hasSpecs: c.hasSpecs,
       codigoFipe: c.codigoFipe, anoModelo: c.anoModelo,
     };
@@ -1175,72 +1251,25 @@ function calcular() {
   container.innerHTML = html;
 }
 
-// ---- Badges de seguro/IPVA reaproveitados só pelo modal de Detalhes agora
-// (a tabela principal não mostra mais essas colunas direto).
-const SEGURO_BADGE = {
-  cotacao: { cls: "badge-cotacao", label: "cotação", title: "Cotação de mercado para essa versão" },
-  categoria: { cls: "badge-estimativa", label: "estimativa", title: "Estimativa pela categoria (percentual IPSA/Serasa Experian sobre o preço de tabela)" },
-  categoria_diferente: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Só temos ficha técnica de uma versão de motorização diferente deste modelo (ex.: carro é HEV, ficha cadastrada é PHEV) — usamos a cotação dela mesmo assim, mas confira antes de decidir" },
-  generica: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Sem cotação nem percentual de categoria para este carro — estimativa genérica de 2,5% ao ano sobre o preço de tabela" },
-};
-function seguroHtmlFor(r) {
-  const b = SEGURO_BADGE[r.seguroFonte] || SEGURO_BADGE.generica;
-  return r.seguroAnual != null
-    ? fmtBRL(r.seguroAnual) + " <span class='badge " + b.cls + "' title='" + b.title + "'>" + b.label + "</span>"
-    : "<span class='sem-dado'>—</span>";
-}
-const IPVA_BADGE = {
-  aliquota_estado: null,
-  generica: { cls: "badge-conf-baixa", label: "baixa confiabilidade", title: "Sem estado escolhido ou sem alíquota pesquisada para esse estado/categoria — estimativa genérica de 4% ao ano sobre o preço de tabela" },
-};
-function ipvaHtmlFor(r) {
-  const b = IPVA_BADGE[r.ipvaFonte];
-  return r.ipvaAnual != null
-    ? fmtBRL(r.ipvaAnual) + (b ? " <span class='badge " + b.cls + "' title='" + b.title + "'>" + b.label + "</span>" : "")
-    : "<span class='sem-dado'>—</span>";
-}
-
-// ---- Modal "Detalhes": mostra a ficha de custo completa de uma linha
-// (preço, perda de valor, energia, seguro, IPVA, custo real) sem precisar
-// recalcular nada -- usa o que já foi guardado em LAST_CALC pelo calcular().
+// ---- "Detalhes": em vez de modal, guarda a ficha de custo completa da linha
+// (preço, perda de valor ano a ano, energia, cada revisão de manutenção,
+// seguro, IPVA) no sessionStorage e abre detalhes.html, que lê e renderiza —
+// sem precisar recalcular nada, nem duplicar a consulta ao Supabase.
 let LAST_CALC = null;
 function abrirDetalhes(i) {
   if (!LAST_CALC) return;
   const r = LAST_CALC.rows[i];
   if (!r) return;
   const { anos, comparar, showPcdCols, isPcd } = LAST_CALC;
-  const confBadgeHtml = confBadge(r.confianca, r.motivoOverride);
-
-  let priceRows;
-  if (showPcdCols) {
-    priceRows =
-      "<div class='modal-row'><span class='k'>Preço PCD</span><span class='v'>" + fmtBRL(r.pcd) + "</span></div>" +
-      "<div class='modal-row'><span class='k'>Preço de tabela</span><span class='v'>" + fmtBRL(r.tabela) + "</span></div>" +
-      "<div class='modal-row'><span class='k'>Desconto PCD</span><span class='v'>" + (r.descontoPct !== null ? (r.descontoPct * 100).toFixed(1) + "%" : "—") + "</span></div>";
-  } else {
-    priceRows = "<div class='modal-row'><span class='k'>Preço de tabela</span><span class='v'>" + fmtBRL(r.tabela) + "</span></div>";
+  const detalhe = Object.assign({}, r, { anos, comparar, showPcdCols, isPcd, catLabel: CAT_LABEL[r.cat] });
+  try {
+    sessionStorage.setItem("custoRealDetalhe", JSON.stringify(detalhe));
+  } catch (e) {
+    alert("Não foi possível abrir os detalhes (armazenamento do navegador indisponível).");
+    return;
   }
-
-  const html =
-    "<h3 class='modal-title'>" + r.name + "</h3>" +
-    "<p class='modal-sub'><span class='badge badge-cat'>" + CAT_LABEL[r.cat] + "</span>" + confBadgeHtml + "</p>" +
-    "<div class='modal-rows'>" +
-      priceRows +
-      "<div class='modal-row'><span class='k'>Perda de valor (" + anos + (anos === 1 ? " ano" : " anos") + ")</span><span class='v'>" + fmtBRL(r.perdaValor) + "</span></div>" +
-      "<div class='modal-row'><span class='k'>Energia/mês</span><span class='v'>" + fmtBRL(r.custoEnergiaMes) + "</span></div>" +
-      (comparar ? "<div class='modal-row'><span class='k'>Economia/mês vs. seu carro atual</span><span class='v'>" + fmtBRL(r.economiaMes) + "</span></div>" : "") +
-      "<div class='modal-row'><span class='k'>Seguro/ano</span><span class='v'>" + seguroHtmlFor(r) + "</span></div>" +
-      "<div class='modal-row'><span class='k'>IPVA/ano</span><span class='v'>" + ipvaHtmlFor(r) + "</span></div>" +
-      "<div class='modal-row total'><span class='k'>Custo real (" + anos + (anos === 1 ? " ano" : " anos") + ")</span><span class='v'>" + fmtBRL(r.custoReal) + "</span></div>" +
-    "</div>";
-
-  document.getElementById("detalhesConteudo").innerHTML = html;
-  document.getElementById("detalhesOverlay").classList.add("open");
+  window.location.href = "detalhes.html";
 }
-function fecharDetalhes() {
-  document.getElementById("detalhesOverlay").classList.remove("open");
-}
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharDetalhes(); });
 
 const EDGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/gemini-chat";
 

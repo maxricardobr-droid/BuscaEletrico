@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalhes do custo real — Carro PCD</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#eef3fa;
+    --border:#d7e1ee;
+    --text:#0f2740;
+    --muted:#5c7089;
+    --orange:#123F82;
+    --orange-dim:#0C2E5E;
+    --orange-bg: rgba(18,63,130,0.10);
+    --green:#1E8A5C; --green-bg: rgba(30,138,92,0.12);
+    --blue:#2F6FE4;
+    --purple:#7A4FD1;
+    --red:#C43D3D; --red-bg: rgba(196,61,61,0.10);
+    --amber:#B8860B; --amber-bg: rgba(184,134,11,0.12);
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:28px 20px 80px;}
+
+  a.back{color:var(--muted);font-size:12.5px;text-decoration:none;display:inline-block;margin-bottom:16px;}
+  a.back:hover{color:var(--orange);}
+
+  header.hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:8px;}
+  header.hdr h1{font-size:21px;margin:0;font-weight:800;letter-spacing:-.01em;}
+  .hdr-sub{margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .hdr-period{font-size:12.5px;color:var(--muted);margin-top:10px;}
+
+  .badge{font-size:10.5px;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:700;letter-spacing:.02em;}
+  .badge-cat{background:var(--orange-bg);color:var(--orange);}
+  .badge-alta{background:var(--green-bg);color:var(--green);}
+  .badge-media{background:var(--amber-bg);color:var(--amber);}
+  .badge-baixa{background:var(--red-bg);color:var(--red);}
+  .badge-manual{background:var(--orange-bg);color:var(--orange);}
+  .badge-cotacao{background:var(--green-bg);color:var(--green);}
+  .badge-estimativa{background:var(--amber-bg);color:var(--amber);}
+  .badge-gratis{background:var(--green-bg);color:var(--green);}
+
+  .summary{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;
+    margin:20px 0 22px;
+  }
+  .sum-card{background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .sum-card .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .sum-card .val{font-size:18px;font-weight:800;}
+  .sum-card.total{background:var(--orange);grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  .sum-card.total .lbl{color:rgba(255,255,255,.8);}
+  .sum-card.total .val{color:#fff;font-size:26px;}
+
+  .price-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:18px;}
+  .price-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13.5px;border-bottom:1px dashed var(--border);}
+  .price-row:last-child{border-bottom:none;}
+  .price-row .k{color:var(--muted);}
+  .price-row .v{font-weight:700;}
+
+  .section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:26px 0 10px;}
+
+  .ano-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;}
+  .ano-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--border);}
+  .ano-head .ano-titulo{font-size:15px;font-weight:800;}
+  .ano-head .ano-subtotal{font-size:15px;font-weight:800;color:var(--orange);}
+
+  .linha{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;font-size:13px;}
+  .linha .k{color:var(--muted);}
+  .linha .v{font-weight:700;white-space:nowrap;}
+  .linha.sub{padding-left:14px;font-size:12.5px;}
+  .linha.sub .k{color:var(--text);}
+
+  .revisoes{margin:4px 0 8px;padding-left:0;}
+  .revisao-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0 5px 14px;font-size:12.5px;border-left:2px solid var(--border);margin-bottom:2px;}
+  .revisao-item .desc{color:var(--text);}
+  .revisao-item .desc .meta{color:var(--muted);font-size:11.5px;}
+  .revisao-item .custo{font-weight:700;white-space:nowrap;}
+  .revisao-item .custo.gratis{color:var(--green);}
+
+  .sem-schedule{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0 8px;}
+
+  .fontes{margin-top:26px;font-size:12px;color:var(--muted);line-height:1.6;}
+  .fontes a{color:var(--blue);}
+  .fontes-title{font-weight:700;color:var(--text);margin-bottom:4px;}
+
+  .empty-state{text-align:center;color:var(--muted);padding:80px 20px;font-size:14px;}
+  .empty-state .big{font-size:36px;margin-bottom:14px;}
+  .empty-state a{color:var(--orange);font-weight:700;}
+
+  footer.note{margin-top:34px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;}
+
+  /* Menu hambúrguer — navegação entre páginas */
+  .hb-btn{
+    position:fixed;top:14px;left:14px;z-index:300;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border-strong, var(--border));
+    background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.15);
+  }
+  .hb-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+  .hb-btn:hover{border-color:var(--cyan, var(--orange));}
+  .hb-overlay{
+    position:fixed;inset:0;background:rgba(4,9,15,0.6);z-index:290;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .hb-overlay.open{opacity:1;pointer-events:auto;}
+  .hb-drawer{
+    position:fixed;top:0;left:0;bottom:0;width:250px;max-width:82vw;
+    background:var(--panel);border-right:1px solid var(--border-strong, var(--border));
+    z-index:295;transform:translateX(-100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;padding:18px 0;
+  }
+  .hb-drawer.open{transform:translateX(0);}
+  .hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 18px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+  .hb-drawer-title{font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);}
+  .hb-close{background:none;border:none;color:var(--text-muted, var(--muted));font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;}
+  .hb-link{
+    display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:14px;
+    border-left:3px solid transparent;
+  }
+  .hb-link:hover{background:var(--panel-alt, var(--panel-2));}
+  .hb-link.active{border-left-color:var(--cyan, var(--orange));color:var(--cyan-dark, var(--orange-dim));font-weight:700;background:var(--cyan-bg, rgba(18,63,130,0.10));}
+</style>
+</head>
+<body>
+<button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
+<nav class="hb-drawer" id="hbDrawer">
+  <div class="hb-drawer-head">
+    <span class="hb-drawer-title">Carro PCD</span>
+    <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
+  </div>
+  <a href="index.html" class="hb-link">Custo Real</a>
+  <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
+  <a href="especificacoes.html" class="hb-link">Especificações</a>
+  <a href="forum.html" class="hb-link">Fórum</a>
+</nav>
+<script>
+  function hbToggle(){
+    document.getElementById('hbDrawer').classList.toggle('open');
+    document.getElementById('hbOverlay').classList.toggle('open');
+  }
+  function hbClose(){
+    document.getElementById('hbDrawer').classList.remove('open');
+    document.getElementById('hbOverlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') hbClose(); });
+</script>
+
+<div class="wrap" id="wrap">
+  <a class="back" href="index.html">← voltar ao comparador</a>
+  <div id="conteudo"><div class="empty-state">Carregando…</div></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const CAT_LABEL = { BEV: "Elétrico", PHEV: "Híbrido plug-in", HEV: "Híbrido pleno" };
+  const CONF_CLASS = { "Alta": "badge-alta", "Media": "badge-media", "Baixa": "badge-baixa", "Manual": "badge-manual" };
+  const CONF_LABEL = { "Alta": "confiança alta", "Media": "confiança média", "Baixa": "confiança baixa", "Manual": "override manual" };
+  const SEGURO_BADGE = {
+    cotacao: { cls: "badge-cotacao", label: "cotação", title: "Cotação de mercado para essa versão" },
+    categoria: { cls: "badge-estimativa", label: "estimativa por categoria", title: "Estimativa pela categoria (percentual IPSA/Serasa Experian sobre o preço de tabela)" },
+    categoria_diferente: { cls: "badge-baixa", label: "baixa confiabilidade", title: "Só há ficha técnica de uma versão de motorização diferente deste modelo — usamos a cotação dela mesmo assim" },
+    generica: { cls: "badge-baixa", label: "baixa confiabilidade", title: "Sem cotação nem percentual de categoria — estimativa genérica de 2,5% ao ano sobre o preço de tabela" },
+  };
+  const IPVA_BADGE = {
+    aliquota_estado: null,
+    generica: { cls: "badge-baixa", label: "baixa confiabilidade", title: "Sem estado escolhido ou sem alíquota pesquisada para esse estado/categoria — estimativa genérica de 4% ao ano sobre o preço de tabela" },
+  };
+  const MANUT_BADGE = {
+    cotacao: { cls: "badge-cotacao", label: "plano de revisão do fabricante", title: "Plano de revisão programada pesquisado especificamente para este modelo" },
+    categoria: { cls: "badge-estimativa", label: "estimativa por categoria", title: "Sem plano específico coletado — percentual médio da categoria sobre o preço de tabela" },
+    sem_coleta: { cls: "badge-estimativa", label: "estimativa por categoria (coleta em andamento)", title: "A coleta diária de planos de revisão ainda não chegou neste modelo — percentual médio da categoria, atualiza automaticamente quando o dado específico for coletado" },
+  };
+
+  function fmtBRL(v) {
+    if (v === null || v === undefined || isNaN(v)) return "—";
+    const neg = v < 0;
+    const abs = Math.abs(Math.round(v));
+    const s = "R$ " + abs.toLocaleString("pt-BR");
+    return neg ? "(" + s + ")" : s;
+  }
+  function esc(s) {
+    return (s || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function badgeHtml(cls, label, title) {
+    return "<span class='badge " + cls + "' title=\"" + esc(title) + "\">" + esc(label) + "</span>";
+  }
+  function confBadgeHtml(conf, motivo) {
+    if (!conf) return "";
+    const key = conf.indexOf("Baixa") === 0 ? "Baixa" : conf;
+    const cls = CONF_CLASS[key] || "badge-baixa";
+    const label = CONF_LABEL[key] || conf;
+    return badgeHtml(cls, label, motivo || "");
+  }
+  function seguroBadgeHtml(fonte) {
+    const b = SEGURO_BADGE[fonte] || SEGURO_BADGE.generica;
+    return badgeHtml(b.cls, b.label, b.title);
+  }
+  function ipvaBadgeHtml(fonte) {
+    const b = IPVA_BADGE[fonte];
+    return b ? badgeHtml(b.cls, b.label, b.title) : "";
+  }
+  function manutBadgeHtml(fonte) {
+    const b = MANUT_BADGE[fonte] || MANUT_BADGE.sem_coleta;
+    return badgeHtml(b.cls, b.label, b.title);
+  }
+
+  // ---- Reconstrói o valor estimado do carro ao fim de cada ano (curva de
+  // depreciação anual composta, a mesma usada no cálculo do comparador) e a
+  // perda de valor correspondente a cada ano — a soma das perdas anuais bate
+  // exatamente com "perdaValor" total mostrado no comparador.
+  function buildAnoDepreciacao(D) {
+    const anos = D.anos;
+    const pct = D.depAnualPct;
+    const out = [];
+    let anterior = D.precoCompra;
+    for (let n = 1; n <= anos; n++) {
+      const valorFim = (D.tabela != null && pct != null) ? D.tabela * Math.pow(1 - pct, n) : null;
+      const perda = (anterior != null && valorFim != null) ? anterior - valorFim : null;
+      out.push({ ano: n, valorFim, perda });
+      anterior = valorFim;
+    }
+    return out;
+  }
+
+  function revisoesDoAno(D, ano) {
+    if (!D.manutRevisoes) return null;
+    return D.manutRevisoes.filter(function (rv) { return rv.ano === ano; });
+  }
+
+  function renderRevisoesHtml(D, ano) {
+    const revisoes = revisoesDoAno(D, ano);
+    if (revisoes === null) {
+      const anual = D.manutAnualEstimado;
+      return "<div class='sem-schedule'>Sem cronograma de revisão específico coletado para este modelo — valor é uma estimativa anual por categoria" +
+        (D.manutFonte ? " " + manutBadgeHtml(D.manutFonte) : "") + ".</div>" +
+        "<div class='linha sub'><span class='k'>Estimativa anual de manutenção</span><span class='v'>" + fmtBRL(anual) + "</span></div>";
+    }
+    if (!revisoes.length) {
+      return "<div class='sem-schedule'>Nenhuma revisão programada cai neste ano (intervalo de " + D.manutDado.intervaloMeses + " meses).</div>";
+    }
+    return "<div class='revisoes'>" + revisoes.map(function (rv) {
+      const metaParts = ["mês " + rv.mes];
+      if (rv.km != null) metaParts.push(rv.km.toLocaleString("pt-BR") + " km (estimado)");
+      return "<div class='revisao-item'>" +
+        "<span class='desc'>Revisão nº " + rv.numero + " <span class='meta'>(" + metaParts.join(" · ") + ")</span></span>" +
+        "<span class='custo" + (rv.gratis ? " gratis" : "") + "'>" + (rv.gratis ? "Grátis" : fmtBRL(rv.custo)) + "</span>" +
+        "</div>";
+    }).join("") + "</div>";
+  }
+
+  function manutTotalDoAno(D, ano) {
+    const revisoes = revisoesDoAno(D, ano);
+    const base = revisoes !== null
+      ? revisoes.reduce(function (s, rv) { return s + (rv.custo || 0); }, 0)
+      : (D.manutAnualEstimado || 0);
+    return base + (D.manutExtraAnual || 0);
+  }
+
+  function renderFontes(D) {
+    const blocos = [];
+    if (D.manutDado && ((D.manutDado.fonte && D.manutDado.fonte.length) || D.manutDado.observacoes)) {
+      let html = "<div class='fontes-title'>Manutenção/revisão</div>";
+      if (D.manutDado.observacoes) html += "<div>" + esc(D.manutDado.observacoes) + "</div>";
+      if (D.manutDado.fonte && D.manutDado.fonte.length) {
+        html += "<div>" + D.manutDado.fonte.map(function (u) {
+          return "<a href='" + esc(u) + "' target='_blank' rel='noopener'>" + esc(u) + "</a>";
+        }).join(" · ") + "</div>";
+      }
+      if (D.manutDado.dataColeta) html += "<div>Coletado em " + esc(D.manutDado.dataColeta) + "</div>";
+      blocos.push(html);
+    }
+    return blocos.length ? "<div class='fontes'>" + blocos.join("<br>") + "</div>" : "";
+  }
+
+  function render(D) {
+    const anoDep = buildAnoDepreciacao(D);
+    const anosHtml = anoDep.map(function (a) {
+      const energiaAno = D.custoEnergiaMes * 12;
+      const manutAno = manutTotalDoAno(D, a.ano);
+      const seguroAno = D.seguroAnual || 0;
+      const ipvaAno = D.ipvaAnual || 0;
+      const subtotal = (a.perda || 0) + energiaAno + manutAno + seguroAno + ipvaAno;
+      return "<div class='ano-card'>" +
+        "<div class='ano-head'><span class='ano-titulo'>Ano " + a.ano + "</span><span class='ano-subtotal'>" + fmtBRL(subtotal) + "</span></div>" +
+        "<div class='linha'><span class='k'>Valor estimado do carro ao fim do ano</span><span class='v'>" + fmtBRL(a.valorFim) + "</span></div>" +
+        "<div class='linha'><span class='k'>Perda de valor no ano</span><span class='v'>" + fmtBRL(a.perda) + "</span></div>" +
+        "<div class='linha'><span class='k'>Energia/combustível no ano</span><span class='v'>" + fmtBRL(energiaAno) + "</span></div>" +
+        "<div class='linha'><span class='k'>Manutenção/revisão no ano</span><span class='v'>" + fmtBRL(manutAno) + "</span></div>" +
+        renderRevisoesHtml(D, a.ano) +
+        (D.manutExtraAnual ? "<div class='linha sub'><span class='k'>Manutenção extra informada</span><span class='v'>" + fmtBRL(D.manutExtraAnual) + "</span></div>" : "") +
+        "<div class='linha'><span class='k'>Seguro no ano</span><span class='v'>" + fmtBRL(seguroAno) + " " + (D.seguroAnual != null ? seguroBadgeHtml(D.seguroFonte) : "") + "</span></div>" +
+        "<div class='linha'><span class='k'>IPVA no ano</span><span class='v'>" + fmtBRL(ipvaAno) + " " + (D.ipvaAnual != null ? ipvaBadgeHtml(D.ipvaFonte) : "") + "</span></div>" +
+        "</div>";
+    }).join("");
+
+    const periodoLabel = D.anos + (D.anos === 1 ? " ano" : " anos");
+
+    let priceRows;
+    if (D.showPcdCols) {
+      priceRows =
+        "<div class='price-row'><span class='k'>Preço PCD</span><span class='v'>" + fmtBRL(D.pcd) + "</span></div>" +
+        "<div class='price-row'><span class='k'>Preço de tabela</span><span class='v'>" + fmtBRL(D.tabela) + "</span></div>" +
+        "<div class='price-row'><span class='k'>Desconto PCD</span><span class='v'>" + (D.descontoPct !== null && D.descontoPct !== undefined ? (D.descontoPct * 100).toFixed(1) + "%" : "—") + "</span></div>";
+    } else {
+      priceRows = "<div class='price-row'><span class='k'>Preço de tabela</span><span class='v'>" + fmtBRL(D.tabela) + "</span></div>";
+    }
+    priceRows += "<div class='price-row'><span class='k'>Depreciação anual usada</span><span class='v'>" + (D.depAnualPct != null ? (D.depAnualPct * 100).toFixed(1) + "%" : "—") + "</span></div>";
+    priceRows += "<div class='price-row'><span class='k'>Energia/combustível por mês</span><span class='v'>" + fmtBRL(D.custoEnergiaMes) + "</span></div>";
+    if (D.comparar) {
+      priceRows += "<div class='price-row'><span class='k'>Economia/mês vs. seu carro atual</span><span class='v'>" + fmtBRL(D.economiaMes) + "</span></div>";
+      priceRows += "<div class='price-row'><span class='k'>Economia no período (" + periodoLabel + ")</span><span class='v'>" + fmtBRL(D.economiaMes * D.anos * 12) + "</span></div>";
+    }
+
+    const html =
+      "<header class='hdr'>" +
+        "<div><h1>" + esc(D.name) + "</h1>" +
+        "<div class='hdr-sub'><span class='badge badge-cat'>" + esc(D.catLabel || CAT_LABEL[D.cat] || D.cat) + "</span>" + confBadgeHtml(D.confianca, D.motivoOverride) + "</div></div>" +
+      "</header>" +
+      "<div class='hdr-period'>Período escolhido: " + periodoLabel + (D.comparar ? " · comparando com o carro atual" : "") + "</div>" +
+      "<div class='summary'>" +
+        "<div class='sum-card'><div class='lbl'>Perda de valor</div><div class='val'>" + fmtBRL(D.perdaValor) + "</div></div>" +
+        "<div class='sum-card'><div class='lbl'>Energia/combustível</div><div class='val'>" + fmtBRL(D.custoEnergiaPeriodo) + "</div></div>" +
+        "<div class='sum-card'><div class='lbl'>Manutenção/revisão</div><div class='val'>" + fmtBRL(D.custoManutencaoPeriodo) + "</div></div>" +
+        "<div class='sum-card'><div class='lbl'>Seguro</div><div class='val'>" + fmtBRL(D.seguroAnual != null ? D.seguroAnual * D.anos : null) + "</div></div>" +
+        "<div class='sum-card'><div class='lbl'>IPVA</div><div class='val'>" + fmtBRL(D.ipvaAnual != null ? D.ipvaAnual * D.anos : null) + "</div></div>" +
+        "<div class='sum-card total'><div><div class='lbl'>Custo real (" + periodoLabel + ")</div></div><div class='val'>" + fmtBRL(D.custoReal) + "</div></div>" +
+      "</div>" +
+      "<div class='price-card'>" + priceRows + "</div>" +
+      "<div class='section-title'>Detalhamento ano a ano</div>" +
+      anosHtml +
+      renderFontes(D) +
+      "<footer class='note'>Custo real = perda de valor + energia/combustível + manutenção/revisão + seguro + IPVA, somados ano a ano. Seguro e IPVA são projetados como valor anual constante (não reduzem com a depreciação do carro). Nenhum valor de manutenção foi inventado — onde não há plano de revisão específico coletado, é usada uma estimativa média por categoria sobre o preço de tabela.</footer>";
+
+    document.getElementById("conteudo").innerHTML = html;
+  }
+
+  let D = null;
+  try {
+    D = JSON.parse(sessionStorage.getItem("custoRealDetalhe") || "null");
+  } catch (e) {
+    D = null;
+  }
+
+  if (!D) {
+    document.getElementById("conteudo").innerHTML =
+      "<div class='empty-state'><div class='big'>📄</div>Abra os detalhes a partir do <a href='index.html'>comparador Custo Real</a> — clique em \"Detalhes\" em qualquer linha da tabela.</div>";
+  } else {
+    render(D);
+  }
+})();
+</script>
+</body>
+</html>
