@@ -168,6 +168,14 @@
   .row-link:hover, .row-link-btn:hover { text-decoration: underline; color: var(--cyan-dark); }
   .row-link-off { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
 
+  .row-whatsapp {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(37,211,102,0.12); transition: transform .12s ease, background .12s ease;
+  }
+  .row-whatsapp:hover { background: rgba(37,211,102,0.22); transform: scale(1.08); }
+  .row-whatsapp svg { display: block; }
+
   .modal-overlay {
     display: none; position: fixed; inset: 0; background: rgba(4,9,15,0.72); z-index: 100;
     align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto;
@@ -518,6 +526,22 @@ const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
 
 const CAT_LABEL = { BEV: "Elétrico", PHEV: "Híbrido plug-in", HEV: "Híbrido pleno" };
+
+// ---- Contato "Compre Aqui" (WhatsApp) -----------------------------------
+// Número fixo por enquanto. No futuro, isto deve virar um mapa UF -> número
+// (um contato por estado) escolhido a partir da UF detectada por geolocalização
+// (ver detectarLocalizacao()) ou selecionada manualmente pelo usuário no combo
+// de estado — bastando trocar o corpo desta função, sem mexer em quem a chama.
+const WHATSAPP_NUMERO_PADRAO = "5579988197577";
+function getWhatsappNumero(/* ufValor */) {
+  return WHATSAPP_NUMERO_PADRAO;
+}
+function whatsappLinkCompra(r) {
+  const numero = getWhatsappNumero();
+  const msg = "Olá! Tenho interesse no " + r.name + " que vi no CustoReal.";
+  return "https://wa.me/" + numero + "?text=" + encodeURIComponent(msg);
+}
+const WHATSAPP_ICON_SVG = '<svg viewBox="0 0 32 32" width="20" height="20" aria-hidden="true" focusable="false"><path fill="#25D366" d="M16.02 3C9.4 3 4 8.4 4 15.02c0 2.27.62 4.4 1.7 6.23L4 29l7.94-1.66a12.9 12.9 0 0 0 4.08.66h.01c6.62 0 12.02-5.4 12.02-12.02C28.05 8.4 22.65 3 16.02 3Z"/><path fill="#fff" d="M22.1 18.6c-.33-.17-1.96-.97-2.27-1.08-.3-.11-.53-.17-.75.17-.22.33-.86 1.08-1.06 1.3-.2.22-.39.25-.72.08-.33-.17-1.4-.52-2.66-1.65-.98-.88-1.65-1.96-1.84-2.29-.19-.33-.02-.5.15-.67.15-.15.33-.39.5-.58.16-.2.22-.33.33-.55.11-.22.06-.42-.03-.58-.08-.17-.75-1.82-1.03-2.49-.27-.65-.55-.56-.75-.57-.19-.01-.42-.01-.64-.01-.22 0-.58.08-.89.42-.3.33-1.16 1.14-1.16 2.78 0 1.64 1.19 3.22 1.36 3.44.17.22 2.34 3.57 5.67 5.01.79.34 1.41.55 1.89.7.79.25 1.51.21 2.08.13.63-.1 1.96-.8 2.24-1.58.28-.77.28-1.44.19-1.58-.08-.13-.3-.21-.63-.38Z"/></svg>';
 
 // Premissas genericas por categoria, usadas SOMENTE quando o modelo nao tem specs proprias
 // (escopo "todos os modelos" -- catalogo FIPE nao traz bateria/autonomia/consumo por trim).
@@ -882,8 +906,7 @@ function detectarLocalizacao() {
         const code = ((data.principalSubdivisionCode || "").split("-").pop() || "").toUpperCase();
         if (code && IPVA_POR_UF[code]) {
           elUf.value = code;
-          hint.textContent = "📍 Localização detectada: " + IPVA_POR_UF[code].nome + " (" + code + "). Pode trocar acima se preferir.";
-          if (DATA_READY) calcular();
+          hint.textContent = "📍 Localização detectada: " + IPVA_POR_UF[code].nome + " (" + code + "). Pode trocar acima se preferir — clique em \"Calcular ranking de custo real\" para atualizar o resultado.";
         } else {
           hint.textContent = "Não conseguimos identificar seu estado automaticamente — selecione acima.";
         }
@@ -936,22 +959,22 @@ function clampPriceRange(changedId) {
   }
 }
 document.getElementById("precoMin").addEventListener("input", function () {
-  clampPriceRange("precoMin"); atualizaPriceSliderVisual(); if (DATA_READY) calcular();
+  clampPriceRange("precoMin"); atualizaPriceSliderVisual();
 });
 document.getElementById("precoMax").addEventListener("input", function () {
-  clampPriceRange("precoMax"); atualizaPriceSliderVisual(); if (DATA_READY) calcular();
+  clampPriceRange("precoMax"); atualizaPriceSliderVisual();
 });
 atualizaPriceSliderVisual();
 
 document.getElementById("carregaCasa").addEventListener("change", function () {
   document.getElementById("blocoSolar").classList.toggle("show", this.checked);
 });
-document.getElementById("pcdSim").addEventListener("change", () => { atualizaTogglePcd(); if (DATA_READY) calcular(); });
-document.getElementById("pcdNao").addEventListener("change", () => { atualizaTogglePcd(); if (DATA_READY) calcular(); });
-document.getElementById("compararSim").addEventListener("change", () => { atualizaToggleComparar(); if (DATA_READY) calcular(); });
-document.getElementById("compararNao").addEventListener("change", () => { atualizaToggleComparar(); if (DATA_READY) calcular(); });
-document.querySelectorAll(".marcaFixaChk").forEach(el => el.addEventListener("change", () => { if (DATA_READY) calcular(); }));
-document.getElementById("ufSelecionada").addEventListener("change", () => { if (DATA_READY) calcular(); });
+// Nota: estes filtros NÃO recalculam automaticamente — o ranking só é gerado
+// quando o usuário clica no botão "Calcular ranking de custo real" (#btnCalc).
+document.getElementById("pcdSim").addEventListener("change", () => { atualizaTogglePcd(); });
+document.getElementById("pcdNao").addEventListener("change", () => { atualizaTogglePcd(); });
+document.getElementById("compararSim").addEventListener("change", () => { atualizaToggleComparar(); });
+document.getElementById("compararNao").addEventListener("change", () => { atualizaToggleComparar(); });
 
 // ---- Autocomplete de marcas -------------------------------------------
 // Substitui o antigo campo de texto livre (que exigia digitar a marca certinho)
@@ -999,13 +1022,11 @@ function adicionarMarca(marca) {
   elMarcasInput.value = "";
   elMarcasResults.classList.remove("open");
   renderMarcasChips();
-  if (DATA_READY) calcular();
 }
 
 function removerMarca(marca) {
   marcasSelecionadas = marcasSelecionadas.filter(s => normTxt(s) !== normTxt(marca));
   renderMarcasChips();
-  if (DATA_READY) calcular();
 }
 
 function renderMarcasChips() {
@@ -1213,8 +1234,12 @@ function calcular() {
   // modal, aberto pelo link "Detalhes" de cada linha.
   LAST_CALC = { rows, anos, comparar, showPcdCols, isPcd };
 
+  const precoColLabel = isPcd ? "Preço PCD" : "Preço";
+
   let html = "<table><thead><tr>" +
-    "<th title='Perda de valor + energia + seguro + IPVA no período escolhido'>Custo real (" + anos + "a)</th><th>Modelo</th><th>Links</th>" +
+    "<th title='Perda de valor + energia + seguro + IPVA no período escolhido'>Custo real (" + anos + "a)</th>" +
+    "<th>" + precoColLabel + "</th>" +
+    "<th>Modelo</th><th>Links</th><th>Compre Aqui</th>" +
     "</tr></thead><tbody>";
 
   rows.forEach((r, i) => {
@@ -1238,12 +1263,14 @@ function calcular() {
 
     html += "<tr class='" + rankClass + "'>" +
       "<td class='custoreal-cell " + crClass + "'>" + fmtBRL(r.custoReal) + "</td>" +
+      "<td>" + fmtBRL(r.precoCompra) + "</td>" +
       "<td>" + r.name + "<span class='badge badge-cat'>" + CAT_LABEL[r.cat] + "</span></td>" +
       "<td><div class='row-links'>" +
         "<button type='button' class='row-link-btn' onclick='abrirDetalhes(" + i + ")'>Detalhes</button>" +
         historicoHtml +
         especHtml +
       "</div></td>" +
+      "<td><a class='row-whatsapp' target='_blank' rel='noopener' title='Falar no WhatsApp sobre este modelo' href='" + whatsappLinkCompra(r) + "'>" + WHATSAPP_ICON_SVG + "</a></td>" +
       "</tr>";
   });
 
@@ -1362,10 +1389,11 @@ function aplicarPreenchimentoFormulario(args) {
     );
     renderMarcasChips();
   }
-  if (DATA_READY) calcular();
-  const resultsEl = document.getElementById("resultsTable");
-  if (resultsEl && typeof resultsEl.scrollIntoView === "function") {
-    resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  // O ranking só é gerado quando o usuário clica no botão — aqui só rolamos
+  // a tela até ele, já preenchido, esperando o clique.
+  const btnEl = document.getElementById("btnCalc");
+  if (btnEl && typeof btnEl.scrollIntoView === "function") {
+    btnEl.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 }
 
@@ -1407,7 +1435,7 @@ async function enviarChat() {
     if (data.functionCall && data.functionCall.name === "preencher_formulario") {
       try {
         aplicarPreenchimentoFormulario(data.functionCall.args || {});
-        chatAddMsg("system", "Formulário preenchido e ranking atualizado abaixo.");
+        chatAddMsg("system", "Formulário preenchido! Clique em \"Calcular ranking de custo real\" para ver o resultado.");
       } catch (fillErr) {
         chatAddMsg("error", "Recebi os dados mas houve um problema ao preencher o formulário. Role a página para conferir/ajustar manualmente.");
       }
@@ -1439,7 +1467,9 @@ carregarDados().then(data => {
   document.getElementById("loadMsg").style.display = "none";
   document.getElementById("btnCalc").disabled = false;
   document.getElementById("btnCalc").textContent = "Calcular ranking de custo real";
-  calcular();
+  // O ranking só é gerado quando o usuário clica no botão acima — não calculamos
+  // automaticamente aqui, só avisamos que já dá pra clicar.
+  document.getElementById("resultsTable").innerHTML = '<div class="empty-state">Ajuste os filtros acima e clique em "Calcular ranking de custo real" para ver o resultado.</div>';
 }).catch(err => {
   document.getElementById("loadMsg").textContent = "Erro ao carregar dados do Supabase: " + (err.message || err);
   document.getElementById("loadMsg").style.color = "#b3261e";
