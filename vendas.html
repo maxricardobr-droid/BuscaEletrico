@@ -32,6 +32,10 @@
     min-height:100vh;
   }
   .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+  /* Em telas estreitas o ".wrap" não fica mais centralizado com sobra lateral suficiente, então o cabeçalho (logo/título) nasce embaixo do botão de menu, fixo em top:14px/left:14px. Damos espaço vertical pro botão. */
+  @media (max-width: 960px) {
+    .wrap{padding-top:62px;}
+  }
   header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
   header .logo{
     width:40px;height:40px;border-radius:10px;
@@ -217,6 +221,7 @@
   <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
   <a href="vendas.html" class="hb-link active">Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link">Especificações</a>
+  <a href="noticias.html" class="hb-link">Notícias</a>
   <a href="forum.html" class="hb-link">Fórum</a>
 </nav>
 <script>

@@ -34,6 +34,12 @@
     padding: 22px 4px 20px; margin-bottom: 22px;
     border-bottom: 2px solid var(--border-strong);
   }
+  /* Em telas estreitas, ".wrap" não tem padding lateral nenhum, então a logo
+     (que só tem 4px de respiro) nasce embaixo do botão de menu, fixo em
+     top:14px/left:14px — parte da logo ficava cortada atrás do botão. */
+  @media (max-width: 900px) {
+    .brandBar { padding-top: 58px; }
+  }
   .brandBar img { height: 52px; width: auto; display: block; filter: drop-shadow(0 0 10px rgba(18,63,130,0.25)); }
   .brandBar .brandText h1 {
     font-size: 20px; font-weight: 800; margin: 0; color: var(--text);
@@ -381,6 +387,7 @@
   <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
   <a href="vendas.html" class="hb-link">Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link">Especificações</a>
+  <a href="noticias.html" class="hb-link">Notícias</a>
   <a href="forum.html" class="hb-link">Fórum</a>
 </nav>
 <script>
