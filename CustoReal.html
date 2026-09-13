@@ -112,6 +112,24 @@
   }
   tbody tr:hover { background: var(--bg-alt); }
   tbody tr.rank1 { background: var(--green-bg); }
+  /* Coluna "Compre Aqui" (última) fica fixa na borda direita da área de
+     rolagem horizontal — é a ação de conversão principal da tabela, então
+     não pode ficar escondida atrás de uma rolagem que ninguém percebe que
+     existe (especialmente no celular, onde a tabela é mais larga que a tela). */
+  th:last-child, td:last-child { position: sticky; right: 0; }
+  th:last-child { background: var(--bg-alt); z-index: 3; }
+  td:last-child {
+    background: var(--panel); z-index: 1;
+    box-shadow: -8px 0 8px -8px rgba(15,39,64,0.25);
+  }
+  tbody tr:hover td:last-child { background: var(--bg-alt); }
+  tbody tr.rank1 td:last-child { background: var(--green-bg); }
+  .table-scroll-hint {
+    display: none; font-size: 11.5px; color: var(--text-muted); margin: 0 0 8px;
+  }
+  @media (max-width: 900px) {
+    .table-scroll-hint { display: block; }
+  }
   .badge {
     display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px;
     margin-left: 6px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.02em;
@@ -268,14 +286,30 @@
   }
 
   #chatFab {
-    position: fixed; right: 22px; bottom: 22px; z-index: 40;
-    background: var(--cyan); color: #ffffff; border: none; border-radius: 3px;
-    padding: 13px 20px; font-size: 13px; font-weight: 800; cursor: pointer;
-    box-shadow: 0 4px 18px rgba(18,63,130,0.35); text-transform: uppercase; letter-spacing: 0.04em;
+    position: fixed; right: 18px; bottom: 18px; z-index: 40;
+    width: 52px; height: 52px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--cyan); color: #ffffff; border: none; border-radius: 50%;
+    cursor: pointer; box-shadow: 0 4px 18px rgba(18,63,130,0.4);
   }
+  /* Antes era um botão largo com texto ("Falar com o Voltinho") sempre visível,
+     que cobria conteúdo embaixo dele (uma pergunta do formulário no celular,
+     o botão de WhatsApp de uma linha da tabela no desktop). Como ícone
+     circular pequeno ele ocupa uma fração da área e some visualmente entre
+     o conteúdo; o nome continua acessível via aria-label/title e por um
+     rótulo que aparece ao passar o mouse (desktop). */
   #chatFab:hover { background: var(--cyan-dark); }
+  #chatFab::after {
+    content: "Falar com o Voltinho"; position: absolute; right: 62px; bottom: 14px;
+    background: var(--cyan-dark); color: #fff; padding: 7px 12px; border-radius: 3px;
+    font-size: 12px; font-weight: 700; white-space: nowrap; text-transform: none;
+    letter-spacing: normal; opacity: 0; pointer-events: none; transition: opacity 0.15s;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+  #chatFab:hover::after, #chatFab:focus-visible::after { opacity: 1; }
+  @media (hover: none) { #chatFab::after { display: none; } }
   #chatPanel {
-    position: fixed; right: 22px; bottom: 84px; z-index: 40;
+    position: fixed; right: 18px; bottom: 78px; z-index: 40;
     width: 360px; max-width: calc(100vw - 32px); height: 480px; max-height: calc(100vh - 140px);
     background: var(--panel); border: 1px solid var(--border-strong); border-radius: 4px;
     box-shadow: 0 12px 36px rgba(0,0,0,0.45);
@@ -487,6 +521,7 @@
       <h2 style="font-size:16px;">Ranking de custo real</h2>
       <span class="results-note" id="resultsNote"></span>
     </div>
+    <p class="table-scroll-hint">⇆ Arraste a tabela para o lado para ver vendidos, links e o botão de compra — a coluna "Compre aqui" fica sempre visível na borda direita.</p>
     <div class="table-scroll" id="resultsTable">
       <div class="empty-state">Aguardando dados…</div>
     </div>
@@ -501,7 +536,7 @@
 
 </div>
 
-<button id="chatFab" onclick="abrirChat()"><img id="chatFabIcon" alt="" style="width:26px;height:26px;vertical-align:-8px;margin-right:6px;">Falar com o Voltinho</button>
+<button id="chatFab" onclick="abrirChat()" aria-label="Falar com o Voltinho" title="Falar com o Voltinho"><img id="chatFabIcon" alt="" style="width:28px;height:28px;display:block;"></button>
 <div id="chatPanel">
   <div id="chatHeader">
     <div style="display:flex; align-items:center; gap:10px;">
