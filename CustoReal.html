@@ -101,8 +101,11 @@
   .results-note { font-size: 11.5px; color: var(--text-muted); font-family: var(--mono); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { padding: 10px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; font-family: var(--mono); font-variant-numeric: tabular-nums; }
-  th:nth-child(2), td:nth-child(2) { text-align: left; white-space: normal; font-family: -apple-system, "Segoe UI", Arial, sans-serif; }
-  th:nth-child(3), td:nth-child(3) { text-align: left; white-space: normal; font-family: -apple-system, "Segoe UI", Arial, sans-serif; font-variant-numeric: normal; }
+  /* Colunas 3 (Modelo) e 4 (Links) — texto normal, não monoespaçado/numérico.
+     Coluna 1 (Custo real) e 2 (Preço/Preço PCD) ficam com o padrão acima
+     (alinhado à direita, mono, tabular) por serem valores monetários. */
+  th:nth-child(3), td:nth-child(3) { text-align: left; white-space: normal; font-family: -apple-system, "Segoe UI", Arial, sans-serif; }
+  th:nth-child(4), td:nth-child(4) { text-align: left; white-space: normal; font-family: -apple-system, "Segoe UI", Arial, sans-serif; font-variant-numeric: normal; }
   th {
     color: var(--cyan); font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em;
     background: var(--bg-alt); position: sticky; top: 0; border-bottom: 2px solid var(--border-strong);
@@ -342,6 +345,7 @@
   </div>
   <a href="CustoReal.html" class="hb-link active">Custo Real</a>
   <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
+  <a href="vendas.html" class="hb-link">Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link">Especificações</a>
   <a href="forum.html" class="hb-link">Fórum</a>
 </nav>
@@ -491,7 +495,7 @@
     </p>
     <details class="calc-hint">
       <summary>Como calculamos o custo real?</summary>
-      <p class="foot-note">Perda de valor: preço efetivamente pago menos o valor de revenda estimado ao fim do período, usando a depreciação anual de cada modelo — uma mistura estatística entre a taxa própria do modelo (de preferência calculada no histórico real da Tabela FIPE) e a média da categoria (elétrico/híbrido plug-in/híbrido pleno); modelos com pouco histórico próprio dependem mais da média da categoria (confiança "Baixa"/"Média"), modelos com histórico robusto usam principalmente a taxa própria (confiança "Alta"). Song Pro GL usa correção manual por lançamento de nova geração. Energia: no escopo "desconto PCD confirmado" usamos a ficha técnica real do carro (bateria, autonomia, consumo); no escopo "todos os modelos" usamos uma premissa média por categoria, porque o catálogo FIPE não traz specs por versão. Manutenção/revisão: plano de revisão programada pesquisado por modelo (intervalo, custo por revisão, revisões grátis) quando já coletado; sem coleta ainda, percentual médio por categoria sobre o preço de tabela — nenhum valor é inventado. Seguro e IPVA: ver detalhe no painel "Seguro e IPVA" acima. Preços e descontos PCD levantados em agosto/2026 e sujeitos a mudança — confirme com a concessionária antes de decidir.</p>
+      <p class="foot-note">Perda de valor: preço efetivamente pago menos o valor de revenda estimado ao fim do período, usando a depreciação anual de cada modelo — uma mistura estatística entre a taxa própria do modelo (de preferência calculada no histórico real da Tabela FIPE) e a média da categoria (elétrico/híbrido plug-in/híbrido pleno); modelos com pouco histórico próprio dependem mais da média da categoria (confiança "Baixa"/"Média"), modelos com histórico robusto usam principalmente a taxa própria (confiança "Alta"). Song Pro GL usa correção manual por lançamento de nova geração. Energia: no escopo "desconto PCD confirmado" usamos a ficha técnica real do carro (bateria, autonomia, consumo); no escopo "todos os modelos" usamos uma premissa média por categoria, porque o catálogo FIPE não traz specs por versão. Manutenção/revisão: plano de revisão programada pesquisado por modelo (intervalo, custo por revisão, revisões grátis) quando já coletado; sem coleta ainda, percentual médio por categoria sobre o preço de tabela — nenhum valor é inventado. Seguro e IPVA: ver detalhe no painel "Seguro e IPVA" acima. Vendidos: emplacamentos por modelo do ranking ABVE (Associação Brasileira do Veículo Elétrico) — cobertura parcial, só traz os modelos mais vendidos de cada categoria; "sem dado" não significa zero vendas, só que o modelo não apareceu num ranking publicado. Preços e descontos PCD levantados em agosto/2026 e sujeitos a mudança — confirme com a concessionária antes de decidir.</p>
     </details>
   </div>
 
@@ -564,6 +568,8 @@ let IPVA_POR_UF = {};
 let MARCAS_DISPONIVEIS = [];
 let marcasSelecionadas = [];
 let MANUTENCAO_POR_FIPE = {};
+let VENDAS_INDEX = [];
+let VENDAS_MENSAL_INDEX = [];
 
 // ---- Ficha técnica (especificacoes_tecnicas): monta índice marca+modelo p/
 // linkar o nome do carro na tabela pra especificacoes.html. Casamento é por
@@ -782,6 +788,74 @@ function buildRevisoesSchedule(dado, anos) {
   return lista;
 }
 
+// ---- Vendas/emplacamentos (vendas_estimado): ranking ABVE por marca+família
+// de modelo, cobertura parcial (só os mais vendidos de cada categoria, ver
+// claude/vendas-eletrificados-metodologia.md). Casamento por prefixo de
+// tokens, igual findSpecsMatch — MAS aqui a categoria é filtro DURO, não
+// preferência com fallback: mostrar um número de vendas de categoria errada
+// (ex.: contagem de um PHEV aparecendo na linha de um trim HEV do mesmo nome)
+// é pior do que "sem dado", porque o catálogo tem casos reais de mesmo nome
+// com categorias diferentes por trim.
+function buildVendasIndex(rows) {
+  const seen = new Map();
+  const idx = [];
+  (rows || []).forEach(r => {
+    const key = normTxt(r.marca_nome) + "||" + normTxt(r.modelo_familia);
+    let entry = seen.get(key);
+    if (!entry) {
+      entry = { marcaNorm: normTxt(r.marca_nome), modeloTokens: tokenize(r.modelo_familia), versoes: [] };
+      seen.set(key, entry);
+      idx.push(entry);
+    }
+    entry.versoes.push({
+      categoria: r.categoria,
+      quantidade: r.quantidade_vendida != null ? Number(r.quantidade_vendida) : null,
+      periodo: r.periodo || null,
+      fonte: r.fonte || [],
+      observacoes: r.observacoes || null,
+    });
+  });
+  return idx;
+}
+function findInVendasIndex(index, marca, modelo, cat) {
+  if (!index.length || !marca || !modelo || !cat) return null;
+  const marcaNorm = normTxt(marca);
+  const modeloTokens = tokenize(modelo);
+  let best = null;
+  index.forEach(entry => {
+    if (entry.marcaNorm !== marcaNorm) return;
+    if (entry.modeloTokens.length > modeloTokens.length) return;
+    for (let i = 0; i < entry.modeloTokens.length; i++) {
+      if (entry.modeloTokens[i] !== modeloTokens[i]) return;
+    }
+    if (!best || entry.modeloTokens.length > best.modeloTokens.length) best = entry;
+  });
+  if (!best) return null;
+  // filtro duro: só aceita a versão da MESMA categoria, sem cair pro grupo todo.
+  return best.versoes.find(v => v.categoria === cat) || null;
+}
+function findVendasMatch(marca, modelo, cat) { return findInVendasIndex(VENDAS_INDEX, marca, modelo, cat); }
+function estimarVendas(car) {
+  const v = findVendasMatch(car.marca, car.modelo, car.cat);
+  if (!v || v.quantidade == null) return { quantidade: null, periodo: null, fonte: [], observacoes: null, semDado: true };
+  return { quantidade: v.quantidade, periodo: v.periodo, fonte: v.fonte, observacoes: v.observacoes, semDado: false };
+}
+// ---- Vendas mensais (vendas_mensal): usado só para saber se existe uma
+// série com dado mensal pra este marca+modelo+categoria, e assim decidir se
+// mostra (ou não) o link "Ranking de Vendas ↗" na coluna de links — evita
+// mandar o usuário pra vendas.html e ele achar a busca vazia. Mesmo índice/
+// casamento por prefixo de tokens com filtro duro de categoria, mas
+// construído a partir de vendas_mensal em vez de vendas_estimado (são tabelas
+// e coberturas diferentes, ver claude/vendas-em-detalhes-e-reconstrucao-local.md).
+function findVendasMensalMatch(marca, modelo, cat) { return findInVendasIndex(VENDAS_MENSAL_INDEX, marca, modelo, cat); }
+function vendasCellHtml(r) {
+  if (r.vendasSemDado || r.vendasQtd == null) {
+    return "<span class='sem-dado' title='Não apareceu em nenhum ranking ABVE publicado — não significa zero vendas'>sem dado</span>";
+  }
+  return Number(r.vendasQtd).toLocaleString("pt-BR") +
+    "<span class='badge badge-cotacao' title='Fonte: ranking ABVE'>" + (r.vendasPeriodo || "") + "</span>";
+}
+
 function fmtBRL(v) {
   if (v === null || v === undefined || isNaN(v)) return "—";
   const neg = v < 0;
@@ -794,13 +868,15 @@ function fmtBRL(v) {
 async function carregarDados() {
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const [todosRes, pcdRes, specsRes, seguroRes, ipvaRes, manutencaoRes] = await Promise.all([
+  const [todosRes, pcdRes, specsRes, seguroRes, ipvaRes, manutencaoRes, vendasRes, vendasMensalRes] = await Promise.all([
     client.from("mercado_completo").select("*"),
     client.from("pcd_confirmado_completo").select("*"),
     client.from("especificacoes_tecnicas").select("id,marca,modelo,versao,tipo_motorizacao,preco_tabela"),
     client.from("seguro_estimado").select("especificacao_id,valor_seguro_anual_estimado,metodo"),
     client.from("ipva_aliquotas_estados").select("*"),
     client.from("manutencao_estimada").select("codigo_fipe,custo_revisao_estimado,custo_revisao_min,custo_revisao_max,intervalo_km,intervalo_meses,n_revisoes_gratuitas,anos_cobertura_gratuita,custo_manutencao_anual_estimado,metodo,percentual_sobre_preco,fonte,observacoes,data_coleta"),
+    client.from("vendas_estimado").select("marca_nome,modelo_familia,categoria,quantidade_vendida,periodo,fonte,observacoes"),
+    client.from("vendas_mensal").select("marca_nome,modelo_familia,categoria"),
   ]);
 
   if (todosRes.error) throw todosRes.error;
@@ -830,6 +906,12 @@ async function carregarDados() {
       };
     });
   } else console.warn("Não foi possível carregar manutencao_estimada:", manutencaoRes.error);
+
+  if (!vendasRes.error) VENDAS_INDEX = buildVendasIndex(vendasRes.data);
+  else console.warn("Não foi possível carregar vendas_estimado:", vendasRes.error);
+
+  if (!vendasMensalRes.error) VENDAS_MENSAL_INDEX = buildVendasIndex(vendasMensalRes.data);
+  else console.warn("Não foi possível carregar vendas_mensal:", vendasMensalRes.error);
 
   if (!seguroRes.error) {
     SEGURO_BY_ESPEC_ID = {};
@@ -1190,6 +1272,8 @@ function calcular() {
     const economiaMes = comparar ? (custoAtualMes - custoEnergiaMes) : null;
     const descontoPct = c.pcd !== null ? (c.tabela - c.pcd) / c.tabela : null;
 
+    const vendasInfo = estimarVendas(c);
+
     return {
       name: c.name, marca: c.marca, modelo: c.modelo, cat: c.cat, precoCompra, tabela: c.tabela, pcd: c.pcd, descontoPct,
       depAnualPct: c.depAnual,
@@ -1199,6 +1283,8 @@ function calcular() {
       manutRevisoes, manutEstimadoPeriodo, manutExtraAnual: manutencaoExtra, manutExtraPeriodo, custoManutencaoPeriodo,
       confianca: c.confianca, motivoOverride: c.motivoOverride, hasSpecs: c.hasSpecs,
       codigoFipe: c.codigoFipe, anoModelo: c.anoModelo,
+      vendasQtd: vendasInfo.quantidade, vendasPeriodo: vendasInfo.periodo, vendasFonte: vendasInfo.fonte,
+      vendasObservacoes: vendasInfo.observacoes, vendasSemDado: vendasInfo.semDado,
     };
   });
 
@@ -1239,7 +1325,9 @@ function calcular() {
   let html = "<table><thead><tr>" +
     "<th title='Perda de valor + energia + seguro + IPVA no período escolhido'>Custo real (" + anos + "a)</th>" +
     "<th>" + precoColLabel + "</th>" +
-    "<th>Modelo</th><th>Links</th><th>Compre Aqui</th>" +
+    "<th>Modelo</th><th>Links</th>" +
+    "<th title='Emplacamentos ABVE — cobertura parcial (só os mais vendidos de cada categoria); \"sem dado\" não significa zero vendas, significa que o modelo não apareceu num ranking publicado'>Vendidos</th>" +
+    "<th>Compre Aqui</th>" +
     "</tr></thead><tbody>";
 
   rows.forEach((r, i) => {
@@ -1261,6 +1349,15 @@ function calcular() {
       ? "<a class='row-link' target='_blank' rel='noopener' title='" + specLinkTitle + "' href='especificacoes.html?marca=" + encodeURIComponent(specMatch.marca) + "&modelo=" + encodeURIComponent(specMatch.modelo) + "&categoria=" + encodeURIComponent(r.cat || "") + "'>Especificações ↗</a>"
       : "<span class='row-link-off'>sem ficha técnica</span>";
 
+    // só mostra o link se existir série com dado MENSAL pra esse marca+modelo+
+    // categoria (vendas_mensal) — sem isso o usuário cai numa busca vazia em
+    // vendas.html. É uma checagem separada da coluna "Vendidos" (que usa
+    // vendas_estimado, cobertura/nomenclatura não idêntica).
+    const vendasMensalMatch = findVendasMensalMatch(r.marca, r.modelo, r.cat);
+    const vendasLinkHtml = vendasMensalMatch
+      ? "<a class='row-link' target='_blank' rel='noopener' href='vendas.html?marca=" + encodeURIComponent(r.marca) + "&modelo=" + encodeURIComponent(r.modelo) + "&categoria=" + encodeURIComponent(r.cat || "") + "'>Ranking de Vendas ↗</a>"
+      : "<span class='row-link-off'>sem ranking mensal</span>";
+
     html += "<tr class='" + rankClass + "'>" +
       "<td class='custoreal-cell " + crClass + "'>" + fmtBRL(r.custoReal) + "</td>" +
       "<td>" + fmtBRL(r.precoCompra) + "</td>" +
@@ -1268,8 +1365,10 @@ function calcular() {
       "<td><div class='row-links'>" +
         "<button type='button' class='row-link-btn' onclick='abrirDetalhes(" + i + ")'>Detalhes</button>" +
         historicoHtml +
+        vendasLinkHtml +
         especHtml +
       "</div></td>" +
+      "<td>" + vendasCellHtml(r) + "</td>" +
       "<td><a class='row-whatsapp' target='_blank' rel='noopener' title='Falar no WhatsApp sobre este modelo' href='" + whatsappLinkCompra(r) + "'>" + WHATSAPP_ICON_SVG + "</a></td>" +
       "</tr>";
   });
