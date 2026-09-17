@@ -110,6 +110,20 @@
   .spec-row .k{color:var(--muted);}
   .spec-row .v{font-weight:600;text-align:right;}
 
+  .equip-section{margin-top:14px;}
+  .equip-section > h4{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--orange);font-weight:700;}
+  .equip-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+  .equip-cat{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+  .equip-cat h5{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;}
+  .equip-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;}
+  .equip-list li{font-size:12.5px;display:flex;align-items:flex-start;gap:6px;line-height:1.4;}
+  .equip-list li .ei{flex:none;font-size:12px;line-height:1.5;color:var(--green);}
+  .equip-list li.ind{color:var(--muted);}
+  .equip-list li.ind .ei{color:var(--muted);}
+  .equip-tag{font-size:9.5px;padding:1px 7px;border-radius:20px;font-weight:700;letter-spacing:.02em;margin-left:2px;white-space:nowrap;}
+  .equip-tag.opcional{background:rgba(122,79,209,.14);color:var(--purple);}
+  .equip-tag.pacote{background:rgba(47,111,228,.14);color:var(--blue);}
+
   .note-box{
     margin-top:14px;background:rgba(18,63,130,.06);border:1px solid rgba(18,63,130,.30);
     border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text);line-height:1.55;
@@ -216,9 +230,11 @@
   </div>
 
   <div class="footer-note">
-    Especificações coletadas manualmente via pesquisa web (site do fabricante + imprensa especializada), sem
-    verificação humana das fichas técnicas — confirme o preço e as configurações exatas na concessionária antes de
-    decidir. Ver observações em cada versão para divergências entre fontes.
+    Especificações e lista de equipamentos coletadas manualmente via pesquisa web (site do fabricante + imprensa
+    especializada), sem verificação humana das fichas técnicas — confirme o preço e as configurações exatas na
+    concessionária antes de decidir. A lista de equipamentos ainda está sendo expandida marca a marca; versões sem
+    essa seção visível ainda não tiveram os opcionais coletados. Ver observações em cada versão para divergências
+    entre fontes.
   </div>
 </div>
 
@@ -247,9 +263,18 @@
     return day + "/" + m + "/" + y;
   }
 
-  let catalogo = [];       // todas as 52 linhas de especificacoes_tecnicas
+  let catalogo = [];       // todas as linhas de especificacoes_tecnicas
+  let opcionaisPorVersao = {}; // chave marca|modelo|versao|ano_modelo -> { categoria: [itens] }
   let activeResultIndex = -1;
   let currentMatches = [];
+
+  const CATEGORIA_ORDEM = [
+    "Conforto", "Segurança", "Multimídia/Conectividade",
+    "Exterior", "ADAS/Assistência ao motorista", "Interior/Acabamento",
+  ];
+  function chaveVersao(marca, modelo, versao, ano) {
+    return normalize(marca) + "|" + normalize(modelo) + "|" + normalize(versao) + "|" + normalize(ano);
+  }
 
   const els = {
     searchInput: document.getElementById("searchInput"),
@@ -273,6 +298,27 @@
       els.hint.textContent = "Não foi possível carregar a ficha técnica (" + err.message + "). Verifique a conexão com o Supabase.";
       els.hint.style.color = "var(--red)";
       console.error(err);
+    }
+  }
+
+  // ---- Carrega equipamentos/opcionais por versão (tabela especificacoes_opcionais) --
+  async function carregarOpcionais() {
+    try {
+      const url = REST + "/especificacoes_opcionais?select=marca,modelo,versao,ano_modelo,categoria,item,disponibilidade,pacote_nome&order=marca.asc,modelo.asc,versao.asc,categoria.asc,item.asc";
+      const resp = await fetch(url, { headers: HEADERS });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const linhas = await resp.json();
+      opcionaisPorVersao = {};
+      linhas.forEach((o) => {
+        const key = chaveVersao(o.marca, o.modelo, o.versao, o.ano_modelo);
+        if (!opcionaisPorVersao[key]) opcionaisPorVersao[key] = {};
+        if (!opcionaisPorVersao[key][o.categoria]) opcionaisPorVersao[key][o.categoria] = [];
+        opcionaisPorVersao[key][o.categoria].push(o);
+      });
+    } catch (err) {
+      // Não é crítico: a ficha técnica principal continua funcionando sem a
+      // lista de equipamentos (nem toda versão tem opcionais coletados ainda).
+      console.warn("Não foi possível carregar especificacoes_opcionais:", err);
     }
   }
 
@@ -332,6 +378,35 @@
   function specRow(label, value) {
     if (value === null || value === undefined || value === "") return "";
     return '<div class="spec-row"><span class="k">' + label + '</span><span class="v">' + escapeHtml(value.toString()) + '</span></div>';
+  }
+
+  function equipItemHtml(o) {
+    const label = escapeHtml(o.item);
+    if (o.disponibilidade === "indisponivel") {
+      return '<li class="ind"><span class="ei">–</span> ' + label + '</li>';
+    }
+    if (o.disponibilidade === "opcional") {
+      return '<li><span class="ei">✓</span> ' + label + ' <span class="equip-tag opcional">opcional</span></li>';
+    }
+    if (o.disponibilidade === "pacote") {
+      const nomePacote = o.pacote_nome ? ": " + escapeHtml(o.pacote_nome) : "";
+      return '<li><span class="ei">✓</span> ' + label + ' <span class="equip-tag pacote">pacote' + nomePacote + '</span></li>';
+    }
+    return '<li><span class="ei">✓</span> ' + label + '</li>'; // "serie" (padrão)
+  }
+
+  function renderEquipamentos(v) {
+    const porCategoria = opcionaisPorVersao[chaveVersao(v.marca, v.modelo, v.versao, v.ano_modelo)];
+    if (!porCategoria) return "";
+    const categorias = CATEGORIA_ORDEM.filter((c) => porCategoria[c] && porCategoria[c].length)
+      .concat(Object.keys(porCategoria).filter((c) => CATEGORIA_ORDEM.indexOf(c) === -1));
+    if (!categorias.length) return "";
+    const blocos = categorias.map((c) =>
+      '<div class="equip-cat"><h5>' + escapeHtml(c) + '</h5><ul class="equip-list">' +
+        porCategoria[c].map(equipItemHtml).join("") +
+      '</ul></div>'
+    ).join("");
+    return '<div class="equip-section"><h4>Equipamentos de série e opcionais</h4><div class="equip-cats">' + blocos + '</div></div>';
   }
 
   function renderCard(v, versaoDestaque, idx) {
@@ -396,6 +471,7 @@
         '<div class="card-price"><div class="label">Preço de tabela</div><div class="value">' + (v.preco_tabela ? currencyFmt.format(v.preco_tabela) : "—") + '</div></div>' +
       '</div>' +
       '<div class="spec-grid">' + sections + '</div>' +
+      renderEquipamentos(v) +
       obsHtml +
       sourcesHtml +
       (coleta ? '<div class="card-foot">Dados coletados em ' + coleta + '</div>' : "") +
@@ -454,7 +530,7 @@
   }
 
   // ---- Início ----------------------------------------------------------
-  carregarCatalogo().then(aplicarSelecaoViaURL);
+  Promise.all([carregarCatalogo(), carregarOpcionais()]).then(aplicarSelecaoViaURL);
 })();
 </script>
 </body>
