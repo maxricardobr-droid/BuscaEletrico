@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CustoReal — Portal</title>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#eef3fa; --border:#d7e1ee; --border-strong:#b7c6db;
+    --text:#0f2740; --muted:#5c7089; --accent:#123F82; --accent-dark:#0C2E5E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--text);
+    display:flex; flex-direction:column; height:100vh; overflow:hidden;
+  }
+  .portalHeader{
+    flex:none; background:var(--bg); border-bottom:1px solid var(--border);
+    padding:10px 14px 0;
+  }
+  .portalBrand{ display:flex; align-items:center; gap:10px; padding-bottom:8px; }
+  .portalBrand .logo{
+    width:30px;height:30px;border-radius:8px;flex:none;
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;
+  }
+  .portalBrand h1{font-size:15.5px;margin:0;font-weight:800;letter-spacing:-.01em;}
+  .portalBrand .tag{font-size:11.5px;color:var(--muted);margin-left:auto;white-space:nowrap;}
+  .tabStrip{
+    display:flex; gap:2px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  .tabStrip::-webkit-scrollbar{display:none;}
+  .tabBtn{
+    flex:none; appearance:none; border:none; background:transparent; cursor:pointer;
+    padding:10px 15px 11px; font-size:13.5px; font-weight:600; color:var(--muted);
+    border-bottom:3px solid transparent; white-space:nowrap; font-family:inherit;
+    transition:color .15s, border-color .15s;
+  }
+  .tabBtn:hover{color:var(--text);}
+  .tabBtn.active{color:var(--accent-dark); border-bottom-color:var(--accent);}
+  .frameWrap{flex:1 1 auto; min-height:0; position:relative; background:var(--panel);}
+  .frameWrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; background:var(--bg); }
+  @media (max-width:600px){
+    .portalBrand .tag{display:none;}
+    .tabBtn{padding:9px 11px 10px; font-size:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="portalHeader">
+  <div class="portalBrand">
+    <div class="logo">CR</div>
+    <h1>CustoReal</h1>
+    <span class="tag">Portal único — carros elétricos e híbridos</span>
+  </div>
+  <nav class="tabStrip" id="tabStrip"></nav>
+</div>
+<div class="frameWrap" id="frameWrap"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Ordem fixa das abas, exatamente como pedido: cada uma é uma cópia da
+  // página correspondente do site (sem o menu hambúrguer, que aqui foi
+  // substituído por esta barra de abas).
+  var ABAS = [
+    { key: "custoreal",       label: "Custo Real",                  file: "tab-custoreal.html" },
+    { key: "especificacoes",  label: "Busca por Especificações",    file: "tab-especificacoes.html" },
+    { key: "fipe",            label: "Histórico FIPE",              file: "tab-fipe.html" },
+    { key: "vendas",          label: "Ranking de Vendas",           file: "tab-vendas.html" },
+    { key: "noticias",        label: "Notícias",                    file: "tab-noticias.html" },
+    { key: "forum",           label: "Fórum",                       file: "tab-forum.html" },
+  ];
+
+  var tabStrip = document.getElementById("tabStrip");
+  var frameWrap = document.getElementById("frameWrap");
+  var frames = {};   // key -> <iframe> já criado (mantido vivo ao trocar de aba)
+  var abaAtual = null;
+
+  function render() {
+    tabStrip.innerHTML = ABAS.map(function (a) {
+      return '<button type="button" class="tabBtn' + (a.key === abaAtual ? " active" : "") +
+        '" data-key="' + a.key + '">' + a.label + "</button>";
+    }).join("");
+  }
+
+  // Troca de aba SEM recarregar as que já foram abertas antes — cada aba
+  // mantém seu estado (formulário preenchido, resultado calculado, etc.)
+  // enquanto o portal ficar aberto, do mesmo jeito que abas de navegador.
+  function mostrarAba(key, search) {
+    var aba = null;
+    for (var i = 0; i < ABAS.length; i++) if (ABAS[i].key === key) aba = ABAS[i];
+    if (!aba) return;
+
+    abaAtual = key;
+    render();
+
+    Object.keys(frames).forEach(function (k) {
+      frames[k].style.display = (k === key) ? "block" : "none";
+    });
+
+    if (!frames[key]) {
+      var ifr = document.createElement("iframe");
+      ifr.title = aba.label;
+      ifr.src = aba.file + (search || "");
+      frameWrap.appendChild(ifr);
+      frames[key] = ifr;
+    } else if (search) {
+      // Chegou um link com parâmetros novos (ex.: outra aba pediu pra abrir
+      // uma marca/modelo específico em "Especificações") — recarrega só essa
+      // aba com os novos parâmetros.
+      frames[key].src = aba.file + search;
+    }
+
+    if (history.replaceState) history.replaceState(null, "", "#" + key);
+  }
+
+  tabStrip.addEventListener("click", function (e) {
+    var btn = e.target.closest(".tabBtn");
+    if (btn) mostrarAba(btn.dataset.key, "");
+  });
+
+  // Links internos entre as 6 páginas (ex.: "← voltar ao comparador" em
+  // Especificações) avisam o portal via postMessage em vez de navegar a
+  // própria aba pra fora — ver o script "bridge" no fim de cada tab-*.html.
+  window.addEventListener("message", function (e) {
+    if (e.data && typeof e.data.portalTab === "string") {
+      mostrarAba(e.data.portalTab, e.data.search || "");
+    }
+  });
+
+  var abaInicial = (location.hash || "").replace("#", "");
+  var valida = false;
+  for (var i = 0; i < ABAS.length; i++) if (ABAS[i].key === abaInicial) valida = true;
+  mostrarAba(valida ? abaInicial : ABAS[0].key, "");
+})();
+</script>
+</body>
+</html>

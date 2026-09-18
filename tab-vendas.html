@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranking de Vendas — Carros Elétricos e Híbridos</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#eef3fa;
+    --border:#d7e1ee;
+    --text:#0f2740;
+    --muted:#5c7089;
+    --green:#1E8A5C;
+    --green-dim:#145C3E;
+    --blue:#2F6FE4;
+    --orange:#123F82;
+    --orange-dim:#0C2E5E;
+    --pink:#C23572;
+    --purple:#7A4FD1;
+    --red:#C43D3D;
+    --amber:#B8860B;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+
+  header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  header .logo{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(135deg,var(--green),var(--green-dim));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:18px;
+    flex:none;
+  }
+  header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+
+  .search-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px;position:relative;
+  }
+  .search-box{position:relative;}
+  .search-box input{
+    width:100%;padding:13px 44px 13px 16px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:15px;outline:none;transition:border-color .15s;
+  }
+  .search-box input:focus{border-color:var(--green);}
+  .search-box .icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px;padding-left:2px;}
+
+  .results{
+    margin-top:10px;max-height:340px;overflow-y:auto;border-radius:10px;
+    border:1px solid var(--border);display:none;background:var(--panel-2);
+  }
+  .results.open{display:block;}
+  .result-item{
+    padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .result-item:last-child{border-bottom:none;}
+  .result-item:hover, .result-item.active{background:rgba(18,63,130,0.08);}
+  .result-item .ri-main{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .result-item .ri-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .result-item .ri-sub{font-size:12px;color:var(--muted);}
+  .badge{
+    font-size:10.5px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;letter-spacing:.02em;
+  }
+  .badge.eletrico{background:rgba(30,138,92,.12);color:var(--green);}
+  .badge.hibrido{background:rgba(47,111,228,.12);color:var(--blue);}
+  .badge.hibrido_plugin{background:rgba(122,79,209,.12);color:var(--purple);}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .chip{
+    display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--border);
+    border-radius:20px;padding:6px 8px 6px 12px;font-size:12.5px;
+  }
+  .chip .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .chip button{
+    background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;
+    padding:2px 4px;border-radius:50%;
+  }
+  .chip button:hover{color:#fff;background:var(--orange-dim);}
+  .chip.primary{border-color:var(--green);}
+
+  .empty-state{
+    text-align:center;color:var(--muted);padding:70px 20px;font-size:14px;
+  }
+  .empty-state .big{font-size:34px;margin-bottom:10px;}
+
+  #content{display:none;}
+  #content.open{display:block;}
+
+  .summary{
+    margin-top:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;
+  }
+  .stat{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;
+  }
+  .stat .label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .stat .value{font-size:20px;font-weight:700;}
+  .stat .value.pos{color:var(--green);}
+  .stat .value.neg{color:var(--red);}
+  .stat .sub{font-size:11.5px;color:var(--muted);margin-top:4px;}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px;margin-top:16px;
+  }
+  .panel-title{font-size:14px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .panel-title .muted{font-weight:400;color:var(--muted);font-size:12px;}
+
+  .disclaimer{
+    background:rgba(184,134,11,.08);border:1px solid rgba(184,134,11,.3);border-radius:10px;
+    padding:12px 14px;font-size:12px;color:var(--text);line-height:1.55;margin-top:14px;
+  }
+  .disclaimer b{color:var(--amber);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 4px;}
+  .legend .li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+  .legend .li .dot{width:9px;height:9px;border-radius:50%;}
+
+  .chart-wrap{width:100%;overflow-x:auto;}
+  svg{display:block;font-family:inherit;}
+  .axis-label{fill:var(--muted);font-size:10.5px;}
+  .grid-line{stroke:var(--border);stroke-width:1;}
+  .series-line{fill:none;stroke-width:2.4;}
+  .series-dot{stroke:var(--panel);stroke-width:1.5;}
+  .hover-line{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;}
+
+  .tooltip{
+    position:absolute;pointer-events:none;background:#0f2740;color:#fff;border:1px solid var(--border);
+    border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+    opacity:0;transition:opacity .1s;white-space:nowrap;z-index:5;
+  }
+  .tooltip .tt-date{color:#b8c4d6;margin-bottom:3px;}
+  .tooltip .tt-row{display:flex;align-items:center;gap:6px;}
+  .tooltip .tt-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;
+    letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);
+  }
+  tbody td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--panel-2);}
+  tbody tr.gap-row td{color:var(--muted);font-style:italic;}
+  .table-scroll{max-height:420px;overflow-y:auto;border-radius:8px;}
+  .mono{font-variant-numeric:tabular-nums;}
+  .delta-pos{color:var(--green);}
+  .delta-neg{color:var(--red);}
+  .delta-zero{color:var(--muted);}
+  .obs-icon{cursor:help;color:var(--amber);margin-left:4px;}
+  .src-link{color:var(--blue);text-decoration:none;font-size:11.5px;}
+  .src-link:hover{text-decoration:underline;}
+
+  .footer-note{color:var(--muted);font-size:11.5px;margin-top:26px;line-height:1.6;text-align:center;}
+  a{color:var(--blue);}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#c7d3e2;border-radius:20px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  @media (max-width:640px){
+    .summary{grid-template-columns:repeat(2,1fr);}
+  }
+  /* Menu hambúrguer — navegação entre páginas */
+  .hb-btn{
+    position:fixed;top:14px;left:14px;z-index:300;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border-strong, var(--border));
+    background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+  .hb-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+  .hb-btn:hover{border-color:var(--cyan, var(--orange));}
+  .hb-overlay{
+    position:fixed;inset:0;background:rgba(4,9,15,0.6);z-index:290;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .hb-overlay.open{opacity:1;pointer-events:auto;}
+  .hb-drawer{
+    position:fixed;top:0;left:0;bottom:0;width:250px;max-width:82vw;
+    background:var(--panel);border-right:1px solid var(--border-strong, var(--border));
+    z-index:295;transform:translateX(-100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;padding:18px 0;
+  }
+  .hb-drawer.open{transform:translateX(0);}
+  .hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 18px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+  .hb-drawer-title{font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);}
+  .hb-close{background:none;border:none;color:var(--text-muted, var(--muted));font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;}
+  .hb-link{
+    display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:14px;
+    border-left:3px solid transparent;
+  }
+  .hb-link:hover{background:var(--panel-alt, var(--panel-2));}
+  .hb-link.active{border-left-color:var(--cyan, var(--orange));color:var(--cyan-dark, var(--orange-dim));font-weight:700;background:var(--cyan-bg, rgba(18,63,130,0.10));}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">RV</div>
+    <div>
+      <h1>Ranking de Vendas — Elétricos &amp; Híbridos</h1>
+      <p>Compare emplacamentos mensais por modelo (ranking ABVE)</p>
+    </div>
+  </header>
+
+  <div class="search-card">
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Digite marca ou modelo… ex: BYD Dolphin, Corolla Cross, Haval H6" autocomplete="off">
+      <span class="icon">⌕</span>
+    </div>
+    <div id="results" class="results"></div>
+    <div class="hint" id="hint">Carregando dados de vendas…</div>
+    <div id="chips" class="chips"></div>
+  </div>
+
+  <div id="emptyState" class="empty-state">
+    <div class="big">📊</div>
+    Busque um modelo acima para comparar vendas mês a mês. Só aparecem na busca modelos com pelo menos um mês de dado nos últimos 12 meses.
+  </div>
+
+  <div id="content">
+    <div class="summary" id="summary"></div>
+
+    <div class="panel">
+      <div class="panel-title">
+        <span>Emplacamentos mensais</span>
+        <span class="muted" id="chartRange"></span>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="chart-wrap">
+        <svg id="chart" width="100%" height="320"></svg>
+      </div>
+      <div class="disclaimer">
+        <b>Cobertura parcial:</b> os números vêm de rankings mensais publicados (Top 10–20 por categoria), não de um censo completo do mercado — um modelo que não aparece em um mês pode ainda ter vendido, só não entrou no recorte daquele ranking. Por isso um mês sem dado é tratado como <b>lacuna</b> (linha quebrada no gráfico, "sem ranking neste mês" na tabela), nunca como zero vendas.
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">
+        <span id="tableTitle">Tabela detalhada</span>
+        <span class="muted" id="tableCount"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Mês de referência</th><th>Unidades vendidas</th><th>Variação no mês</th><th>Fonte</th></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Dados: ranking mensal de emplacamentos ABVE (Associação Brasileira do Veículo Elétrico), consolidado a partir de
+    coberturas jornalísticas especializadas. Cobertura parcial — ver aviso acima. Set–dez/2025 não tem dado de
+    híbridos (PHEV/HEV), só elétricos (BEV).
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Configuração Supabase --------------------------------------------
+  const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
+  const REST = SUPABASE_URL + "/rest/v1";
+  const HEADERS = {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: "Bearer " + SUPABASE_ANON_KEY
+  };
+
+  const COLORS = ["#1E8A5C", "#2F6FE4", "#B8860B", "#C23572", "#7A4FD1", "#C43D3D"];
+  const CAT_LABEL = { BEV: "Elétrico", PHEV: "Híbrido plug-in", HEV: "Híbrido pleno" };
+  const CAT_CLASS = { BEV: "eletrico", PHEV: "hibrido_plugin", HEV: "hibrido" };
+  const numFmt = new Intl.NumberFormat("pt-BR");
+  const pctFmt = (v) => (v > 0 ? "+" : "") + v.toFixed(1).replace(".", ",") + "%";
+
+  function normalize(s) {
+    return (s || "").toString().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  }
+  // Mesmo tokenizador usado em CustoReal.html (findSpecsMatch/findVendasMatch)
+  // — necessário pro deep-link ?marca=&modelo= (ver aplicarSelecaoViaURL):
+  // o "modelo" que chega ali é o nome COMPLETO do trim FIPE (ex.: "AION UT
+  // Premium"), enquanto aqui cada série é uma família curta (ex.: "AION UT").
+  // Um simples "contém a substring" erra a direção da comparação; o correto é
+  // checar se os tokens da família são um PREFIXO dos tokens do trim.
+  function tokenize(s) {
+    return normalize(s).replace(/\(.*?\)/g, " ").replace(/[^a-z0-9]+/g, " ").trim().split(/\s+/).filter(Boolean);
+  }
+  function escapeHtml(s) {
+    return (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+  const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  const MESES_FULL = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  // monthKey: "YYYY-MM" (independe de dia-do-mes; mes_referencia do banco é
+  // sempre dia 1, mas normalizamos assim mesmo pra não depender disso).
+  function monthKey(dateStr) { return (dateStr || "").slice(0, 7); }
+  function monthLabel(mk) {
+    const [y, m] = mk.split("-");
+    return MESES[parseInt(m, 10) - 1] + "/" + y.slice(2);
+  }
+  function fullMonthLabel(mk) {
+    const [y, m] = mk.split("-");
+    return MESES_FULL[parseInt(m, 10) - 1] + " de " + y;
+  }
+  function monthNum(mk) { const [y, m] = mk.split("-").map(Number); return y * 12 + (m - 1); }
+  function addMonths(mk, n) {
+    const total = monthNum(mk) + n;
+    const y = Math.floor(total / 12), m = (total % 12) + 1;
+    return y + "-" + String(m).padStart(2, "0");
+  }
+  function monthsDiff(mkA, mkB) { return monthNum(mkB) - monthNum(mkA); }
+
+  // ---- Estado --------------------------------------------------------------
+  let RAW = [];              // todas as linhas de vendas_mensal
+  let SERIES = [];           // [{key, marca, modeloFamilia, categoria, pontos:[{mes,qtd,metodo,fonte,observacoes}]}]
+  let MONTH_GRID = [];        // grade fixa de meses (todo o dataset), ex: ["2025-09", ..., "2026-08"]
+  let selecionados = [];      // séries escolhidas p/ comparação [{key, marca, modeloFamilia, categoria, color, serie}]
+  let seriePrincipal = null;  // key da série cuja tabela é exibida
+  let activeResultIndex = -1;
+  let currentMatches = [];
+
+  const els = {
+    searchInput: document.getElementById("searchInput"),
+    results: document.getElementById("results"),
+    hint: document.getElementById("hint"),
+    chips: document.getElementById("chips"),
+    emptyState: document.getElementById("emptyState"),
+    content: document.getElementById("content"),
+    summary: document.getElementById("summary"),
+    chartRange: document.getElementById("chartRange"),
+    legend: document.getElementById("legend"),
+    chart: document.getElementById("chart"),
+    tableTitle: document.getElementById("tableTitle"),
+    tableCount: document.getElementById("tableCount"),
+    tableBody: document.getElementById("tableBody"),
+    tooltip: document.getElementById("tooltip")
+  };
+
+  // ---- Carrega vendas_mensal (paginado, mesmo padrão do histórico FIPE) ---
+  async function carregarVendas() {
+    try {
+      const PAGE = 1000;
+      let de = 0;
+      RAW = [];
+      while (true) {
+        const url = REST + "/vendas_mensal?select=marca_nome,modelo_familia,categoria,mes_referencia,quantidade_vendida,metodo,fonte,observacoes,data_coleta&order=marca_nome.asc,modelo_familia.asc,categoria.asc,mes_referencia.asc";
+        const resp = await fetch(url, { headers: Object.assign({}, HEADERS, { Range: de + "-" + (de + PAGE - 1) }) });
+        if (!resp.ok && resp.status !== 206) throw new Error("HTTP " + resp.status);
+        const pagina = await resp.json();
+        RAW.push(...pagina);
+        if (!pagina.length || pagina.length < PAGE) break;
+        de += PAGE;
+      }
+      SERIES = buildSeries(RAW);
+      MONTH_GRID = buildMonthGrid(RAW);
+      els.hint.textContent = SERIES.length.toLocaleString("pt-BR") + " modelos com dado de vendas — digite para buscar (só aparecem os que tiveram ao menos um mês de dado nos últimos 12 meses).";
+    } catch (err) {
+      els.hint.textContent = "Não foi possível carregar os dados de vendas (" + err.message + "). Verifique a conexão com o Supabase.";
+      els.hint.style.color = "var(--red)";
+      console.error(err);
+    }
+  }
+
+  function buildSeries(rows) {
+    const map = new Map();
+    (rows || []).forEach((r) => {
+      const key = normalize(r.marca_nome) + "||" + normalize(r.modelo_familia) + "||" + r.categoria;
+      let entry = map.get(key);
+      if (!entry) {
+        entry = { key, marca: r.marca_nome, modeloFamilia: r.modelo_familia, categoria: r.categoria, pontos: [] };
+        map.set(key, entry);
+      }
+      entry.pontos.push({
+        mes: monthKey(r.mes_referencia),
+        qtd: r.quantidade_vendida != null ? Number(r.quantidade_vendida) : null,
+        metodo: r.metodo || null,
+        fonte: r.fonte || [],
+        observacoes: r.observacoes || null,
+      });
+    });
+    const list = Array.from(map.values());
+    list.forEach((e) => e.pontos.sort((a, b) => (a.mes < b.mes ? -1 : a.mes > b.mes ? 1 : 0)));
+    return list;
+  }
+
+  // Grade fixa do eixo X: todos os meses do dataset inteiro (não só da
+  // seleção atual), pra não distorcer a escala de tempo quando os modelos
+  // selecionados tem cobertura diferente.
+  function buildMonthGrid(rows) {
+    const keys = (rows || []).map((r) => monthKey(r.mes_referencia)).filter(Boolean);
+    if (!keys.length) return [];
+    let min = keys[0], max = keys[0];
+    keys.forEach((k) => { if (k < min) min = k; if (k > max) max = k; });
+    const grid = [];
+    let cur = min;
+    while (cur <= max) { grid.push(cur); cur = addMonths(cur, 1); }
+    return grid;
+  }
+
+  // ---- Elegibilidade: só entram na busca séries com pelo menos um mês de
+  // dado dentro de uma janela móvel de 12 meses terminando no mês ATUAL do
+  // navegador (não uma data fixa) — pedido explícito do usuário. O corte
+  // avança sozinho com o tempo: uma série que só vendeu há mais de 12 meses
+  // "some" da busca sozinha, sem precisar de atualização manual dos dados.
+  function mesAtual() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+  }
+  function elegivel(serie) {
+    const hoje = mesAtual();
+    return serie.pontos.some((p) => {
+      const diff = monthsDiff(p.mes, hoje); // hoje - p.mes, em meses
+      return diff >= 0 && diff < 12;
+    });
+  }
+
+  // ---- Busca -------------------------------------------------------------
+  function buscar(q) {
+    const nq = normalize(q).trim();
+    if (!nq) return [];
+    const termos = nq.split(/\s+/);
+    return SERIES.filter((s) => {
+      if (!elegivel(s)) return false;
+      const alvo = normalize(s.marca + " " + s.modeloFamilia);
+      return termos.every((t) => alvo.indexOf(t) !== -1);
+    }).slice(0, 40);
+  }
+
+  function renderResults(matches) {
+    currentMatches = matches;
+    activeResultIndex = -1;
+    if (!matches.length) {
+      els.results.classList.remove("open");
+      els.results.innerHTML = "";
+      return;
+    }
+    els.results.innerHTML = matches.map((s, i) => {
+      const cls = CAT_CLASS[s.categoria] || "hibrido";
+      const label = CAT_LABEL[s.categoria] || s.categoria;
+      const ultimo = s.pontos[s.pontos.length - 1];
+      return '<div class="result-item" data-idx="' + i + '">' +
+        '<div class="ri-main">' +
+          '<div class="ri-title">' + escapeHtml(s.marca) + " " + escapeHtml(s.modeloFamilia) + '</div>' +
+          '<div class="ri-sub">Último dado: ' + monthLabel(ultimo.mes) + " · " + numFmt.format(ultimo.qtd) + ' un.</div>' +
+        '</div>' +
+        '<span class="badge ' + cls + '">' + label + '</span>' +
+      '</div>';
+    }).join("");
+    els.results.classList.add("open");
+  }
+
+  els.searchInput.addEventListener("input", () => renderResults(buscar(els.searchInput.value)));
+  els.searchInput.addEventListener("focus", () => { if (els.searchInput.value.trim()) renderResults(buscar(els.searchInput.value)); });
+  els.searchInput.addEventListener("keydown", (e) => {
+    if (!currentMatches.length) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); activeResultIndex = Math.min(activeResultIndex + 1, currentMatches.length - 1); highlightActive(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); activeResultIndex = Math.max(activeResultIndex - 1, 0); highlightActive(); }
+    else if (e.key === "Enter") { e.preventDefault(); const s = currentMatches[activeResultIndex] || currentMatches[0]; if (s) escolherSerie(s); }
+    else if (e.key === "Escape") { els.results.classList.remove("open"); }
+  });
+  function highlightActive() {
+    Array.from(els.results.children).forEach((el, i) => el.classList.toggle("active", i === activeResultIndex));
+  }
+  els.results.addEventListener("click", (e) => {
+    const item = e.target.closest(".result-item");
+    if (!item) return;
+    const s = currentMatches[parseInt(item.dataset.idx, 10)];
+    if (s) escolherSerie(s);
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-card")) els.results.classList.remove("open");
+  });
+
+  // ---- Seleção -------------------------------------------------------------
+  function escolherSerie(s) {
+    els.searchInput.value = "";
+    els.results.classList.remove("open");
+    seriePrincipal = s.key;
+
+    let entry = selecionados.find((e) => e.key === s.key);
+    if (!entry) {
+      if (selecionados.length >= 6) selecionados.shift();
+      entry = { key: s.key, marca: s.marca, modeloFamilia: s.modeloFamilia, categoria: s.categoria, pontos: s.pontos, color: COLORS[selecionados.length % COLORS.length] };
+      selecionados.push(entry);
+    }
+    renderChips();
+    render();
+  }
+
+  function removerSerie(key) {
+    selecionados = selecionados.filter((s) => s.key !== key);
+    selecionados.forEach((s, i) => (s.color = COLORS[i % COLORS.length]));
+    if (seriePrincipal === key) seriePrincipal = selecionados.length ? selecionados[selecionados.length - 1].key : null;
+    renderChips();
+    render();
+  }
+
+  function renderChips() {
+    els.chips.innerHTML = selecionados.map((s) => {
+      const primary = s.key === seriePrincipal ? " primary" : "";
+      return '<div class="chip' + primary + '" data-key="' + escapeHtml(s.key) + '">' +
+        '<span class="dot" style="background:' + s.color + '"></span>' +
+        '<span>' + escapeHtml(s.marca) + " " + escapeHtml(s.modeloFamilia) + " (" + (CAT_LABEL[s.categoria] || s.categoria) + ")</span>" +
+        '<button data-remove="' + escapeHtml(s.key) + '" title="Remover">×</button>' +
+      '</div>';
+    }).join("");
+  }
+  els.chips.addEventListener("click", (e) => {
+    const rm = e.target.closest("[data-remove]");
+    if (rm) { removerSerie(rm.dataset.remove); return; }
+    const chip = e.target.closest(".chip");
+    if (chip) { seriePrincipal = chip.dataset.key; renderChips(); render(); }
+  });
+
+  // ---- Render geral ---------------------------------------------------------
+  function render() {
+    if (!selecionados.length) {
+      els.emptyState.style.display = "block";
+      els.content.classList.remove("open");
+      return;
+    }
+    els.emptyState.style.display = "none";
+    els.content.classList.add("open");
+
+    renderSummary();
+    renderChart();
+    renderLegend();
+    renderTable();
+  }
+
+  function renderSummary() {
+    const principal = selecionados.find((s) => s.key === seriePrincipal) || selecionados[0];
+    const pontos = (principal && principal.pontos) || [];
+    els.summary.innerHTML = "";
+    if (!pontos.length) {
+      els.summary.innerHTML = '<div class="stat"><div class="label">Sem dados</div><div class="value">—</div></div>';
+      return;
+    }
+    const ultimo = pontos[pontos.length - 1];
+    const total = pontos.reduce((s, p) => s + (p.qtd || 0), 0);
+    let pico = pontos[0];
+    pontos.forEach((p) => { if ((p.qtd || 0) > (pico.qtd || 0)) pico = p; });
+
+    const stats = [
+      { label: "Mês mais recente com dado", value: numFmt.format(ultimo.qtd) + " un.", sub: monthLabel(ultimo.mes) + " — " + principal.marca + " " + principal.modeloFamilia },
+    ];
+    const anterior = pontos.length > 1 ? pontos[pontos.length - 2] : null;
+    if (anterior && monthsDiff(anterior.mes, ultimo.mes) === 1) {
+      const vari = ((ultimo.qtd - anterior.qtd) / anterior.qtd) * 100;
+      stats.push({ label: "Variação no mês anterior", value: pctFmt(vari), cls: vari > 0 ? "pos" : (vari < 0 ? "neg" : ""), sub: "vs. " + monthLabel(anterior.mes) });
+    } else {
+      stats.push({ label: "Variação no mês anterior", value: "—", sub: "mês anterior sem ranking publicado" });
+    }
+    stats.push({ label: "Mês de pico no período", value: numFmt.format(pico.qtd) + " un.", sub: monthLabel(pico.mes) });
+    stats.push({ label: "Total no período com dado", value: numFmt.format(total) + " un.", sub: pontos.length + " mes(es) com ranking publicado" });
+
+    els.summary.innerHTML = stats.map((s) =>
+      '<div class="stat"><div class="label">' + s.label + '</div>' +
+      '<div class="value' + (s.cls ? " " + s.cls : "") + '">' + s.value + '</div>' +
+      (s.sub ? '<div class="sub">' + escapeHtml(s.sub) + '</div>' : "") + '</div>'
+    ).join("");
+  }
+
+  function renderLegend() {
+    els.legend.innerHTML = selecionados.map((s) =>
+      '<div class="li"><span class="dot" style="background:' + s.color + '"></span>' +
+      escapeHtml(s.marca) + " " + escapeHtml(s.modeloFamilia) + " (" + (CAT_LABEL[s.categoria] || s.categoria) + ")</div>"
+    ).join("");
+  }
+
+  // Agrupa os pontos de uma série em blocos contíguos no CALENDÁRIO (não só
+  // adjacentes no array) — cada bloco vira um <polyline> separado, deixando
+  // a lacuna visualmente quebrada em vez de uma reta interpolando por cima.
+  function segmentosContiguos(pontos) {
+    const blocos = [];
+    let atual = [];
+    pontos.forEach((p) => {
+      if (atual.length && monthsDiff(atual[atual.length - 1].mes, p.mes) !== 1) {
+        blocos.push(atual);
+        atual = [];
+      }
+      atual.push(p);
+    });
+    if (atual.length) blocos.push(atual);
+    return blocos;
+  }
+
+  // ---- Gráfico SVG -----------------------------------------------------
+  function renderChart() {
+    const svg = els.chart;
+    svg.innerHTML = "";
+    if (!selecionados.length || !MONTH_GRID.length) return;
+
+    const rect = svg.getBoundingClientRect();
+    const W = Math.max(rect.width, 640);
+    const H = 320;
+    const padL = 60, padR = 20, padT = 20, padB = 34;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+    let allQtds = [];
+    selecionados.forEach((s) => s.pontos.forEach((p) => { if (p.qtd != null) allQtds.push(p.qtd); }));
+    if (!allQtds.length) allQtds = [0, 1];
+    const maxV = Math.max(...allQtds);
+    const yMin = 0, yMax = maxV * 1.12 || 1;
+
+    els.chartRange.textContent = MONTH_GRID.length ? (monthLabel(MONTH_GRID[0]) + " – " + monthLabel(MONTH_GRID[MONTH_GRID.length - 1])) : "";
+
+    const x = (mk) => padL + (MONTH_GRID.indexOf(mk) / Math.max(MONTH_GRID.length - 1, 1)) * (W - padL - padR);
+    const y = (v) => padT + (1 - (v - yMin) / (yMax - yMin)) * (H - padT - padB);
+
+    const ns = "http://www.w3.org/2000/svg";
+    function el(tag, attrs) {
+      const e = document.createElementNS(ns, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    // grid horizontal + labels eixo Y
+    const gridN = 5;
+    for (let i = 0; i <= gridN; i++) {
+      const v = yMin + (i / gridN) * (yMax - yMin);
+      const yy = y(v);
+      svg.appendChild(el("line", { x1: padL, x2: W - padR, y1: yy, y2: yy, class: "grid-line" }));
+      const label = el("text", { x: padL - 10, y: yy + 4, class: "axis-label", "text-anchor": "end" });
+      label.textContent = (v >= 1000 ? (v / 1000).toFixed(1).replace(/\.0$/, "") + "k" : v.toFixed(0));
+      svg.appendChild(label);
+    }
+
+    // labels eixo X (até ~8 marcações), sobre a grade FIXA de meses
+    const step = Math.max(Math.ceil(MONTH_GRID.length / 8), 1);
+    MONTH_GRID.forEach((mk, i) => {
+      if (i % step !== 0 && i !== MONTH_GRID.length - 1) return;
+      const xx = x(mk);
+      const label = el("text", { x: xx, y: H - padB + 18, class: "axis-label", "text-anchor": "middle" });
+      label.textContent = monthLabel(mk);
+      svg.appendChild(label);
+    });
+
+    // linhas por série, quebradas em segmentos nas lacunas de calendário
+    selecionados.forEach((s) => {
+      const validPontos = s.pontos.filter((p) => p.qtd != null);
+      const blocos = segmentosContiguos(validPontos);
+      blocos.forEach((bloco) => {
+        if (bloco.length > 1) {
+          const pts = bloco.map((p) => x(p.mes) + "," + y(p.qtd)).join(" ");
+          svg.appendChild(el("polyline", { points: pts, class: "series-line", stroke: s.color }));
+        }
+      });
+      validPontos.forEach((p) => {
+        svg.appendChild(el("circle", { cx: x(p.mes), cy: y(p.qtd), r: 2.8, fill: s.color, class: "series-dot", "data-key": s.key, "data-mes": p.mes }));
+      });
+    });
+
+    // hover interativo
+    const hoverLine = el("line", { x1: 0, x2: 0, y1: padT, y2: H - padB, class: "hover-line", visibility: "hidden" });
+    svg.appendChild(hoverLine);
+    const overlay = el("rect", { x: padL, y: padT, width: Math.max(W - padL - padR, 1), height: Math.max(H - padT - padB, 1), fill: "transparent" });
+    svg.appendChild(overlay);
+
+    overlay.addEventListener("mousemove", (e) => {
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const ratio = Math.min(Math.max((loc.x - padL) / (W - padL - padR), 0), 1);
+      const idx = Math.round(ratio * (MONTH_GRID.length - 1));
+      const mk = MONTH_GRID[idx];
+      if (mk === undefined) return;
+      hoverLine.setAttribute("x1", x(mk)); hoverLine.setAttribute("x2", x(mk)); hoverLine.setAttribute("visibility", "visible");
+
+      const rows = selecionados.map((s) => {
+        const p = s.pontos.find((pp) => pp.mes === mk && pp.qtd != null);
+        if (!p) return "";
+        return '<div class="tt-row"><span class="tt-dot" style="background:' + s.color + '"></span>' +
+          escapeHtml(s.marca) + " " + escapeHtml(s.modeloFamilia) + ": <strong style=\"margin-left:auto\">" + numFmt.format(p.qtd) + "</strong></div>";
+      }).join("");
+      els.tooltip.innerHTML = '<div class="tt-date">' + fullMonthLabel(mk) + '</div>' + (rows || '<div class="tt-row">Sem ranking publicado neste mês</div>');
+      const svgBox = svg.getBoundingClientRect();
+      els.tooltip.style.left = (svgBox.left + x(mk) + 14 + window.scrollX) + "px";
+      els.tooltip.style.top = (svgBox.top + padT + window.scrollY) + "px";
+      els.tooltip.style.opacity = "1";
+    });
+    overlay.addEventListener("mouseleave", () => {
+      hoverLine.setAttribute("visibility", "hidden");
+      els.tooltip.style.opacity = "0";
+    });
+  }
+
+  // ---- Tabela --------------------------------------------------------------
+  // Mostra todos os meses entre o primeiro e o último dado da série principal
+  // (não só os meses com ranking) — meses sem dado aparecem como lacuna
+  // explícita, nunca são omitidos nem tratados como zero.
+  function renderTable() {
+    const principal = selecionados.find((s) => s.key === seriePrincipal) || selecionados[0];
+    const pontos = (principal && principal.pontos) || [];
+    els.tableTitle.textContent = principal ? ("Tabela detalhada — " + principal.marca + " " + principal.modeloFamilia + " (" + (CAT_LABEL[principal.categoria] || principal.categoria) + ")") : "Tabela detalhada";
+    if (!pontos.length) { els.tableBody.innerHTML = ""; els.tableCount.textContent = ""; return; }
+
+    const porMes = new Map(pontos.map((p) => [p.mes, p]));
+    const primeiro = pontos[0].mes, ultimo = pontos[pontos.length - 1].mes;
+    const faixa = [];
+    let cur = primeiro;
+    while (cur <= ultimo) { faixa.push(cur); cur = addMonths(cur, 1); }
+
+    els.tableCount.textContent = pontos.length + " mes(es) com ranking · " + faixa.length + " no período";
+
+    const linhas = faixa.slice().reverse();
+    els.tableBody.innerHTML = linhas.map((mk, i) => {
+      const p = porMes.get(mk);
+      if (!p) {
+        return "<tr class='gap-row'><td>" + fullMonthLabel(mk) + "</td><td>—</td><td>— (sem ranking neste mês)</td><td>—</td></tr>";
+      }
+      const mesAnteriorKey = linhas[i + 1];
+      const anterior = mesAnteriorKey ? porMes.get(mesAnteriorKey) : null;
+      let deltaHtml = "<span class='delta-zero'>— (sem ranking anterior)</span>";
+      if (anterior && anterior.qtd != null && monthsDiff(anterior.mes, p.mes) === 1) {
+        const d = ((p.qtd - anterior.qtd) / anterior.qtd) * 100;
+        const cls = d > 0 ? "delta-pos" : (d < 0 ? "delta-neg" : "delta-zero");
+        deltaHtml = "<span class='" + cls + "'>" + pctFmt(d) + "</span>";
+      }
+      const obsHtml = p.observacoes ? " <span class='obs-icon' title=\"" + escapeHtml(p.observacoes) + "\">ⓘ</span>" : "";
+      const fonteHtml = (p.fonte && p.fonte.length)
+        ? p.fonte.map((u) => "<a class='src-link' href='" + escapeHtml(u) + "' target='_blank' rel='noopener'>fonte ↗</a>").join(" ")
+        : "<span class='delta-zero'>—</span>";
+      return "<tr><td>" + fullMonthLabel(mk) + obsHtml + "</td><td class='mono'>" + numFmt.format(p.qtd) +
+        "</td><td>" + deltaHtml + "</td><td>" + fonteHtml + "</td></tr>";
+    }).join("");
+  }
+
+  // ---- Redesenha o gráfico ao redimensionar a janela --------------------
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { if (selecionados.length) renderChart(); }, 150);
+  });
+
+  // ---- Deep-link via URL: ?marca=&modelo=[&categoria=] -------------------
+  // Usado por outras páginas do site (ex.: link "Ranking de Vendas ↗" na
+  // coluna de links do CustoReal) pra abrir o ranking já com um modelo
+  // pré-selecionado. "modelo" chega como o nome completo do trim FIPE (ex.:
+  // "AION UT Premium"), enquanto cada série aqui é uma família curta (ex.:
+  // "AION UT") — por isso o casamento é por PREFIXO de tokens dentro da
+  // mesma marca (mesmo algoritmo de findVendasMatch em CustoReal.html), não
+  // por "contém a substring", que erraria a direção da comparação. categoria
+  // desambigua quando a mesma marca+modelo tem mais de uma motorização com
+  // dado de vendas; entre candidatos empatados, prefere a família mais
+  // específica (mais tokens).
+  function aplicarSelecaoViaURL() {
+    const params = new URLSearchParams(window.location.search);
+    const marcaParam = params.get("marca");
+    const modeloParam = params.get("modelo");
+    if (!marcaParam || !modeloParam) return;
+    const categoriaParam = params.get("categoria");
+    const marcaNorm = normalize(marcaParam);
+    const modeloTokens = tokenize(modeloParam);
+    let candidatos = SERIES.filter((s) => {
+      if (normalize(s.marca) !== marcaNorm) return false;
+      const serieTokens = tokenize(s.modeloFamilia);
+      if (serieTokens.length > modeloTokens.length) return false;
+      for (let i = 0; i < serieTokens.length; i++) {
+        if (serieTokens[i] !== modeloTokens[i]) return false;
+      }
+      return true;
+    });
+    if (categoriaParam) {
+      const restrito = candidatos.filter((s) => s.categoria === categoriaParam);
+      if (restrito.length) candidatos = restrito;
+    }
+    if (candidatos.length > 1) {
+      candidatos = candidatos.slice().sort((a, b) => tokenize(b.modeloFamilia).length - tokenize(a.modeloFamilia).length);
+    }
+    if (candidatos.length) escolherSerie(candidatos[0]);
+  }
+
+  // ---- Início ----------------------------------------------------------
+  carregarVendas().then(aplicarSelecaoViaURL);
+})();
+</script>
+
+<script>
+// Bridge do portal de abas: só age quando esta página está embutida como aba
+// (dentro de um <iframe> do portal). Fora do portal (arquivo aberto direto),
+// não faz nada e o link funciona normalmente.
+(function () {
+  if (window.self === window.top) return;
+  var MAPA_ABAS = {
+    "CustoReal.html": "custoreal", "index.html": "custoreal",
+    "especificacoes.html": "especificacoes",
+    "fipe-historico.html": "fipe",
+    "vendas.html": "vendas",
+    "noticias.html": "noticias",
+    "forum.html": "forum"
+  };
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a || a.target === "_blank") return;
+    var href = a.getAttribute("href");
+    if (!href) return;
+    var arquivo = href.split("?")[0].split("#")[0];
+    var chave = MAPA_ABAS[arquivo];
+    if (!chave) return; // link fora das 6 abas (ex.: detalhes.html) navega normal
+    e.preventDefault();
+    var qIdx = href.indexOf("?");
+    window.parent.postMessage({ portalTab: chave, search: qIdx !== -1 ? href.slice(qIdx) : "" }, "*");
+  });
+})();
+</script>
+</body>
+</html>
