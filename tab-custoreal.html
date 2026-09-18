@@ -1600,6 +1600,7 @@ carregarDados().then(data => {
   var MAPA_ABAS = {
     "CustoReal.html": "custoreal", "index.html": "custoreal",
     "especificacoes.html": "especificacoes",
+    "pesquisa.html": "pesquisa",
     "fipe-historico.html": "fipe",
     "vendas.html": "vendas",
     "noticias.html": "noticias",
@@ -1612,7 +1613,7 @@ carregarDados().then(data => {
     if (!href) return;
     var arquivo = href.split("?")[0].split("#")[0];
     var chave = MAPA_ABAS[arquivo];
-    if (!chave) return; // link fora das 6 abas (ex.: detalhes.html) navega normal
+    if (!chave) return; // link fora das 7 abas (ex.: detalhes.html) navega normal
     e.preventDefault();
     var qIdx = href.indexOf("?");
     window.parent.postMessage({ portalTab: chave, search: qIdx !== -1 ? href.slice(qIdx) : "" }, "*");

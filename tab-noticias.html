@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notícias — Carro PCD</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#eef3fa;
+    --border:#d7e1ee;
+    --text:#0f2740;
+    --muted:#5c7089;
+    --orange:#123F82;
+    --orange-dim:#0C2E5E;
+    --green:#1E8A5C;
+    --blue:#2F6FE4;
+    --purple:#7A4FD1;
+    --red:#C43D3D;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:28px 20px 80px;}
+
+  header{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+  header .logo{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(135deg,var(--orange),var(--orange-dim));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px;
+    flex:none;
+  }
+  header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+  .edition-note{font-size:12px;color:var(--muted);margin:0 0 22px;}
+
+  .section-title{
+    display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.04em;color:var(--orange);
+    margin:28px 0 14px;
+  }
+  .section-title:first-of-type{margin-top:0;}
+  .section-title .s-icon{font-size:16px;}
+
+  .cards{display:flex;flex-direction:column;gap:14px;}
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;
+  }
+  .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:8px;}
+  .card-title{font-size:15.5px;font-weight:700;margin:0;line-height:1.4;}
+  .card-meta{display:flex;align-items:center;gap:8px;flex:none;white-space:nowrap;}
+  .badge-tag{
+    font-size:10.5px;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:700;
+    letter-spacing:.02em;background:rgba(18,63,130,.10);color:var(--orange);
+  }
+  .badge-tag.pcd{background:rgba(122,79,209,.12);color:var(--purple);}
+  .card-date{font-size:11.5px;color:var(--muted);}
+  .card-resumo{font-size:13.5px;color:var(--text);line-height:1.55;margin:0 0 10px;}
+  .card-fonte{font-size:12px;color:var(--muted);}
+  .card-fonte a{color:var(--blue);text-decoration:none;font-weight:600;}
+  .card-fonte a:hover{text-decoration:underline;}
+
+  .note-box{
+    margin-top:26px;background:rgba(18,63,130,.06);border:1px solid rgba(18,63,130,.30);
+    border-radius:8px;padding:12px 14px;font-size:12.5px;color:var(--text);line-height:1.6;
+  }
+  .note-box .nb-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--orange);font-weight:700;margin-bottom:4px;}
+
+  .empty-state{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px;}
+  .empty-state .big{font-size:30px;margin-bottom:10px;}
+  .loading{text-align:center;color:var(--muted);padding:40px;font-size:13px;}
+
+  footer{margin-top:36px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;}
+
+  /* Menu hambúrguer — navegação entre páginas */
+  .hb-btn{
+    position:fixed;top:14px;left:14px;z-index:300;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border-strong, var(--border));
+    background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+  .hb-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+  .hb-btn:hover{border-color:var(--cyan, var(--orange));}
+  .hb-overlay{
+    position:fixed;inset:0;background:rgba(4,9,15,0.6);z-index:290;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .hb-overlay.open{opacity:1;pointer-events:auto;}
+  .hb-drawer{
+    position:fixed;top:0;left:0;bottom:0;width:250px;max-width:82vw;
+    background:var(--panel);border-right:1px solid var(--border-strong, var(--border));
+    z-index:295;transform:translateX(-100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;padding:18px 0;
+  }
+  .hb-drawer.open{transform:translateX(0);}
+  .hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 18px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+  .hb-drawer-title{font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);}
+  .hb-close{background:none;border:none;color:var(--text-muted, var(--muted));font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;}
+  .hb-link{
+    display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:14px;
+    border-left:3px solid transparent;
+  }
+  .hb-link:hover{background:var(--panel-alt, var(--panel-2));}
+  .hb-link.active{border-left-color:var(--cyan, var(--orange));color:var(--cyan-dark, var(--orange-dim));font-weight:700;background:var(--cyan-bg, rgba(18,63,130,0.10));}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">NO</div>
+    <div>
+      <h1>Notícias</h1>
+      <p>Boletim semanal com o que mudou no mundo dos elétricos/híbridos e nas regras de isenção para PCD.</p>
+    </div>
+  </header>
+  <p class="edition-note" id="editionNote"></p>
+
+  <div id="conteudo"><div class="loading">Carregando notícias…</div></div>
+
+  <div class="note-box">
+    <div class="nb-label">Sobre este boletim</div>
+    Edição semanal com curadoria manual de fontes jornalísticas e institucionais (ver "fonte" em cada item). As notícias sobre isenção fiscal para PCD tratam de projetos de lei e ações em tramitação — nada aqui é orientação jurídica nem confirmação de que a regra já vale; acompanhe o trâmite oficial (Câmara, Senado, STF) e confirme com um advogado ou a concessionária antes de decidir com base numa mudança ainda não sancionada.
+  </div>
+
+  <footer>Notícias selecionadas manualmente a cada semana a partir de veículos de imprensa e fontes institucionais — não é conteúdo gerado automaticamente sem curadoria.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
+  const REST = SUPABASE_URL + "/rest/v1";
+  const HEADERS = {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": "application/json"
+  };
+
+  const SECOES = [
+    { key: "eletricos", icon: "⚡", titulo: "Elétricos & híbridos" },
+    { key: "pcd", icon: "♿", titulo: "PCD — isenções e acessibilidade" }
+  ];
+
+  function esc(s) {
+    return (s || "").toString()
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function fmtEdicao(dataIso) {
+    try {
+      const d = new Date(dataIso + "T00:00:00");
+      return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    } catch (e) { return dataIso; }
+  }
+
+  function cardHtml(n) {
+    const badgeClass = n.categoria === "pcd" ? "badge-tag pcd" : "badge-tag";
+    const fonteHtml = n.fonte_url
+      ? "<a href='" + esc(n.fonte_url) + "' target='_blank' rel='noopener'>" + esc(n.fonte_nome || "fonte") + " ↗</a>"
+      : esc(n.fonte_nome || "");
+    return "<div class='card'>" +
+      "<div class='card-head'>" +
+        "<h3 class='card-title'>" + esc(n.titulo) + "</h3>" +
+        "<div class='card-meta'>" +
+          (n.tag ? "<span class='" + badgeClass + "'>" + esc(n.tag) + "</span>" : "") +
+          "<span class='card-date'>" + esc(n.data_label || "") + "</span>" +
+        "</div>" +
+      "</div>" +
+      "<p class='card-resumo'>" + esc(n.resumo) + "</p>" +
+      "<div class='card-fonte'>Fonte: " + fonteHtml + "</div>" +
+    "</div>";
+  }
+
+  function renderConteudo(rows) {
+    const el = document.getElementById("conteudo");
+    if (!rows.length) {
+      el.innerHTML = "<div class='empty-state'><div class='big'>📰</div>Nenhuma notícia publicada ainda nesta edição.</div>";
+      return;
+    }
+
+    // maior semana_referencia = edição atual (linhas de semanas antigas ficam
+    // guardadas como histórico na tabela, nunca aparecem aqui)
+    let maxSemana = rows[0].semana_referencia;
+    rows.forEach(function (r) { if (r.semana_referencia > maxSemana) maxSemana = r.semana_referencia; });
+    const daSemana = rows.filter(function (r) { return r.semana_referencia === maxSemana; });
+
+    document.getElementById("editionNote").textContent = "Edição de " + fmtEdicao(maxSemana);
+
+    let html = "";
+    SECOES.forEach(function (sec) {
+      const itens = daSemana
+        .filter(function (r) { return r.categoria === sec.key; })
+        .sort(function (a, b) { return (a.ordem || 0) - (b.ordem || 0); });
+      html += "<div class='section-title'><span class='s-icon'>" + sec.icon + "</span>" + esc(sec.titulo) + "</div>";
+      if (!itens.length) {
+        html += "<div class='empty-state' style='padding:24px 20px;'>Sem notícias desta seção nesta edição.</div>";
+      } else {
+        html += "<div class='cards'>" + itens.map(cardHtml).join("") + "</div>";
+      }
+    });
+    el.innerHTML = html;
+  }
+
+  function carregar() {
+    fetch(REST + "/noticias_semanais?select=*&order=semana_referencia.desc,categoria.asc,ordem.asc", { headers: HEADERS })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        renderConteudo(Array.isArray(rows) ? rows : []);
+      })
+      .catch(function () {
+        document.getElementById("conteudo").innerHTML = "<div class='empty-state'>Não foi possível carregar as notícias agora. Tente recarregar a página.</div>";
+      });
+  }
+
+  carregar();
+})();
+</script>
+
+<script>
+// Bridge do portal de abas: só age quando esta página está embutida como aba
+// (dentro de um <iframe> do portal). Fora do portal (arquivo aberto direto),
+// não faz nada e o link funciona normalmente.
+(function () {
+  if (window.self === window.top) return;
+  var MAPA_ABAS = {
+    "CustoReal.html": "custoreal", "index.html": "custoreal",
+    "especificacoes.html": "especificacoes",
+    "pesquisa.html": "pesquisa",
+    "fipe-historico.html": "fipe",
+    "vendas.html": "vendas",
+    "noticias.html": "noticias",
+    "forum.html": "forum"
+  };
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a || a.target === "_blank") return;
+    var href = a.getAttribute("href");
+    if (!href) return;
+    var arquivo = href.split("?")[0].split("#")[0];
+    var chave = MAPA_ABAS[arquivo];
+    if (!chave) return; // link fora das 7 abas (ex.: detalhes.html) navega normal
+    e.preventDefault();
+    var qIdx = href.indexOf("?");
+    window.parent.postMessage({ portalTab: chave, search: qIdx !== -1 ? href.slice(qIdx) : "" }, "*");
+  });
+})();
+</script>
+</body>
+</html>
