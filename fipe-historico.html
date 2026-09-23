@@ -203,10 +203,11 @@
 <div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
 <nav class="hb-drawer" id="hbDrawer">
   <div class="hb-drawer-head">
-    <span class="hb-drawer-title">Carro PCD</span>
+    <span class="hb-drawer-title">BuscaElétrico</span>
     <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
   </div>
   <a href="CustoReal.html" class="hb-link">Custo Real</a>
+  <a href="pesquisa.html" class="hb-link">Busca por Equipamentos</a>
   <a href="fipe-historico.html" class="hb-link active">Histórico FIPE</a>
   <a href="vendas.html" class="hb-link">Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link">Especificações</a>
@@ -367,7 +368,7 @@
       }
       els.hint.textContent = catalogo.length.toLocaleString("pt-BR") + " veículos monitorados — digite para buscar.";
     } catch (err) {
-      els.hint.textContent = "Não foi possível carregar o catálogo (" + err.message + "). Verifique a conexão com o Supabase.";
+      els.hint.textContent = "Não foi possível carregar o catálogo (" + err.message + "). Verifique sua conexão e tente novamente.";
       els.hint.style.color = "var(--red)";
       console.error(err);
     }

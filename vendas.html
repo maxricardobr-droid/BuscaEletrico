@@ -214,10 +214,11 @@
 <div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
 <nav class="hb-drawer" id="hbDrawer">
   <div class="hb-drawer-head">
-    <span class="hb-drawer-title">Carro PCD</span>
+    <span class="hb-drawer-title">BuscaElétrico</span>
     <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
   </div>
   <a href="CustoReal.html" class="hb-link">Custo Real</a>
+  <a href="pesquisa.html" class="hb-link">Busca por Equipamentos</a>
   <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
   <a href="vendas.html" class="hb-link active">Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link">Especificações</a>
@@ -272,7 +273,7 @@
         <svg id="chart" width="100%" height="320"></svg>
       </div>
       <div class="disclaimer">
-        <b>Cobertura parcial:</b> os números vêm de rankings mensais publicados (Top 10–20 por categoria), não de um censo completo do mercado — um modelo que não aparece em um mês pode ainda ter vendido, só não entrou no recorte daquele ranking. Por isso um mês sem dado é tratado como <b>lacuna</b> (linha quebrada no gráfico, "sem ranking neste mês" na tabela), nunca como zero vendas.
+        <b>Cobertura parcial:</b> os números vêm de rankings mensais publicados (Top 10–20 por categoria), não de um censo completo — um modelo fora do recorte pode ainda ter vendido. Por isso um mês sem dado é tratado como <b>lacuna</b> (linha quebrada no gráfico, "sem ranking neste mês" na tabela), nunca como zero vendas.
       </div>
     </div>
 
@@ -401,7 +402,7 @@
       MONTH_GRID = buildMonthGrid(RAW);
       els.hint.textContent = SERIES.length.toLocaleString("pt-BR") + " modelos com dado de vendas — digite para buscar (só aparecem os que tiveram ao menos um mês de dado nos últimos 12 meses).";
     } catch (err) {
-      els.hint.textContent = "Não foi possível carregar os dados de vendas (" + err.message + "). Verifique a conexão com o Supabase.";
+      els.hint.textContent = "Não foi possível carregar os dados de vendas (" + err.message + "). Verifique sua conexão e tente novamente.";
       els.hint.style.color = "var(--red)";
       console.error(err);
     }

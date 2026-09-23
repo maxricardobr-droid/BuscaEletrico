@@ -179,10 +179,11 @@
 <div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
 <nav class="hb-drawer" id="hbDrawer">
   <div class="hb-drawer-head">
-    <span class="hb-drawer-title">Carro PCD</span>
+    <span class="hb-drawer-title">BuscaElétrico</span>
     <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
   </div>
   <a href="CustoReal.html" class="hb-link">Custo Real</a>
+  <a href="pesquisa.html" class="hb-link">Busca por Equipamentos</a>
   <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
   <a href="vendas.html" class="hb-link">Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link active">Especificações</a>
@@ -230,11 +231,10 @@
   </div>
 
   <div class="footer-note">
-    Especificações e lista de equipamentos coletadas manualmente via pesquisa web (site do fabricante + imprensa
-    especializada), sem verificação humana das fichas técnicas — confirme o preço e as configurações exatas na
-    concessionária antes de decidir. A lista de equipamentos ainda está sendo expandida marca a marca; versões sem
-    essa seção visível ainda não tiveram os opcionais coletados. Ver observações em cada versão para divergências
-    entre fontes.
+    Especificações e equipamentos coletados manualmente via pesquisa web (fabricante + imprensa especializada),
+    sem verificação humana — confirme preço e configurações na concessionária antes de decidir. A lista de
+    equipamentos ainda está sendo expandida marca a marca; versões sem essa seção ainda não tiveram os opcionais
+    coletados.
   </div>
 </div>
 
@@ -295,7 +295,7 @@
       catalogo = await resp.json();
       els.hint.textContent = catalogo.length.toLocaleString("pt-BR") + " versões/trims monitorados — digite para buscar.";
     } catch (err) {
-      els.hint.textContent = "Não foi possível carregar a ficha técnica (" + err.message + "). Verifique a conexão com o Supabase.";
+      els.hint.textContent = "Não foi possível carregar a ficha técnica (" + err.message + "). Verifique sua conexão e tente novamente.";
       els.hint.style.color = "var(--red)";
       console.error(err);
     }

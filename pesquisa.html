@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Busca por Equipamentos — Elétricos e Híbridos</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#eef3fa;
+    --border:#d7e1ee;
+    --text:#0f2740;
+    --muted:#5c7089;
+    --orange:#123F82;
+    --orange-dim:#0C2E5E;
+    --green:#1E8A5C;
+    --blue:#2F6FE4;
+    --purple:#7A4FD1;
+    --red:#C43D3D;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 90px;}
+
+
+  header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  header .logo{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(135deg,var(--orange),var(--orange-dim));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:18px;flex:none;
+  }
+  header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+  header a.back{margin-left:auto;color:var(--muted);font-size:12.5px;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:7px 12px;white-space:nowrap;}
+  header a.back:hover{color:var(--text);border-color:var(--orange);}
+
+  a{color:var(--blue);}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--orange);outline-offset:2px;}
+
+  /* ---------- layout ---------- */
+  .layout{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start;}
+  @media (max-width: 900px){ .layout{grid-template-columns:1fr;} }
+
+  .filters{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;
+  }
+  @media (max-width: 900px){
+    .filters{position:static;max-height:none;display:none;}
+    .filters.open{display:block;}
+  }
+  .filters-toggle{
+    display:none;width:100%;margin-bottom:12px;padding:12px 14px;border-radius:10px;
+    border:1px solid var(--border);background:var(--panel-2);color:var(--text);
+    font-size:14px;font-weight:600;cursor:pointer;text-align:left;
+  }
+  @media (max-width: 900px){ .filters-toggle{display:block;} }
+  .filters-toggle .count{float:right;color:var(--orange);font-weight:700;}
+
+  .fgroup{padding:14px 0;border-bottom:1px solid var(--border);}
+  .fgroup:first-child{padding-top:0;}
+  .fgroup:last-of-type{border-bottom:none;}
+  .fgroup > h3{
+    margin:0 0 10px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--orange);font-weight:700;
+  }
+  .fhelp{font-size:11.5px;color:var(--muted);margin:6px 0 0;line-height:1.45;}
+
+  .frow{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px;}
+  .flabel{font-size:13px;color:var(--text);}
+  .fval{font-size:13px;font-weight:700;color:var(--orange);white-space:nowrap;}
+  .fval.off{color:var(--muted);font-weight:600;}
+
+  input[type="range"]{
+    width:100%;accent-color:var(--orange);margin:2px 0 0;height:22px;
+  }
+  .ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:-2px;}
+
+  .txtfield{
+    width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:14px;outline:none;
+  }
+  .txtfield:focus{border-color:var(--orange);}
+
+  select.sel{
+    width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:13.5px;
+  }
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{
+    border:1px solid var(--border);background:var(--panel-2);color:var(--text);
+    border-radius:20px;padding:6px 12px;font-size:12.5px;cursor:pointer;
+  }
+  .chip:hover{border-color:var(--orange);}
+  .chip[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:600;}
+  .chip.mini{padding:4px 10px;font-size:11.5px;}
+
+  .seg{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .seg button{
+    flex:1;padding:8px 6px;font-size:12.5px;border:none;background:var(--panel-2);
+    color:var(--muted);cursor:pointer;border-right:1px solid var(--border);
+  }
+  .seg button:last-child{border-right:none;}
+  .seg button[aria-pressed="true"]{background:var(--orange);color:#fff;font-weight:600;}
+
+  .switchrow{display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;}
+  .switchrow input{position:absolute;opacity:0;width:0;height:0;}
+  .track{
+    width:38px;height:22px;border-radius:20px;background:#c7d3e2;position:relative;flex:none;transition:background .15s;
+  }
+  .track::after{
+    content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;
+    background:#fff;transition:transform .15s;
+  }
+  .switchrow input:checked + .track{background:var(--orange);}
+  .switchrow input:checked + .track::after{transform:translateX(16px);}
+  .switchrow input:focus-visible + .track{outline:2px solid var(--orange);outline-offset:2px;}
+  .switchrow .sw-label{font-size:13.5px;line-height:1.3;}
+  .switchrow .sw-count{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap;}
+
+  .checkrow{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13px;cursor:pointer;}
+  .checkrow input{accent-color:var(--orange);width:16px;height:16px;flex:none;}
+  .checkrow .ck-count{margin-left:auto;font-size:11px;color:var(--muted);}
+
+  .btn{
+    width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:13.5px;font-weight:600;cursor:pointer;
+  }
+  .btn:hover{border-color:var(--orange);}
+  .btn.primary{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .btn.primary:hover{background:var(--orange-dim);}
+  .btn + .btn{margin-top:8px;}
+
+  /* ---------- resultados ---------- */
+  .toolbar{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:12px 14px;margin-bottom:14px;
+  }
+  .toolbar .rcount{font-size:14px;font-weight:700;}
+  .toolbar .rcount span{color:var(--muted);font-weight:500;}
+  .toolbar .sortbox{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .toolbar .sortbox label{font-size:12.5px;color:var(--muted);}
+  .toolbar select{
+    padding:8px 10px;border-radius:9px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:13px;
+  }
+
+  .gapnote{
+    background:rgba(18,63,130,.06);border:1px solid rgba(18,63,130,.30);border-radius:8px;
+    padding:10px 12px;font-size:12.5px;line-height:1.5;margin-bottom:14px;
+  }
+  .gapnote button{
+    background:none;border:none;color:var(--blue);font-size:12.5px;text-decoration:underline;cursor:pointer;padding:0;
+  }
+
+  .rlist{display:flex;flex-direction:column;gap:12px;}
+  .rcard{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;
+  }
+  .rcard.partial{border-style:dashed;}
+  .rc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .rc-title{font-size:16px;font-weight:700;margin:0;}
+  .rc-sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .rc-price{text-align:right;flex:none;}
+  .rc-price .value{font-size:18px;font-weight:800;color:var(--orange);}
+  .rc-price .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .badge{font-size:10.5px;padding:3px 8px;border-radius:20px;font-weight:600;letter-spacing:.02em;white-space:nowrap;}
+  .badge.BEV{background:rgba(30,138,92,.12);color:var(--green);}
+  .badge.HEV{background:rgba(47,111,228,.12);color:var(--blue);}
+  .badge.PHEV{background:rgba(122,79,209,.12);color:var(--purple);}
+
+  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .pill{
+    font-size:12px;padding:5px 10px;border-radius:8px;background:var(--panel-2);
+    border:1px solid var(--border);white-space:nowrap;
+  }
+  .pill b{font-weight:700;}
+  .pill.hit{background:rgba(30,138,92,.12);border-color:rgba(30,138,92,.35);color:#146344;}
+  .pill.nodata{color:var(--muted);border-style:dashed;}
+  .pill.equip{background:rgba(18,63,130,.07);border-color:rgba(18,63,130,.22);}
+
+  .rc-foot{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
+  .rc-foot a{font-size:12.5px;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:7px 11px;color:var(--text);}
+  .rc-foot a:hover{border-color:var(--orange);color:var(--orange);}
+  .rc-foot .warn{font-size:11.5px;color:var(--muted);}
+
+  .empty-state{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px;
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);}
+  .empty-state .big{font-size:34px;margin-bottom:10px;}
+  .empty-state button{margin-top:14px;background:none;border:none;color:var(--blue);text-decoration:underline;cursor:pointer;font-size:13.5px;}
+
+  .footer-note{color:var(--muted);font-size:11.5px;margin-top:26px;line-height:1.6;text-align:center;}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#c7d3e2;border-radius:20px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  /* Menu hambúrguer — navegação entre páginas */
+  .hb-btn{
+    position:fixed;top:14px;left:14px;z-index:300;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border-strong, var(--border));
+    background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+  .hb-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+  .hb-btn:hover{border-color:var(--cyan, var(--orange));}
+  .hb-overlay{
+    position:fixed;inset:0;background:rgba(4,9,15,0.6);z-index:290;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .hb-overlay.open{opacity:1;pointer-events:auto;}
+  .hb-drawer{
+    position:fixed;top:0;left:0;bottom:0;width:250px;max-width:82vw;
+    background:var(--panel);border-right:1px solid var(--border-strong, var(--border));
+    z-index:295;transform:translateX(-100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;padding:18px 0;
+  }
+  .hb-drawer.open{transform:translateX(0);}
+  .hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 18px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+  .hb-drawer-title{font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);}
+  .hb-close{background:none;border:none;color:var(--text-muted, var(--muted));font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;}
+  .hb-link{
+    display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:14px;
+    border-left:3px solid transparent;
+  }
+  .hb-link:hover{background:var(--panel-alt, var(--panel-2));}
+  .hb-link.active{border-left-color:var(--cyan, var(--orange));color:var(--cyan-dark, var(--orange-dim));font-weight:700;background:var(--cyan-bg, rgba(18,63,130,0.10));}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+  /* Em telas estreitas o ".wrap" não fica mais centralizado com sobra lateral suficiente, então o cabeçalho (logo/título) nasce embaixo do botão de menu, fixo em top:14px/left:14px. Damos espaço vertical pro botão. */
+  @media (max-width: 960px) {
+    .wrap{padding-top:62px;}
+  }
+</style>
+</head>
+<body>
+<button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
+<nav class="hb-drawer" id="hbDrawer">
+  <div class="hb-drawer-head">
+    <span class="hb-drawer-title">BuscaElétrico</span>
+    <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
+  </div>
+  <a href="CustoReal.html" class="hb-link">Custo Real</a>
+  <a href="pesquisa.html" class="hb-link active">Busca por Equipamentos</a>
+  <a href="fipe-historico.html" class="hb-link">Histórico FIPE</a>
+  <a href="vendas.html" class="hb-link">Ranking de Vendas</a>
+  <a href="especificacoes.html" class="hb-link">Especificações</a>
+  <a href="noticias.html" class="hb-link">Notícias</a>
+  <a href="forum.html" class="hb-link">Fórum</a>
+</nav>
+<script>
+  function hbToggle(){
+    document.getElementById('hbDrawer').classList.toggle('open');
+    document.getElementById('hbOverlay').classList.toggle('open');
+  }
+  function hbClose(){
+    document.getElementById('hbDrawer').classList.remove('open');
+    document.getElementById('hbOverlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') hbClose(); });
+</script>
+<div class="wrap">
+  <header>
+    <div class="logo">PS</div>
+    <div>
+      <h1>Busca por Equipamentos</h1>
+      <p>Encontre a versão que atende ao que você precisa: autonomia, bateria, recarga, espaço e equipamentos</p>
+    </div>
+    <a class="back" href="CustoReal.html">← voltar ao comparador</a>
+  </header>
+
+  <button class="filters-toggle" id="filtersToggle" aria-expanded="false" aria-controls="filtersPanel">
+    Filtros <span class="count" id="activeCount"></span>
+  </button>
+
+  <div class="layout">
+    <aside class="filters" id="filtersPanel">
+
+      <div class="fgroup">
+        <h3>Modelo</h3>
+        <label class="flabel" for="fTexto" style="display:block;margin-bottom:6px;">Marca, modelo ou versão</label>
+        <input class="txtfield" id="fTexto" type="text" placeholder="ex: BYD Dolphin, Haval, EX5" autocomplete="off">
+        <div class="chips" id="fTipos" style="margin-top:10px;" role="group" aria-label="Tipo de motorização">
+          <button class="chip" data-tipo="BEV" aria-pressed="false">Elétrico (BEV)</button>
+          <button class="chip" data-tipo="PHEV" aria-pressed="false">Plug-in (PHEV)</button>
+          <button class="chip" data-tipo="HEV" aria-pressed="false">Híbrido (HEV)</button>
+        </div>
+        <div class="frow" style="margin-top:12px;">
+          <label class="flabel" for="fPreco">Preço de tabela até</label>
+          <output class="fval off" id="outPreco">sem limite</output>
+        </div>
+        <input type="range" id="fPreco" min="100000" max="600000" step="10000" value="600000">
+        <div class="ticks"><span>R$100 mil</span><span>sem limite</span></div>
+      </div>
+
+      <div class="fgroup">
+        <h3>Autonomia</h3>
+        <div class="seg" id="fAutModo" role="group" aria-label="Base da autonomia">
+          <button data-modo="eletrica" aria-pressed="true">Elétrica</button>
+          <button data-modo="total" aria-pressed="false">Total (com motor)</button>
+        </div>
+        <div class="frow" style="margin-top:10px;">
+          <label class="flabel" for="fAutonomia">No mínimo</label>
+          <output class="fval off" id="outAutonomia">qualquer</output>
+        </div>
+        <input type="range" id="fAutonomia" min="0" max="700" step="10" value="0">
+        <div class="chips" style="margin-top:6px;">
+          <button class="chip mini" data-set="fAutonomia" data-value="200">200 km+</button>
+          <button class="chip mini" data-set="fAutonomia" data-value="300">300 km+</button>
+          <button class="chip mini" data-set="fAutonomia" data-value="400">400 km+</button>
+          <button class="chip mini" data-set="fAutonomia" data-value="500">500 km+</button>
+        </div>
+        <p class="fhelp">Autonomia elétrica é a rodada só com bateria (em PHEV/HEV é curta). Total soma o motor a combustão.</p>
+      </div>
+
+      <div class="fgroup">
+        <h3>Bateria</h3>
+        <div class="frow">
+          <label class="flabel" for="fBateria">Capacidade mínima</label>
+          <output class="fval off" id="outBateria">qualquer</output>
+        </div>
+        <input type="range" id="fBateria" min="0" max="110" step="1" value="0">
+        <div class="ticks"><span>0</span><span>55 kWh</span><span>110 kWh</span></div>
+      </div>
+
+      <div class="fgroup">
+        <h3>Recarga</h3>
+        <div class="seg" id="fRecModo" role="group" aria-label="Modo de carregamento">
+          <button data-modo="qualquer" aria-pressed="true">Tanto faz</button>
+          <button data-modo="ac" aria-pressed="false">AC (wallbox)</button>
+          <button data-modo="dc" aria-pressed="false">DC (rápida)</button>
+        </div>
+        <div id="recPotBox" style="display:none;">
+          <div class="frow" style="margin-top:10px;">
+            <label class="flabel" for="fRecPot">Potência mínima</label>
+            <output class="fval off" id="outRecPot">qualquer</output>
+          </div>
+          <input type="range" id="fRecPot" min="0" max="280" step="10" value="0">
+          <div class="ticks" id="recTicks"><span>0</span><span>280 kW</span></div>
+        </div>
+        <p class="fhelp" id="recHelp">Escolher AC ou DC já exige que a versão aceite aquele modo de recarga.</p>
+      </div>
+
+      <div class="fgroup">
+        <h3>Porta-malas</h3>
+        <div class="frow">
+          <label class="flabel" for="fPortaMalas">Volume mínimo</label>
+          <output class="fval off" id="outPortaMalas">qualquer</output>
+        </div>
+        <input type="range" id="fPortaMalas" min="0" max="1200" step="10" value="0">
+        <div class="chips" style="margin-top:6px;">
+          <button class="chip mini" data-set="fPortaMalas" data-value="300">300 L+</button>
+          <button class="chip mini" data-set="fPortaMalas" data-value="400">400 L+</button>
+          <button class="chip mini" data-set="fPortaMalas" data-value="500">500 L+</button>
+        </div>
+      </div>
+
+      <div class="fgroup">
+        <h3>Central multimídia</h3>
+        <div class="frow">
+          <label class="flabel" for="fTela">Tela de no mínimo</label>
+          <output class="fval off" id="outTela">qualquer</output>
+        </div>
+        <input type="range" id="fTela" min="0" max="16" step="0.5" value="0">
+        <div class="ticks"><span>0</span><span>8"</span><span>12"</span><span>16"</span></div>
+        <p class="fhelp">Tamanho lido da descrição do equipamento. Painel de instrumentos e head-up display não contam aqui.</p>
+      </div>
+
+      <div class="fgroup">
+        <h3>Conforto e conveniência</h3>
+        <label class="switchrow" for="swTeto">
+          <input type="checkbox" id="swTeto" data-equip="teto"><span class="track"></span>
+          <span class="sw-label">Teto solar / panorâmico</span><span class="sw-count" data-count="teto"></span>
+        </label>
+        <label class="switchrow" for="swBanco">
+          <input type="checkbox" id="swBanco" data-equip="banco"><span class="track"></span>
+          <span class="sw-label">Banco com ajuste elétrico</span><span class="sw-count" data-count="banco"></span>
+        </label>
+        <label class="switchrow" for="swMala">
+          <input type="checkbox" id="swMala" data-equip="mala"><span class="track"></span>
+          <span class="sw-label">Porta-malas elétrico</span><span class="sw-count" data-count="mala"></span>
+        </label>
+        <label class="switchrow" for="swHud">
+          <input type="checkbox" id="swHud" data-equip="hud"><span class="track"></span>
+          <span class="sw-label">Head-up display</span><span class="sw-count" data-count="hud"></span>
+        </label>
+      </div>
+
+      <div class="fgroup">
+        <h3>ADAS</h3>
+        <select class="sel" id="fAdasModo" aria-label="Como combinar os itens de ADAS">
+          <option value="qualquer">Ter pelo menos um dos marcados</option>
+          <option value="todos">Ter todos os marcados</option>
+        </select>
+        <div id="adasList" style="margin-top:8px;"></div>
+        <p class="fhelp">Itens lidos da lista de equipamentos, incluindo os que vêm descritos dentro de um pacote ADAS.</p>
+      </div>
+
+      <div class="fgroup">
+        <label class="switchrow" for="swLacuna" style="align-items:flex-start;">
+          <input type="checkbox" id="swLacuna"><span class="track" style="margin-top:2px;"></span>
+          <span class="sw-label">Incluir versões sem o dado coletado<br>
+            <span style="font-size:11.5px;color:var(--muted);">Aparecem marcadas como “dado não coletado”, em vez de sumirem da busca.</span>
+          </span>
+        </label>
+      </div>
+
+      <div style="padding-top:14px;">
+        <button class="btn primary" id="btnVer" style="display:none;">Ver resultados</button>
+        <button class="btn" id="btnLimpar">Limpar filtros</button>
+      </div>
+    </aside>
+
+    <section>
+      <div class="toolbar">
+        <div class="rcount" id="rcount">Carregando…</div>
+        <div class="sortbox">
+          <label for="fOrdem">Ordenar por</label>
+          <select id="fOrdem">
+            <option value="preco_asc">Menor preço</option>
+            <option value="preco_desc">Maior preço</option>
+            <option value="autonomia">Maior autonomia</option>
+            <option value="bateria">Maior bateria</option>
+            <option value="dc">Recarga DC mais rápida</option>
+            <option value="portamalas">Maior porta-malas</option>
+            <option value="tela">Maior tela</option>
+            <option value="marca">Marca (A–Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="gapNote"></div>
+      <div class="rlist" id="rlist"></div>
+    </section>
+  </div>
+
+  <div class="footer-note">
+    Ficha técnica e lista de equipamentos coletadas via pesquisa web (site do fabricante + imprensa especializada),
+    sem verificação humana — confirme configuração e preço na concessionária antes de decidir. A coleta de equipamentos
+    ainda está sendo expandida marca a marca: versões sem equipamentos coletados não podem ser avaliadas nos filtros de
+    teto solar, bancos, porta-malas elétrico, head-up display, multimídia e ADAS.
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Configuração Supabase --------------------------------------------
+  const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
+  const REST = SUPABASE_URL + "/rest/v1";
+  const HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY };
+
+  const currencyFmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  const nf = (v) => Number(v).toLocaleString("pt-BR");
+
+  function normalize(s){
+    return (s || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+  function escapeHtml(s){
+    return (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  // ---- Definição dos equipamentos detectados no texto do item -----------
+  // Os textos vêm normalizados (sem acento, minúsculos), então os padrões
+  // abaixo também são escritos sem acento.
+  const EQUIP = {
+    teto: {
+      rotulo: "Teto solar",
+      testa: (i) => /(teto solar|teto panor|sunroof)/.test(i),
+    },
+    banco: {
+      rotulo: "Banco elétrico",
+      testa: (i) => /banc/.test(i) && /(eletric|pneumatic)/.test(i) && !/ajuste manual/.test(i),
+    },
+    mala: {
+      rotulo: "Porta-malas elétrico",
+      testa: (i) => /(porta-mala|porta mala|tampa traseira|tampa do porta)/.test(i)
+                 && /(eletric|hands.?free|automatic|sensor de aproxim)/.test(i),
+    },
+    hud: {
+      rotulo: "Head-up display",
+      testa: (i) => /(head.?up|\bhud\b)/.test(i),
+    },
+  };
+
+  const ADAS = [
+    { id:"acc",       rotulo:"Piloto automático adaptativo (ACC)", testa:(i)=>/(adaptativ|\bacc\b|\bicc\b|stop ?& ?go|stop&go)/.test(i) },
+    { id:"aeb",       rotulo:"Frenagem autônoma de emergência",    testa:(i)=>/(frenagem (autonoma|automatica)|\baeb\b|\bfca\b)/.test(i) },
+    { id:"faixa",     rotulo:"Assistente de faixa",                testa:(i)=>/(faixa|\blka\b|\blkas\b|\bldw\b|\bldws\b|\blca\b|\belk\b)/.test(i) },
+    { id:"pontocego", rotulo:"Alerta de ponto cego",               testa:(i)=>/(ponto cego|\bbsd\b|\bbsm\b)/.test(i) },
+    { id:"cam360",    rotulo:"Câmera 360°",                        testa:(i)=>/(camera|visao)/.test(i) && /(360|540|\bsvm\b)/.test(i) },
+    { id:"cruzado",   rotulo:"Alerta de tráfego cruzado",          testa:(i)=>/(trafego cruzado|\brcta\b|\brcca\b)/.test(i) },
+    { id:"farol",     rotulo:"Farol alto automático",              testa:(i)=>/(farol alto|farois altos|\bihc\b|\bihbc\b)/.test(i) },
+    { id:"motorista", rotulo:"Monitor de atenção do motorista",    testa:(i)=>/(atencao do motorista|\bdms\b|\bdaw\b|fadiga)/.test(i) },
+    { id:"placas",    rotulo:"Reconhecimento de placas",           testa:(i)=>/(placas|\btsr\b)/.test(i) },
+  ];
+
+  // Tamanho da tela: só conta item que é central multimídia (ou tela/touch
+  // que não seja roda, painel de instrumentos ou head-up display).
+  function tamanhoTela(itemNorm){
+    const ehMultimidia = /multimidia/.test(itemNorm);
+    const ehTelaGenerica = /(touch|tela)/.test(itemNorm) && !/(roda|aro|painel|instrument|head.?up|\bhud\b)/.test(itemNorm);
+    if (!ehMultimidia && !ehTelaGenerica) return null;
+    const m = itemNorm.match(/(\d{1,2})(?:[.,](\d{1,2}))?\s*(?:"|''|polegada)/);
+    if (!m) return null;
+    const val = parseFloat(m[1] + (m[2] ? "." + m[2] : ""));
+    return (val >= 5 && val <= 20) ? val : null;
+  }
+
+  // ---- Estado ------------------------------------------------------------
+  let versoes = [];
+  const estado = {
+    texto: "", tipos: [], precoMax: null,
+    autModo: "eletrica", autonomiaMin: 0,
+    bateriaMin: 0,
+    recModo: "qualquer", recPotMin: 0,
+    portaMalasMin: 0, telaMin: 0,
+    equip: { teto:false, banco:false, mala:false, hud:false },
+    adas: [], adasModo: "qualquer",
+    incluirLacuna: false,
+    ordem: "preco_asc",
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  // ---- Carga e preparo dos dados ----------------------------------------
+  function chave(marca, modelo, versao, ano){
+    return normalize(marca) + "|" + normalize(modelo) + "|" + normalize(versao) + "|" + normalize(ano);
+  }
+
+  async function carregar(){
+    const urlSpecs = REST + "/especificacoes_tecnicas?select=*&order=marca.asc,modelo.asc,preco_tabela.asc";
+    const urlOpc = REST + "/especificacoes_opcionais?select=marca,modelo,versao,ano_modelo,categoria,item,disponibilidade,pacote_nome";
+    const [rSpecs, rOpc] = await Promise.all([
+      fetch(urlSpecs, { headers: HEADERS }),
+      fetch(urlOpc, { headers: HEADERS }).catch(() => null),
+    ]);
+    if (!rSpecs || !rSpecs.ok) throw new Error("HTTP " + (rSpecs ? rSpecs.status : "sem resposta"));
+    const specs = await rSpecs.json();
+    let opcionais = [];
+    if (rOpc && rOpc.ok) {
+      try { opcionais = await rOpc.json(); } catch (e) { opcionais = []; }
+    }
+
+    const porVersao = {};
+    opcionais.forEach((o) => {
+      const k = chave(o.marca, o.modelo, o.versao, o.ano_modelo);
+      (porVersao[k] = porVersao[k] || []).push(o);
+    });
+
+    versoes = specs.map((v) => derivar(v, porVersao[chave(v.marca, v.modelo, v.versao, v.ano_modelo)] || []));
+    return versoes;
+  }
+
+  // Deriva, por versão, o que dá para filtrar. Três estados possíveis em
+  // cada equipamento: true (tem), false (não tem) e null (não sabemos,
+  // porque a versão ainda não teve equipamentos coletados) — o null nunca é
+  // tratado como "não tem".
+  function derivar(v, itens){
+    const temColeta = itens.length > 0;
+    const d = Object.assign({}, v);
+    d._itens = itens;
+    d._temColeta = temColeta;
+    d._equip = {};
+    d._adas = {};
+    d._tela = null;
+
+    const disponiveis = itens.filter((o) => o.disponibilidade !== "indisponivel");
+    const textos = disponiveis.map((o) => normalize(o.item));
+
+    Object.keys(EQUIP).forEach((k) => {
+      d._equip[k] = temColeta ? textos.some(EQUIP[k].testa) : null;
+    });
+    ADAS.forEach((f) => {
+      d._adas[f.id] = temColeta ? textos.some(f.testa) : null;
+    });
+
+    let maior = null;
+    textos.forEach((t) => {
+      const tam = tamanhoTela(t);
+      if (tam !== null && (maior === null || tam > maior)) maior = tam;
+    });
+    d._tela = maior; // null = não identificado
+
+    d._autonomiaEletrica = num(v.autonomia_eletrica_km);
+    d._autonomiaTotal = num(v.autonomia_total_km);
+    d._bateria = num(v.capacidade_bateria_kwh);
+    d._ac = num(v.potencia_carregamento_ac_kw);
+    d._dc = num(v.potencia_carregamento_dc_kw);
+    d._portaMalas = num(v.porta_malas_litros);
+    d._preco = num(v.preco_tabela);
+    return d;
+  }
+  function num(x){
+    if (x === null || x === undefined || x === "") return null;
+    const n = Number(x);
+    return isNaN(n) ? null : n;
+  }
+
+  // ---- Avaliação de uma versão contra os filtros ------------------------
+  // Retorna "ok", "falha" (não atende) ou "lacuna" (atenderia, mas falta o
+  // dado). A separação existe para nunca contar ausência de dado como "não".
+  function avaliar(v){
+    let lacuna = false;
+    const marcarNumero = (valor, minimo) => {
+      if (!minimo) return true;
+      if (valor === null) { lacuna = true; return true; }
+      return valor >= minimo;
+    };
+
+    if (estado.texto) {
+      const alvo = normalize(v.marca + " " + v.modelo + " " + v.versao + " " + v.ano_modelo);
+      if (!normalize(estado.texto).split(/\s+/).every((t) => alvo.indexOf(t) !== -1)) return "falha";
+    }
+    if (estado.tipos.length && estado.tipos.indexOf(v.tipo_motorizacao) === -1) return "falha";
+
+    if (estado.precoMax !== null) {
+      if (v._preco === null) lacuna = true;
+      else if (v._preco > estado.precoMax) return "falha";
+    }
+
+    const autonomia = estado.autModo === "total" ? v._autonomiaTotal : v._autonomiaEletrica;
+    if (!marcarNumero(autonomia, estado.autonomiaMin)) return "falha";
+    if (!marcarNumero(v._bateria, estado.bateriaMin)) return "falha";
+    if (!marcarNumero(v._portaMalas, estado.portaMalasMin)) return "falha";
+    if (!marcarNumero(v._tela, estado.telaMin)) return "falha";
+
+    if (estado.recModo !== "qualquer") {
+      const pot = estado.recModo === "ac" ? v._ac : v._dc;
+      if (pot === null) lacuna = true;
+      else if (pot < (estado.recPotMin || 0)) return "falha";
+    }
+
+    for (const k of Object.keys(estado.equip)) {
+      if (!estado.equip[k]) continue;
+      const tem = v._equip[k];
+      if (tem === null) lacuna = true;
+      else if (tem === false) return "falha";
+    }
+
+    if (estado.adas.length) {
+      if (!v._temColeta) lacuna = true;
+      else {
+        const marcados = estado.adas.map((id) => v._adas[id] === true);
+        const ok = estado.adasModo === "todos" ? marcados.every(Boolean) : marcados.some(Boolean);
+        if (!ok) return "falha";
+      }
+    }
+
+    return lacuna ? "lacuna" : "ok";
+  }
+
+  const ORDENADORES = {
+    preco_asc:  (a,b) => cmp(a._preco, b._preco, 1),
+    preco_desc: (a,b) => cmp(a._preco, b._preco, -1),
+    autonomia:  (a,b) => cmp(estado.autModo === "total" ? a._autonomiaTotal : a._autonomiaEletrica,
+                             estado.autModo === "total" ? b._autonomiaTotal : b._autonomiaEletrica, -1),
+    bateria:    (a,b) => cmp(a._bateria, b._bateria, -1),
+    dc:         (a,b) => cmp(a._dc, b._dc, -1),
+    portamalas: (a,b) => cmp(a._portaMalas, b._portaMalas, -1),
+    tela:       (a,b) => cmp(a._tela, b._tela, -1),
+    marca:      (a,b) => (a.marca + a.modelo + a.versao).localeCompare(b.marca + b.modelo + b.versao, "pt-BR"),
+  };
+  // Valor ausente vai sempre para o fim da lista, nas duas direções.
+  function cmp(a, b, dir){
+    if (a === null && b === null) return 0;
+    if (a === null) return 1;
+    if (b === null) return -1;
+    return (a - b) * dir;
+  }
+
+  // ---- Renderização ------------------------------------------------------
+  function pill(texto, classe){
+    return '<span class="pill' + (classe ? " " + classe : "") + '">' + texto + "</span>";
+  }
+
+  function renderCard(v, parcial){
+    const pills = [];
+    const autonomia = estado.autModo === "total" ? v._autonomiaTotal : v._autonomiaEletrica;
+    const rotuloAut = estado.autModo === "total" ? "total" : "elétricos";
+    if (autonomia !== null) {
+      pills.push(pill("<b>" + nf(autonomia) + " km</b> " + rotuloAut, estado.autonomiaMin ? "hit" : ""));
+    } else if (estado.autonomiaMin) {
+      pills.push(pill("autonomia não coletada", "nodata"));
+    }
+    if (v._bateria !== null) pills.push(pill("<b>" + nf(v._bateria) + " kWh</b>", estado.bateriaMin ? "hit" : ""));
+    else if (estado.bateriaMin) pills.push(pill("bateria não coletada", "nodata"));
+
+    if (v._dc !== null) pills.push(pill("DC <b>" + nf(v._dc) + " kW</b>", estado.recModo === "dc" ? "hit" : ""));
+    else if (estado.recModo === "dc") pills.push(pill("recarga DC não coletada", "nodata"));
+    if (v._ac !== null) pills.push(pill("AC <b>" + nf(v._ac) + " kW</b>", estado.recModo === "ac" ? "hit" : ""));
+    else if (estado.recModo === "ac") pills.push(pill("recarga AC não coletada", "nodata"));
+
+    if (v._portaMalas !== null) pills.push(pill("<b>" + nf(v._portaMalas) + " L</b> porta-malas", estado.portaMalasMin ? "hit" : ""));
+    else if (estado.portaMalasMin) pills.push(pill("porta-malas não coletado", "nodata"));
+
+    if (v._tela !== null) pills.push(pill("tela <b>" + v._tela.toLocaleString("pt-BR") + "”</b>", estado.telaMin ? "hit" : ""));
+    else if (estado.telaMin) pills.push(pill("tela não identificada", "nodata"));
+
+    const equipPills = [];
+    Object.keys(EQUIP).forEach((k) => {
+      if (v._equip[k] === true) equipPills.push(pill("✓ " + EQUIP[k].rotulo, estado.equip[k] ? "hit" : "equip"));
+      else if (estado.equip[k] && v._equip[k] === null) equipPills.push(pill(EQUIP[k].rotulo + ": sem coleta", "nodata"));
+    });
+    const adasTem = ADAS.filter((f) => v._adas[f.id] === true);
+    if (adasTem.length) {
+      const destaque = estado.adas.length ? "hit" : "equip";
+      equipPills.push(pill("✓ ADAS: " + adasTem.map((f) => f.rotulo.replace(/ \(.*\)/, "")).join(", "), destaque));
+    } else if (estado.adas.length && !v._temColeta) {
+      equipPills.push(pill("ADAS: sem coleta", "nodata"));
+    }
+
+    const link = "especificacoes.html?marca=" + encodeURIComponent(v.marca) +
+                 "&modelo=" + encodeURIComponent(v.modelo) +
+                 "&versao=" + encodeURIComponent(v.versao) +
+                 "&categoria=" + encodeURIComponent(v.tipo_motorizacao || "");
+
+    return '<article class="rcard' + (parcial ? " partial" : "") + '">' +
+      '<div class="rc-head">' +
+        '<div>' +
+          '<h3 class="rc-title">' + escapeHtml(v.marca) + " " + escapeHtml(v.modelo) +
+            ' <span class="badge ' + escapeHtml(v.tipo_motorizacao || "") + '">' + escapeHtml(v.tipo_motorizacao || "") + '</span></h3>' +
+          '<div class="rc-sub">' + escapeHtml(v.versao) + (v.ano_modelo ? " · ano-modelo " + escapeHtml(v.ano_modelo) : "") + '</div>' +
+        '</div>' +
+        '<div class="rc-price"><div class="label">Preço de tabela</div><div class="value">' +
+          (v._preco !== null ? currencyFmt.format(v._preco) : "sem preço") + '</div></div>' +
+      '</div>' +
+      (pills.length ? '<div class="pills">' + pills.join("") + "</div>" : "") +
+      (equipPills.length ? '<div class="pills">' + equipPills.join("") + "</div>" : "") +
+      '<div class="rc-foot">' +
+        '<a href="' + link + '">Ver ficha completa</a>' +
+        (parcial ? '<span class="warn">Entrou na lista porque parte do que você filtrou ainda não foi coletado nessa versão.</span>' : "") +
+      "</div>" +
+    "</article>";
+  }
+
+  function aplicar(){
+    const ok = [], lacunas = [];
+    versoes.forEach((v) => {
+      const r = avaliar(v);
+      if (r === "ok") ok.push(v);
+      else if (r === "lacuna") lacunas.push(v);
+    });
+
+    const ordenador = ORDENADORES[estado.ordem] || ORDENADORES.preco_asc;
+    ok.sort(ordenador);
+    lacunas.sort(ordenador);
+
+    const lista = estado.incluirLacuna ? ok.concat(lacunas) : ok;
+
+    $("rcount").innerHTML = lista.length + (lista.length === 1 ? " versão" : " versões") +
+      ' <span>de ' + versoes.length + " monitoradas</span>";
+
+    // Aviso de lacuna: só aparece quando o filtro atual descartou alguém por
+    // falta de dado — é o caso em que o número da tela pode enganar.
+    const gap = $("gapNote");
+    if (!estado.incluirLacuna && lacunas.length) {
+      gap.innerHTML = '<div class="gapnote">' + lacunas.length +
+        (lacunas.length === 1 ? " versão ficou de fora" : " versões ficaram de fora") +
+        " porque parte do que você filtrou ainda não foi coletada nelas — não porque não atendem. " +
+        '<button type="button" id="btnIncluir">Mostrar mesmo assim</button></div>';
+      const b = $("btnIncluir");
+      if (b) b.addEventListener("click", () => { $("swLacuna").checked = true; estado.incluirLacuna = true; aplicar(); });
+    } else if (estado.incluirLacuna && lacunas.length) {
+      gap.innerHTML = '<div class="gapnote">Incluindo ' + lacunas.length +
+        (lacunas.length === 1 ? " versão com dado faltando" : " versões com dado faltando") +
+        " (marcadas com borda tracejada no fim da lista).</div>";
+    } else {
+      gap.innerHTML = "";
+    }
+
+    if (!lista.length) {
+      $("rlist").innerHTML = '<div class="empty-state"><div class="big">🔍</div>' +
+        "Nenhuma versão atende a todos esses critérios ao mesmo tempo." +
+        '<br><button type="button" id="btnLimpar2">Limpar filtros e recomeçar</button></div>';
+      const b2 = $("btnLimpar2");
+      if (b2) b2.addEventListener("click", limpar);
+    } else {
+      const setOk = new Set(ok);
+      $("rlist").innerHTML = lista.map((v) => renderCard(v, !setOk.has(v))).join("");
+    }
+
+    atualizarContadorFiltros();
+    salvarNaURL();
+  }
+
+  function contarFiltrosAtivos(){
+    let n = 0;
+    if (estado.texto) n++;
+    if (estado.tipos.length) n++;
+    if (estado.precoMax !== null) n++;
+    if (estado.autonomiaMin) n++;
+    if (estado.bateriaMin) n++;
+    if (estado.recModo !== "qualquer") n++;
+    if (estado.portaMalasMin) n++;
+    if (estado.telaMin) n++;
+    n += Object.keys(estado.equip).filter((k) => estado.equip[k]).length;
+    if (estado.adas.length) n++;
+    return n;
+  }
+  function atualizarContadorFiltros(){
+    const n = contarFiltrosAtivos();
+    $("activeCount").textContent = n ? n + (n === 1 ? " ativo" : " ativos") : "";
+  }
+
+  // ---- Contadores de disponibilidade (quantas versões têm cada item) -----
+  function preencherContagens(){
+    Object.keys(EQUIP).forEach((k) => {
+      const n = versoes.filter((v) => v._equip[k] === true).length;
+      document.querySelectorAll('[data-count="' + k + '"]').forEach((el) => { el.textContent = n + " versões"; });
+    });
+    $("adasList").innerHTML = ADAS.map((f) => {
+      const n = versoes.filter((v) => v._adas[f.id] === true).length;
+      return '<label class="checkrow"><input type="checkbox" data-adas="' + f.id + '">' +
+        "<span>" + escapeHtml(f.rotulo) + '</span><span class="ck-count">' + n + "</span></label>";
+    }).join("");
+    $("adasList").querySelectorAll("input[data-adas]").forEach((el) => {
+      el.addEventListener("change", () => {
+        estado.adas = Array.from($("adasList").querySelectorAll("input[data-adas]:checked")).map((i) => i.dataset.adas);
+        aplicar();
+      });
+    });
+  }
+
+  // ---- Ligação dos controles --------------------------------------------
+  function ligarSlider(id, outId, chave, formatar){
+    const inp = $(id), out = $(outId);
+    const sync = () => {
+      const val = parseFloat(inp.value);
+      estado[chave] = val;
+      const vazio = !val;
+      out.textContent = vazio ? "qualquer" : formatar(val);
+      out.classList.toggle("off", vazio);
+    };
+    inp.addEventListener("input", () => { sync(); aplicar(); });
+    sync();
+  }
+
+  function ligarControles(){
+    $("fTexto").addEventListener("input", (e) => { estado.texto = e.target.value.trim(); aplicar(); });
+
+    $("fTipos").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-tipo]");
+      if (!b) return;
+      const ativo = b.getAttribute("aria-pressed") === "true";
+      b.setAttribute("aria-pressed", ativo ? "false" : "true");
+      estado.tipos = Array.from($("fTipos").querySelectorAll('button[aria-pressed="true"]')).map((x) => x.dataset.tipo);
+      aplicar();
+    });
+
+    const preco = $("fPreco"), outPreco = $("outPreco");
+    const syncPreco = () => {
+      const val = parseInt(preco.value, 10);
+      const semLimite = val >= parseInt(preco.max, 10);
+      estado.precoMax = semLimite ? null : val;
+      outPreco.textContent = semLimite ? "sem limite" : currencyFmt.format(val);
+      outPreco.classList.toggle("off", semLimite);
+    };
+    preco.addEventListener("input", () => { syncPreco(); aplicar(); });
+    syncPreco();
+
+    ligarSlider("fAutonomia", "outAutonomia", "autonomiaMin", (v) => nf(v) + " km");
+    ligarSlider("fBateria", "outBateria", "bateriaMin", (v) => nf(v) + " kWh");
+    ligarSlider("fPortaMalas", "outPortaMalas", "portaMalasMin", (v) => nf(v) + " L");
+    ligarSlider("fTela", "outTela", "telaMin", (v) => v.toLocaleString("pt-BR") + "”");
+    ligarSlider("fRecPot", "outRecPot", "recPotMin", (v) => nf(v) + " kW");
+
+    $("fAutModo").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-modo]");
+      if (!b) return;
+      $("fAutModo").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      estado.autModo = b.dataset.modo;
+      aplicar();
+    });
+
+    $("fRecModo").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-modo]");
+      if (!b) return;
+      $("fRecModo").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      estado.recModo = b.dataset.modo;
+      ajustarEscalaRecarga();
+      aplicar();
+    });
+
+    document.querySelectorAll("button[data-set]").forEach((b) => {
+      b.addEventListener("click", () => {
+        const alvo = $(b.dataset.set);
+        const novo = parseFloat(b.dataset.value);
+        // Clicar de novo no mesmo atalho desliga o filtro.
+        alvo.value = parseFloat(alvo.value) === novo ? 0 : novo;
+        alvo.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    });
+
+    document.querySelectorAll("input[data-equip]").forEach((el) => {
+      el.addEventListener("change", () => { estado.equip[el.dataset.equip] = el.checked; aplicar(); });
+    });
+
+    $("fAdasModo").addEventListener("change", (e) => { estado.adasModo = e.target.value; aplicar(); });
+    $("fOrdem").addEventListener("change", (e) => { estado.ordem = e.target.value; aplicar(); });
+    $("swLacuna").addEventListener("change", (e) => { estado.incluirLacuna = e.target.checked; aplicar(); });
+    $("btnLimpar").addEventListener("click", limpar);
+
+    const toggle = $("filtersToggle"), painel = $("filtersPanel"), btnVer = $("btnVer");
+    toggle.addEventListener("click", () => {
+      const aberto = painel.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", String(aberto));
+      btnVer.style.display = aberto ? "block" : "none";
+    });
+    btnVer.addEventListener("click", () => {
+      painel.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+      btnVer.style.display = "none";
+      $("rcount").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  // A escala do slider de potência muda conforme o modo: wallbox AC vai até
+  // 22 kW, carregador DC vai até 280 kW. Uma escala só deixaria o AC preso
+  // nos primeiros 8% do curso.
+  function ajustarEscalaRecarga(){
+    const box = $("recPotBox"), inp = $("fRecPot");
+    if (estado.recModo === "qualquer") {
+      box.style.display = "none";
+      inp.value = 0;
+      estado.recPotMin = 0;
+      $("outRecPot").textContent = "qualquer";
+      $("outRecPot").classList.add("off");
+      $("recHelp").textContent = "Escolher AC ou DC já exige que a versão aceite aquele modo de recarga.";
+      return;
+    }
+    box.style.display = "block";
+    const ac = estado.recModo === "ac";
+    inp.max = ac ? 22 : 280;
+    inp.step = ac ? 0.5 : 10;
+    inp.value = 0;
+    estado.recPotMin = 0;
+    $("outRecPot").textContent = "qualquer";
+    $("outRecPot").classList.add("off");
+    $("recTicks").innerHTML = ac ? "<span>0</span><span>11 kW</span><span>22 kW</span>"
+                                 : "<span>0</span><span>140 kW</span><span>280 kW</span>";
+    $("recHelp").textContent = ac
+      ? "Recarga em corrente alternada (tomada ou wallbox de casa). 7 kW é o comum; 11 kW ou 22 kW carregam mais rápido."
+      : "Recarga rápida em corrente contínua, de eletroposto. Acima de 100 kW o carro recupera boa parte da bateria em ~30 min.";
+  }
+
+  function limpar(){
+    $("fTexto").value = "";
+    $("fTipos").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+    $("fPreco").value = $("fPreco").max;
+    ["fAutonomia","fBateria","fPortaMalas","fTela","fRecPot"].forEach((id) => { $(id).value = 0; });
+    $("fRecModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === "qualquer")));
+    $("fAutModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === "eletrica")));
+    document.querySelectorAll("input[data-equip]").forEach((el) => { el.checked = false; });
+    document.querySelectorAll("input[data-adas]").forEach((el) => { el.checked = false; });
+    $("fAdasModo").value = "qualquer";
+    $("swLacuna").checked = false;
+
+    Object.assign(estado, {
+      texto:"", tipos:[], precoMax:null, autModo:"eletrica", autonomiaMin:0, bateriaMin:0,
+      recModo:"qualquer", recPotMin:0, portaMalasMin:0, telaMin:0,
+      equip:{teto:false,banco:false,mala:false,hud:false}, adas:[], adasModo:"qualquer", incluirLacuna:false,
+    });
+    ajustarEscalaRecarga();
+    ["outAutonomia","outBateria","outPortaMalas","outTela","outRecPot"].forEach((id) => {
+      $(id).textContent = "qualquer"; $(id).classList.add("off");
+    });
+    $("outPreco").textContent = "sem limite"; $("outPreco").classList.add("off");
+    aplicar();
+  }
+
+  // ---- Compartilhar a busca pela URL ------------------------------------
+  const URL_MAP = [
+    ["q","texto"],["aut","autonomiaMin"],["autm","autModo"],["bat","bateriaMin"],
+    ["rec","recModo"],["recp","recPotMin"],["pm","portaMalasMin"],["tela","telaMin"],
+    ["ord","ordem"],["adasm","adasModo"],
+  ];
+  function salvarNaURL(){
+    const p = new URLSearchParams();
+    URL_MAP.forEach(([k, campo]) => {
+      const v = estado[campo];
+      if (v && v !== "qualquer" && v !== "eletrica" && v !== "preco_asc") p.set(k, v);
+    });
+    if (estado.tipos.length) p.set("tipo", estado.tipos.join(","));
+    if (estado.precoMax !== null) p.set("preco", estado.precoMax);
+    const eq = Object.keys(estado.equip).filter((k) => estado.equip[k]);
+    if (eq.length) p.set("eq", eq.join(","));
+    if (estado.adas.length) p.set("adas", estado.adas.join(","));
+    if (estado.incluirLacuna) p.set("lacuna", "1");
+    const qs = p.toString();
+    history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
+  }
+  function lerDaURL(){
+    const p = new URLSearchParams(window.location.search);
+    if (!p.toString()) return;
+    const setSlider = (id, valor, campo) => {
+      if (valor === null) return;
+      $(id).value = valor;
+      estado[campo] = parseFloat(valor);
+      $(id).dispatchEvent(new Event("input", { bubbles: true }));
+    };
+    if (p.get("q")) { $("fTexto").value = p.get("q"); estado.texto = p.get("q"); }
+    if (p.get("tipo")) {
+      estado.tipos = p.get("tipo").split(",");
+      $("fTipos").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(estado.tipos.indexOf(b.dataset.tipo) !== -1)));
+    }
+    if (p.get("preco")) { $("fPreco").value = p.get("preco"); $("fPreco").dispatchEvent(new Event("input", { bubbles: true })); }
+    if (p.get("autm")) {
+      estado.autModo = p.get("autm");
+      $("fAutModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === estado.autModo)));
+    }
+    if (p.get("rec")) {
+      estado.recModo = p.get("rec");
+      $("fRecModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === estado.recModo)));
+      ajustarEscalaRecarga();
+    }
+    setSlider("fAutonomia", p.get("aut"), "autonomiaMin");
+    setSlider("fBateria", p.get("bat"), "bateriaMin");
+    setSlider("fPortaMalas", p.get("pm"), "portaMalasMin");
+    setSlider("fTela", p.get("tela"), "telaMin");
+    setSlider("fRecPot", p.get("recp"), "recPotMin");
+    if (p.get("eq")) {
+      p.get("eq").split(",").forEach((k) => {
+        const el = document.querySelector('input[data-equip="' + k + '"]');
+        if (el) { el.checked = true; estado.equip[k] = true; }
+      });
+    }
+    if (p.get("adas")) {
+      estado.adas = p.get("adas").split(",");
+      estado.adas.forEach((id) => {
+        const el = document.querySelector('input[data-adas="' + id + '"]');
+        if (el) el.checked = true;
+      });
+    }
+    if (p.get("adasm")) { estado.adasModo = p.get("adasm"); $("fAdasModo").value = estado.adasModo; }
+    if (p.get("ord")) { estado.ordem = p.get("ord"); $("fOrdem").value = estado.ordem; }
+    if (p.get("lacuna")) { estado.incluirLacuna = true; $("swLacuna").checked = true; }
+  }
+
+  // ---- Início ------------------------------------------------------------
+  ligarControles();
+  ajustarEscalaRecarga();
+  carregar().then(() => {
+    preencherContagens();
+    lerDaURL();
+    aplicar();
+  }).catch((err) => {
+    console.error(err);
+    $("rcount").textContent = "Não foi possível carregar a ficha técnica.";
+    $("rlist").innerHTML = '<div class="empty-state"><div class="big">⚠</div>' +
+      "Não foi possível carregar a ficha técnica (" + escapeHtml(err.message) + "). " +
+      "Recarregue a página para tentar de novo.</div>";
+  });
+
+  // Exposto só para os testes automatizados do projeto rodarem sem DOM real.
+  window.__pesquisa = { avaliar, derivar, tamanhoTela, estado, EQUIP, ADAS, get versoes(){ return versoes; } };
+})();
+</script>
+
+</body>
+</html>
