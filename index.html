@@ -501,7 +501,14 @@ async function carregarDados() {
       opt.textContent = row.nome + " (" + row.uf + ")";
       elUf.appendChild(opt);
     });
-    detectarLocalizacao();
+    // Se o usuário está voltando (ex.: da página de detalhes), mantém o estado
+    // que ele já tinha escolhido em vez de detectar de novo pela localização.
+    if (UF_PENDENTE && IPVA_POR_UF[UF_PENDENTE]) {
+      elUf.value = UF_PENDENTE;
+      document.getElementById("ufStatusHint").textContent = "Estado mantido da sua última busca: " + IPVA_POR_UF[UF_PENDENTE].nome + " (" + UF_PENDENTE + ").";
+    } else {
+      detectarLocalizacao();
+    }
   } else console.warn("Não foi possível carregar ipva_aliquotas_estados:", ipvaRes.error);
 
   // Só carros novos (0km) — mercado_completo/pcd_confirmado_completo já são
@@ -879,6 +886,8 @@ function calcular() {
   // todo o resto (preço, perda de valor, energia, seguro, IPVA) fica no
   // modal, aberto pelo link "Detalhes" de cada linha.
   LAST_CALC = { rows, anos, comparar, showPcdCols, isPcd };
+  try { sessionStorage.setItem(FORM_CALC_KEY, JSON.stringify(lerCriterios())); } catch (e) {}
+  salvarCriterios();
 
   const precoColLabel = isPcd ? "Preço PCD" : "Preço";
 
@@ -950,6 +959,8 @@ function abrirDetalhes(i) {
   const detalhe = Object.assign({}, r, { anos, comparar, showPcdCols, isPcd, catLabel: CAT_LABEL[r.cat] });
   try {
     sessionStorage.setItem("custoRealDetalhe", JSON.stringify(detalhe));
+    sessionStorage.setItem(FORM_SCROLL_KEY, String(window.scrollY || 0));
+    salvarCriterios();
   } catch (e) {
     alert("Não foi possível abrir os detalhes (armazenamento do navegador indisponível).");
     return;
@@ -1048,6 +1059,7 @@ function aplicarPreenchimentoFormulario(args) {
     );
     renderMarcasChips();
   }
+  salvarCriterios();
   // O ranking só é gerado quando o usuário clica no botão — aqui só rolamos
   // a tela até ele, já preenchido, esperando o clique.
   const btnEl = document.getElementById("btnCalc");
@@ -1116,6 +1128,83 @@ document.getElementById("chatInput").addEventListener("keydown", function (e) {
   }
 });
 
+// ---- Manter critérios e ranking ao voltar (ex.: da página de detalhes) ----
+// Os critérios ficam no sessionStorage (só nesta aba do navegador). Ao voltar
+// de detalhes.html — ou recarregar a página — o formulário é restaurado e, se
+// havia um ranking calculado, ele é refeito com os MESMOS critérios usados no
+// último "Calcular ranking" (mesmo que o usuário tenha mexido no formulário
+// depois, sem recalcular: a tela volta exatamente como ele deixou).
+var FORM_STATE_KEY = "custoRealCriterios";
+var FORM_CALC_KEY = "custoRealCriteriosCalculo";
+var FORM_SCROLL_KEY = "custoRealScrollVolta";
+var CAMPOS_VALOR = ["precoMin", "precoMax", "kmMes", "consumoAtual", "precoGasolina", "anos", "tarifaSemSolar", "tarifaComSolar", "tarifaRua", "manutencaoExtra"];
+var CAMPOS_CHECK = ["carregaCasa", "temSolar"];
+var UF_PENDENTE = "";
+var restaurandoCriterios = false;
+
+function lerJSONSessao(chave) {
+  try { return JSON.parse(sessionStorage.getItem(chave) || "null"); } catch (e) { return null; }
+}
+function lerCriterios() {
+  const s = { v: {}, c: {} };
+  CAMPOS_VALOR.forEach(id => { s.v[id] = document.getElementById(id).value; });
+  CAMPOS_CHECK.forEach(id => { s.c[id] = document.getElementById(id).checked; });
+  s.pcd = document.getElementById("pcdSim").checked ? "sim" : "nao";
+  s.comparar = document.getElementById("compararSim").checked ? "sim" : "nao";
+  s.cats = Array.from(document.querySelectorAll(".catChk:checked")).map(c => c.value);
+  s.marcasFixas = Array.from(document.querySelectorAll(".marcaFixaChk:checked")).map(c => c.value);
+  s.marcas = marcasSelecionadas.slice();
+  s.uf = document.getElementById("ufSelecionada").value || UF_PENDENTE || "";
+  return s;
+}
+function aplicarCriterios(s) {
+  if (!s) return;
+  restaurandoCriterios = true;
+  try {
+    CAMPOS_VALOR.forEach(id => { if (s.v && s.v[id] != null) document.getElementById(id).value = s.v[id]; });
+    CAMPOS_CHECK.forEach(id => { if (s.c && typeof s.c[id] === "boolean") document.getElementById(id).checked = s.c[id]; });
+    document.getElementById(s.pcd === "sim" ? "pcdSim" : "pcdNao").checked = true;
+    document.getElementById(s.comparar === "nao" ? "compararNao" : "compararSim").checked = true;
+    if (Array.isArray(s.cats)) document.querySelectorAll(".catChk").forEach(c => { c.checked = s.cats.indexOf(c.value) !== -1; });
+    if (Array.isArray(s.marcasFixas)) document.querySelectorAll(".marcaFixaChk").forEach(c => { c.checked = s.marcasFixas.indexOf(c.value) !== -1; });
+    if (Array.isArray(s.marcas)) marcasSelecionadas = s.marcas.slice();
+    UF_PENDENTE = s.uf || "";
+    const elUf = document.getElementById("ufSelecionada");
+    if (UF_PENDENTE && Array.from(elUf.options).some(o => o.value === UF_PENDENTE)) elUf.value = UF_PENDENTE;
+    atualizaTogglePcd();
+    atualizaToggleComparar();
+    atualizaPriceSliderVisual();
+    document.getElementById("blocoSolar").classList.toggle("show", document.getElementById("carregaCasa").checked);
+    renderMarcasChips();
+  } finally {
+    restaurandoCriterios = false;
+  }
+}
+function salvarCriterios() {
+  if (restaurandoCriterios) return;
+  try { sessionStorage.setItem(FORM_STATE_KEY, JSON.stringify(lerCriterios())); } catch (e) {}
+}
+// Refaz o ranking que estava na tela e volta a rolagem para o mesmo ponto.
+function restaurarRankingSalvo() {
+  const calc = lerJSONSessao(FORM_CALC_KEY);
+  let y = NaN;
+  try { y = parseFloat(sessionStorage.getItem(FORM_SCROLL_KEY)); sessionStorage.removeItem(FORM_SCROLL_KEY); } catch (e) {}
+  if (!calc) return;
+  const atual = lerCriterios();
+  aplicarCriterios(calc);
+  calcular();
+  aplicarCriterios(atual);
+  if (!isNaN(y)) requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "instant" }));
+}
+
+document.addEventListener("input", salvarCriterios);
+document.addEventListener("change", salvarCriterios);
+// Voltou pelo cache do navegador (página intacta): só descarta a rolagem pendente.
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) { try { sessionStorage.removeItem(FORM_SCROLL_KEY); } catch (err) {} }
+});
+aplicarCriterios(lerJSONSessao(FORM_STATE_KEY));
+
 carregarDados().then(data => {
   CARS = data;
   DATA_READY = true;
@@ -1129,6 +1218,7 @@ carregarDados().then(data => {
   // O ranking só é gerado quando o usuário clica no botão acima — não calculamos
   // automaticamente aqui, só avisamos que já dá pra clicar.
   document.getElementById("resultsTable").innerHTML = '<div class="empty-state">Ajuste os filtros acima e clique em "Calcular ranking" para ver o resultado.</div>';
+  restaurarRankingSalvo();
 }).catch(err => {
   document.getElementById("loadMsg").textContent = "Erro ao carregar dados: " + (err.message || err);
   document.getElementById("loadMsg").style.color = "#b3261e";

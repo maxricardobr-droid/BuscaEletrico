@@ -379,5 +379,27 @@
   }
 })();
 </script>
+<script>
+// "← voltar ao comparador": volta para a página anterior de verdade (histórico
+// do navegador) quando o usuário veio do comparador nesta mesma aba — assim o
+// comparador reaparece com os critérios e o ranking que estavam na tela. Se
+// não houver página anterior (link aberto direto), segue o link normal, e o
+// comparador restaura os critérios salvos na sessão. Dentro do portal de
+// abas, volta para a aba "Custo Real" (tab-custoreal.html).
+(function () {
+  var a = document.querySelector("a.back");
+  if (!a) return;
+  if (window.self !== window.top) { a.setAttribute("href", "tab-custoreal.html"); return; }
+  a.addEventListener("click", function (e) {
+    var veioDoComparador = false;
+    try {
+      var ref = document.referrer ? new URL(document.referrer) : null;
+      veioDoComparador = !!ref && ref.origin === location.origin &&
+        /(\/|\/CustoReal\.html|\/index\.html)$/.test(ref.pathname);
+    } catch (err) {}
+    if (veioDoComparador && history.length > 1) { e.preventDefault(); history.back(); }
+  });
+})();
+</script>
 </body>
 </html>

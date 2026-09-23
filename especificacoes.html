@@ -465,13 +465,83 @@
   // ---- Deep-link via URL: ?marca=X&modelo=Y[&versao=Z] -------------------
   function aplicarSelecaoViaURL() {
     const params = new URLSearchParams(window.location.search);
-    const marca = params.get("marca");
-    const modelo = params.get("modelo");
+    const salvo = lerSelecaoSalva();
+    let marca = params.get("marca");
+    let modelo = params.get("modelo");
+    let versao = params.get("versao");
+    let categoria = params.get("categoria");
+    if ((!marca || !modelo) && salvo) {
+      marca = salvo.marca; modelo = salvo.modelo; versao = salvo.versao; categoria = salvo.categoria;
+    }
     if (!marca || !modelo) return;
-    const versao = params.get("versao");
-    const categoria = params.get("categoria");
-    mostrarGrupo(marca, modelo, versao, categoria);
+    // Voltando pelo histórico (botão voltar do navegador ou "← voltar" de
+    // outra página): reabre a mesma ficha e volta a rolagem para onde estava.
+    const mesmaFicha = salvo && normalize(salvo.marca) === normalize(marca) && normalize(salvo.modelo) === normalize(modelo);
+    const rolagem = (voltouPeloHistorico() && mesmaFicha && typeof salvo.scrollY === "number") ? salvo.scrollY : null;
+    mostrarGrupo(marca, modelo, versao, categoria, { semRolagem: rolagem !== null });
+    if (rolagem !== null) requestAnimationFrame(() => window.scrollTo({ top: rolagem, behavior: "instant" }));
   }
+
+  // ---- Manter a ficha aberta ao sair e voltar para esta página -----------
+  // A ficha exibida fica na URL (?marca=&modelo=...) e no sessionStorage
+  // (só nesta aba do navegador), junto com a posição de rolagem.
+  const SELECAO_KEY = "especificacoesSelecao";
+  function lerSelecaoSalva() {
+    try { return JSON.parse(sessionStorage.getItem(SELECAO_KEY) || "null"); } catch (e) { return null; }
+  }
+  function salvarSelecao(sel) {
+    try { sessionStorage.setItem(SELECAO_KEY, JSON.stringify(sel)); } catch (e) {}
+    try {
+      const atual = new URLSearchParams(window.location.search);
+      const p = new URLSearchParams();
+      p.set("marca", sel.marca);
+      p.set("modelo", sel.modelo);
+      if (sel.versao) p.set("versao", sel.versao);
+      if (sel.categoria) p.set("categoria", sel.categoria);
+      if (atual.get("de")) p.set("de", atual.get("de"));
+      history.replaceState(history.state, "", window.location.pathname + "?" + p.toString());
+    } catch (e) {}
+  }
+  function voltouPeloHistorico() {
+    try {
+      const nav = performance.getEntriesByType("navigation")[0];
+      return !!nav && nav.type === "back_forward";
+    } catch (e) { return false; }
+  }
+  window.addEventListener("pagehide", () => {
+    const sel = lerSelecaoSalva();
+    if (!sel || !els.content.classList.contains("open")) return;
+    sel.scrollY = window.scrollY || 0;
+    try { sessionStorage.setItem(SELECAO_KEY, JSON.stringify(sel)); } catch (e) {}
+  });
+
+  // ---- "← voltar": volta para a página de onde o usuário veio ------------
+  // Vindo da Busca por Equipamentos (?de=pesquisa), o link volta para a busca
+  // (com os filtros e a lista como estavam) em vez de ir para o comparador.
+  // Se a página anterior nesta aba for exatamente o destino do link, usa o
+  // histórico do navegador (a página reaparece como foi deixada); senão, segue
+  // o link normal. Dentro do portal de abas quem trata o clique é o script de
+  // ponte, que troca de aba sem recarregar.
+  (function configurarVoltar() {
+    const a = document.querySelector("header a.back");
+    if (!a) return;
+    if (new URLSearchParams(window.location.search).get("de") === "pesquisa") {
+      a.setAttribute("href", "pesquisa.html");
+      a.textContent = "← voltar à busca";
+    }
+    if (window.self !== window.top) return;
+    a.addEventListener("click", (e) => {
+      const destino = a.getAttribute("href");
+      const alvos = destino === "CustoReal.html" ? ["CustoReal.html", "index.html", ""] : [destino];
+      let veioDoDestino = false;
+      try {
+        const ref = document.referrer ? new URL(document.referrer) : null;
+        const arquivo = ref ? ref.pathname.split("/").pop() : null;
+        veioDoDestino = !!ref && ref.origin === location.origin && alvos.indexOf(arquivo) !== -1;
+      } catch (err) {}
+      if (veioDoDestino && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  })();
 
   // categoria (opcional): quando o link vem de um carro específico (ex.: o
   // CustoReal linkando um modelo HEV), filtra pra só mostrar trims daquela
@@ -479,7 +549,7 @@
   // (ex.: Jaecoo 7) e sem esse filtro as duas apareciam juntas, dando a
   // impressão de que um carro HEV também é "PHEV". Se não sobrar nenhum trim
   // na categoria pedida, mostramos o grupo inteiro em vez de uma tela vazia.
-  function mostrarGrupo(marca, modelo, versaoDestaque, categoria) {
+  function mostrarGrupo(marca, modelo, versaoDestaque, categoria, opcoes) {
     els.searchInput.value = "";
     els.results.classList.remove("open");
 
@@ -500,8 +570,9 @@
     els.groupHeading.innerHTML = grupo.length + (grupo.length === 1 ? " versão salva para " : " versões salvas para ") +
       "<strong>" + escapeHtml(marca) + " " + escapeHtml(modelo) + "</strong>";
     els.cards.innerHTML = renderCards(grupo, versaoDestaque);
+    salvarSelecao({ marca: marca, modelo: modelo, versao: versaoDestaque || "", categoria: categoria || "" });
 
-    if (versaoDestaque) {
+    if (versaoDestaque && !(opcoes && opcoes.semRolagem)) {
       const idx = grupo.findIndex((v) => normalize(v.versao) === normalize(versaoDestaque));
       const alvo = idx >= 0 ? document.getElementById("card-" + idx) : null;
       if (alvo) setTimeout(() => alvo.scrollIntoView({ behavior: "smooth", block: "center" }), 60);

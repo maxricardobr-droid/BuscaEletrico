@@ -710,7 +710,8 @@
     const link = "especificacoes.html?marca=" + encodeURIComponent(v.marca) +
                  "&modelo=" + encodeURIComponent(v.modelo) +
                  "&versao=" + encodeURIComponent(v.versao) +
-                 "&categoria=" + encodeURIComponent(v.tipo_motorizacao || "");
+                 "&categoria=" + encodeURIComponent(v.tipo_motorizacao || "") +
+                 "&de=pesquisa";
 
     return '<article class="rcard' + (parcial ? " partial" : "") + '">' +
       '<div class="rc-head">' +
@@ -986,7 +987,28 @@
     if (estado.incluirLacuna) p.set("lacuna", "1");
     const qs = p.toString();
     history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
+    try { sessionStorage.setItem(FILTROS_KEY, qs); } catch (e) {}
   }
+  // Os filtros ficam na URL e também no sessionStorage (só nesta aba do
+  // navegador): ao voltar da ficha técnica — ou reabrir a busca pelo menu —
+  // a busca reaparece com os mesmos critérios, a mesma lista e a mesma rolagem.
+  const FILTROS_KEY = "pesquisaFiltros";
+  const SCROLL_KEY = "pesquisaScroll";
+  function restaurarFiltrosDaSessao(){
+    if (window.location.search) return;
+    let qs = "";
+    try { qs = sessionStorage.getItem(FILTROS_KEY) || ""; } catch (e) {}
+    if (qs) history.replaceState(null, "", "?" + qs);
+  }
+  function voltouPeloHistorico(){
+    try {
+      const nav = performance.getEntriesByType("navigation")[0];
+      return !!nav && nav.type === "back_forward";
+    } catch (e) { return false; }
+  }
+  window.addEventListener("pagehide", () => {
+    try { sessionStorage.setItem(SCROLL_KEY, String(window.scrollY || 0)); } catch (e) {}
+  });
   function lerDaURL(){
     const p = new URLSearchParams(window.location.search);
     if (!p.toString()) return;
@@ -1039,8 +1061,14 @@
   ajustarEscalaRecarga();
   carregar().then(() => {
     preencherContagens();
+    restaurarFiltrosDaSessao();
     lerDaURL();
     aplicar();
+    if (voltouPeloHistorico()) {
+      let y = NaN;
+      try { y = parseFloat(sessionStorage.getItem(SCROLL_KEY)); } catch (e) {}
+      if (!isNaN(y)) requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "instant" }));
+    }
   }).catch((err) => {
     console.error(err);
     $("rcount").textContent = "Não foi possível carregar a ficha técnica.";
