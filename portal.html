@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJH5F1B7GS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  // No portal o page_view é enviado por aba (ver mostrarAba), não na carga da página.
+  gtag('config', 'G-LJH5F1B7GS', { send_page_view: false });
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BuscaElétrico — Portal</title>
@@ -47,6 +58,8 @@
     .tabBtn{padding:9px 11px 10px; font-size:12px;}
   }
 </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5861836196723250"
+     crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="portalHeader">
@@ -80,6 +93,7 @@
   var frameWrap = document.getElementById("frameWrap");
   var frames = {};   // key -> <iframe> já criado (mantido vivo ao trocar de aba)
   var abaAtual = null;
+  var abaMedida = null; // última aba enviada ao Google Analytics
 
   function render() {
     tabStrip.innerHTML = ABAS.map(function (a) {
@@ -117,6 +131,17 @@
     }
 
     if (history.replaceState) history.replaceState(null, "", "#" + key);
+
+    // Google Analytics: cada aba aberta conta como uma página vista
+    // (/portal.html#custoreal, #pesquisa, ...). Clicar de novo na aba que já
+    // está aberta não conta outra vez.
+    if (typeof gtag === "function" && (key !== abaMedida || search)) {
+      abaMedida = key;
+      gtag("event", "page_view", {
+        page_title: "BuscaElétrico — " + aba.label,
+        page_location: location.origin + location.pathname + "#" + key,
+      });
+    }
   }
 
   tabStrip.addEventListener("click", function (e) {
