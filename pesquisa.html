@@ -745,7 +745,7 @@
       if (tam !== null && (maior === null || tam > maior)) maior = tam;
     });
     d._tela = maior; // null = não identificado
-    d._estepe = detectarEstepe(itens);
+    d._estepe = classificarEstepe(v.estepe) || detectarEstepe(itens);
 
     d._autonomiaEletrica = num(v.autonomia_eletrica_km);
     d._autonomiaTotal = num(v.autonomia_total_km);
@@ -756,6 +756,18 @@
     d._preco = num(v.preco_tabela);
     return d;
   }
+  // Fonte principal: coluna especificacoes_tecnicas.estepe (texto livre com a fonte,
+  // ex.: "Sem estepe - kit de reparo ...", "Estepe temporário ...", "Possui estepe ...").
+  // A classificação usa só o início do texto, que é sempre "Sem estepe..." ou
+  // "Estepe.../Possui estepe..."; NULL = a fonte pesquisada não especificou.
+  function classificarEstepe(texto){
+    if (!texto) return null;
+    const t = normalize(texto).trim();
+    if (/^sem (estepe|pneu)/.test(t)) return { tem: false, texto: texto };
+    if (/^(possui |tem )?(estepe|pneu (de )?reserva|roda reserva)/.test(t)) return { tem: true, texto: texto };
+    return null;
+  }
+  // Reserva: menção explícita na lista de equipamentos (especificacoes_opcionais).
   function detectarEstepe(itens){
     let tem = null, texto = null;
     itens.forEach((o) => {
@@ -885,12 +897,19 @@
       if (v._equip[k] === true) equipPills.push(pill("✓ " + EQUIP[k].rotulo, estado.equip[k] ? "hit" : "equip"));
       else if (estado.equip[k] && v._equip[k] === null) equipPills.push(pill(EQUIP[k].rotulo + ": sem coleta", "nodata"));
     });
-    if (v._estepe.tem === true) {
-      equipPills.push(pill("✓ Estepe", estado.estepe === "com" ? "hit" : "equip"));
-    } else if (v._estepe.tem === false) {
+    if (v._estepe.tem !== null) {
       const tx = normalize(v._estepe.texto || "");
-      const motivo = /run.?flat/.test(tx) ? " (pneus run-flat)" : /reparo|selante/.test(tx) ? " (kit de reparo)" : "";
-      equipPills.push(pill("Sem estepe" + motivo, estado.estepe === "sem" ? "hit" : "equip"));
+      let rotulo;
+      if (v._estepe.tem) {
+        rotulo = /temporari|compacto|fininha/.test(tx) ? "✓ Estepe temporário"
+               : /full.?size|tamanho normal|mesma medida|integral/.test(tx) ? "✓ Estepe tamanho normal"
+               : "✓ Estepe";
+      } else {
+        const kit = /kit|selante|spray|vedador|reparo|mobilidade/.test(tx), runflat = /run.?flat/.test(tx);
+        rotulo = "Sem estepe" + (kit && runflat ? " (kit de reparo / run-flat)" : runflat ? " (pneus run-flat)" : kit ? " (kit de reparo)" : "");
+      }
+      const destaque = (estado.estepe === "com" && v._estepe.tem) || (estado.estepe === "sem" && !v._estepe.tem) ? "hit" : "equip";
+      equipPills.push('<span class="pill ' + destaque + '" title="' + escapeHtml(v._estepe.texto || "") + '">' + rotulo + "</span>");
     } else if (estado.estepe !== "qualquer") {
       equipPills.push(pill("Estepe: sem coleta", "nodata"));
     }
