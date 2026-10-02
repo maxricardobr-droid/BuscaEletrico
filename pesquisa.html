@@ -15,7 +15,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Busca por equipamentos: elétricos e híbridos | BuscaElétrico</title>
 <!-- SEO -->
-<meta name="description" content="Filtre carros elétricos e híbridos por autonomia, bateria, recarga, porta-malas, teto solar, ADAS e preço e veja as versões que atendem ao que você precisa.">
+<meta name="description" content="Filtre carros elétricos e híbridos por motorização, autonomia, porta-malas, teto solar, ADAS e preço e veja as versões que atendem ao que você precisa.">
 <link rel="canonical" href="https://www.buscaeletrico.com.br/pesquisa.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="BuscaElétrico">
@@ -306,16 +306,16 @@
     .toolbar .sortbox label{display:none;}
     .toolbar select{width:100%;min-height:42px;font-size:16px;}
 
-    /* filtros abrem numa folha de tela cheia, com botões fixos no rodapé */
+    /* no celular os filtros já vêm abertos, dentro da própria página, logo
+       acima dos resultados; o botão "Filtros" recolhe e reabre */
     .filters{
-      position:fixed;inset:0;z-index:400;display:none;max-height:none;border:0;border-radius:0;
-      padding:0 16px;overflow-y:auto;overscroll-behavior:contain;
+      position:static;display:none;max-height:none;padding:14px;margin-bottom:12px;
+      border:1px solid var(--border);border-radius:var(--radius);overflow:visible;
     }
     .filters.open{display:block;}
-    body:has(.filters.open){overflow:hidden;}
     .sheet-head{
-      display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:2;
-      background:var(--panel);padding:14px 0 12px;margin-bottom:6px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 0 12px;margin-bottom:6px;border-bottom:1px solid var(--border);
     }
     .sheet-head strong{font-size:17px;}
     .sheet-close{
@@ -323,8 +323,8 @@
       font-size:24px;line-height:1;color:var(--text);cursor:pointer;
     }
     .filters-actions{
-      position:sticky;bottom:0;display:flex;gap:10px;background:var(--panel);
-      padding:12px 0 calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--border);margin-top:8px;
+      display:flex;gap:10px;background:var(--panel);
+      padding:12px 0 0;border-top:1px solid var(--border);margin-top:8px;
     }
     .filters-actions .btn{margin-top:0;min-height:48px;font-size:15px;}
     .filters-actions .btn.primary{flex:2;}
@@ -408,7 +408,7 @@
     <div class="logo">PS</div>
     <div>
       <h1>Busca por Equipamentos</h1>
-      <p>Encontre a versão que atende ao que você precisa: autonomia, bateria, recarga, espaço e equipamentos</p>
+      <p>Encontre a versão que atende ao que você precisa: motorização, autonomia, espaço e equipamentos</p>
     </div>
     <a class="back" href="CustoReal.html">← voltar ao comparador</a>
   </header>
@@ -430,6 +430,16 @@
       <div class="sheet-head">
         <strong>Filtros</strong>
         <button type="button" class="sheet-close" id="filtersClose" aria-label="Fechar filtros">&times;</button>
+      </div>
+
+      <div class="fgroup">
+        <h3>Motorização</h3>
+        <div class="chips" id="fTiposPanel" role="group" aria-label="Tipo de motorização">
+          <button class="chip" data-tipo="BEV" aria-pressed="false">⚡ Elétrico (BEV)</button>
+          <button class="chip" data-tipo="PHEV" aria-pressed="false">🔌 Plug-in (PHEV)</button>
+          <button class="chip" data-tipo="HEV" aria-pressed="false">♻️ Híbrido (HEV)</button>
+        </div>
+        <p class="fhelp">BEV roda só com bateria. PHEV recarrega na tomada e também tem motor a combustão. HEV se recarrega sozinho, sem tomada.</p>
       </div>
 
       <div class="fgroup">
@@ -463,34 +473,6 @@
       </div>
 
       <div class="fgroup">
-        <h3>Bateria</h3>
-        <div class="frow">
-          <label class="flabel" for="fBateria">Capacidade mínima</label>
-          <output class="fval off" id="outBateria">qualquer</output>
-        </div>
-        <input type="range" id="fBateria" min="0" max="110" step="1" value="0">
-        <div class="ticks"><span>0</span><span>55 kWh</span><span>110 kWh</span></div>
-      </div>
-
-      <div class="fgroup">
-        <h3>Recarga</h3>
-        <div class="seg" id="fRecModo" role="group" aria-label="Modo de carregamento">
-          <button data-modo="qualquer" aria-pressed="true">Tanto faz</button>
-          <button data-modo="ac" aria-pressed="false">AC (wallbox)</button>
-          <button data-modo="dc" aria-pressed="false">DC (rápida)</button>
-        </div>
-        <div id="recPotBox" style="display:none;">
-          <div class="frow" style="margin-top:10px;">
-            <label class="flabel" for="fRecPot">Potência mínima</label>
-            <output class="fval off" id="outRecPot">qualquer</output>
-          </div>
-          <input type="range" id="fRecPot" min="0" max="280" step="10" value="0">
-          <div class="ticks" id="recTicks"><span>0</span><span>280 kW</span></div>
-        </div>
-        <p class="fhelp" id="recHelp">Escolher AC ou DC já exige que a versão aceite aquele modo de recarga.</p>
-      </div>
-
-      <div class="fgroup">
         <h3>Porta-malas</h3>
         <div class="frow">
           <label class="flabel" for="fPortaMalas">Volume mínimo</label>
@@ -502,17 +484,6 @@
           <button class="chip mini" data-set="fPortaMalas" data-value="400">400 L+</button>
           <button class="chip mini" data-set="fPortaMalas" data-value="500">500 L+</button>
         </div>
-      </div>
-
-      <div class="fgroup">
-        <h3>Central multimídia</h3>
-        <div class="frow">
-          <label class="flabel" for="fTela">Tela de no mínimo</label>
-          <output class="fval off" id="outTela">qualquer</output>
-        </div>
-        <input type="range" id="fTela" min="0" max="16" step="0.5" value="0">
-        <div class="ticks"><span>0</span><span>8"</span><span>12"</span><span>16"</span></div>
-        <p class="fhelp">Tamanho lido da descrição do equipamento. Painel de instrumentos e head-up display não contam aqui.</p>
       </div>
 
       <div class="fgroup">
@@ -581,10 +552,7 @@
             <option value="preco_asc">Menor preço</option>
             <option value="preco_desc">Maior preço</option>
             <option value="autonomia">Maior autonomia</option>
-            <option value="bateria">Maior bateria</option>
-            <option value="dc">Recarga DC mais rápida</option>
             <option value="portamalas">Maior porta-malas</option>
-            <option value="tela">Maior tela</option>
             <option value="marca">Marca (A–Z)</option>
           </select>
         </div>
@@ -599,7 +567,7 @@
     Ficha técnica e lista de equipamentos coletadas via pesquisa web (site do fabricante + imprensa especializada),
     sem verificação humana — confirme configuração e preço na concessionária antes de decidir. A coleta de equipamentos
     ainda está sendo expandida marca a marca: versões sem equipamentos coletados não podem ser avaliadas nos filtros de
-    teto solar, bancos, porta-malas elétrico, head-up display, multimídia e ADAS.
+    teto solar, bancos, porta-malas elétrico, head-up display e ADAS.
   </div>
 </div>
 
@@ -675,9 +643,7 @@
   const estado = {
     texto: "", tipos: [], precoMax: null,
     autModo: "eletrica", autonomiaMin: 0,
-    bateriaMin: 0,
-    recModo: "qualquer", recPotMin: 0,
-    portaMalasMin: 0, telaMin: 0,
+    portaMalasMin: 0,
     equip: { teto:false, banco:false, mala:false, hud:false },
     estepe: "qualquer",
     adas: [], adasModo: "qualquer",
@@ -686,6 +652,18 @@
   };
 
   const $ = (id) => document.getElementById(id);
+
+  // O filtro de motorização aparece em dois lugares (barra de busca e painel
+  // de filtros); esta função mantém os dois mostrando o mesmo estado.
+  function marcarTipos(){
+    ["fTipos", "fTiposPanel"].forEach((id) => {
+      const box = $(id);
+      if (!box) return;
+      box.querySelectorAll("button[data-tipo]").forEach((b) => {
+        b.setAttribute("aria-pressed", String(estado.tipos.indexOf(b.dataset.tipo) !== -1));
+      });
+    });
+  }
 
   // ---- Carga e preparo dos dados ----------------------------------------
   function chave(marca, modelo, versao, ano){
@@ -810,15 +788,7 @@
 
     const autonomia = estado.autModo === "total" ? v._autonomiaTotal : v._autonomiaEletrica;
     if (!marcarNumero(autonomia, estado.autonomiaMin)) return "falha";
-    if (!marcarNumero(v._bateria, estado.bateriaMin)) return "falha";
     if (!marcarNumero(v._portaMalas, estado.portaMalasMin)) return "falha";
-    if (!marcarNumero(v._tela, estado.telaMin)) return "falha";
-
-    if (estado.recModo !== "qualquer") {
-      const pot = estado.recModo === "ac" ? v._ac : v._dc;
-      if (pot === null) lacuna = true;
-      else if (pot < (estado.recPotMin || 0)) return "falha";
-    }
 
     for (const k of Object.keys(estado.equip)) {
       if (!estado.equip[k]) continue;
@@ -878,19 +848,14 @@
     } else if (estado.autonomiaMin) {
       pills.push(pill("autonomia não coletada", "nodata"));
     }
-    if (v._bateria !== null) pills.push(pill("<b>" + nf(v._bateria) + " kWh</b>", estado.bateriaMin ? "hit" : ""));
-    else if (estado.bateriaMin) pills.push(pill("bateria não coletada", "nodata"));
+    if (v._bateria !== null) pills.push(pill("<b>" + nf(v._bateria) + " kWh</b>"));
 
-    if (v._dc !== null) pills.push(pill("DC <b>" + nf(v._dc) + " kW</b>", estado.recModo === "dc" ? "hit" : ""));
-    else if (estado.recModo === "dc") pills.push(pill("recarga DC não coletada", "nodata"));
-    if (v._ac !== null) pills.push(pill("AC <b>" + nf(v._ac) + " kW</b>", estado.recModo === "ac" ? "hit" : ""));
-    else if (estado.recModo === "ac") pills.push(pill("recarga AC não coletada", "nodata"));
+    if (v._dc !== null) pills.push(pill("DC <b>" + nf(v._dc) + " kW</b>"));
 
     if (v._portaMalas !== null) pills.push(pill("<b>" + nf(v._portaMalas) + " L</b> porta-malas", estado.portaMalasMin ? "hit" : ""));
     else if (estado.portaMalasMin) pills.push(pill("porta-malas não coletado", "nodata"));
 
-    if (v._tela !== null) pills.push(pill("tela <b>" + v._tela.toLocaleString("pt-BR") + "”</b>", estado.telaMin ? "hit" : ""));
-    else if (estado.telaMin) pills.push(pill("tela não identificada", "nodata"));
+    if (v._tela !== null) pills.push(pill("tela <b>" + v._tela.toLocaleString("pt-BR") + "”</b>"));
 
     const equipPills = [];
     Object.keys(EQUIP).forEach((k) => {
@@ -1005,10 +970,7 @@
     if (estado.tipos.length) n++;
     if (estado.precoMax !== null) n++;
     if (estado.autonomiaMin) n++;
-    if (estado.bateriaMin) n++;
-    if (estado.recModo !== "qualquer") n++;
     if (estado.portaMalasMin) n++;
-    if (estado.telaMin) n++;
     n += Object.keys(estado.equip).filter((k) => estado.equip[k]).length;
     if (estado.estepe !== "qualquer") n++;
     if (estado.adas.length) n++;
@@ -1057,13 +1019,16 @@
   function ligarControles(){
     $("fTexto").addEventListener("input", (e) => { estado.texto = e.target.value.trim(); aplicar(); });
 
-    $("fTipos").addEventListener("click", (e) => {
-      const b = e.target.closest("button[data-tipo]");
-      if (!b) return;
-      const ativo = b.getAttribute("aria-pressed") === "true";
-      b.setAttribute("aria-pressed", ativo ? "false" : "true");
-      estado.tipos = Array.from($("fTipos").querySelectorAll('button[aria-pressed="true"]')).map((x) => x.dataset.tipo);
-      aplicar();
+    ["fTipos", "fTiposPanel"].forEach((id) => {
+      $(id).addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-tipo]");
+        if (!b) return;
+        const tipo = b.dataset.tipo;
+        const i = estado.tipos.indexOf(tipo);
+        if (i === -1) estado.tipos.push(tipo); else estado.tipos.splice(i, 1);
+        marcarTipos();
+        aplicar();
+      });
     });
 
     const preco = $("fPreco"), outPreco = $("outPreco");
@@ -1078,10 +1043,7 @@
     syncPreco();
 
     ligarSlider("fAutonomia", "outAutonomia", "autonomiaMin", (v) => nf(v) + " km");
-    ligarSlider("fBateria", "outBateria", "bateriaMin", (v) => nf(v) + " kWh");
     ligarSlider("fPortaMalas", "outPortaMalas", "portaMalasMin", (v) => nf(v) + " L");
-    ligarSlider("fTela", "outTela", "telaMin", (v) => v.toLocaleString("pt-BR") + "”");
-    ligarSlider("fRecPot", "outRecPot", "recPotMin", (v) => nf(v) + " kW");
 
     $("fEstepe").addEventListener("click", (e) => {
       const b = e.target.closest("button[data-modo]");
@@ -1096,15 +1058,6 @@
       if (!b) return;
       $("fAutModo").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
       estado.autModo = b.dataset.modo;
-      aplicar();
-    });
-
-    $("fRecModo").addEventListener("click", (e) => {
-      const b = e.target.closest("button[data-modo]");
-      if (!b) return;
-      $("fRecModo").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      estado.recModo = b.dataset.modo;
-      ajustarEscalaRecarga();
       aplicar();
     });
 
@@ -1128,6 +1081,13 @@
     $("btnLimpar").addEventListener("click", limpar);
 
     const toggle = $("filtersToggle"), painel = $("filtersPanel"), btnVer = $("btnVer");
+    // No celular a página já abre com os filtros à mostra — não é preciso
+    // tocar em "Filtros" para ver os critérios.
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      painel.classList.add("open");
+      toggle.setAttribute("aria-expanded", "true");
+      btnVer.style.display = "block";
+    }
     toggle.addEventListener("click", () => {
       const aberto = painel.classList.toggle("open");
       toggle.setAttribute("aria-expanded", String(aberto));
@@ -1142,41 +1102,10 @@
     });
   }
 
-  // A escala do slider de potência muda conforme o modo: wallbox AC vai até
-  // 22 kW, carregador DC vai até 280 kW. Uma escala só deixaria o AC preso
-  // nos primeiros 8% do curso.
-  function ajustarEscalaRecarga(){
-    const box = $("recPotBox"), inp = $("fRecPot");
-    if (estado.recModo === "qualquer") {
-      box.style.display = "none";
-      inp.value = 0;
-      estado.recPotMin = 0;
-      $("outRecPot").textContent = "qualquer";
-      $("outRecPot").classList.add("off");
-      $("recHelp").textContent = "Escolher AC ou DC já exige que a versão aceite aquele modo de recarga.";
-      return;
-    }
-    box.style.display = "block";
-    const ac = estado.recModo === "ac";
-    inp.max = ac ? 22 : 280;
-    inp.step = ac ? 0.5 : 10;
-    inp.value = 0;
-    estado.recPotMin = 0;
-    $("outRecPot").textContent = "qualquer";
-    $("outRecPot").classList.add("off");
-    $("recTicks").innerHTML = ac ? "<span>0</span><span>11 kW</span><span>22 kW</span>"
-                                 : "<span>0</span><span>140 kW</span><span>280 kW</span>";
-    $("recHelp").textContent = ac
-      ? "Recarga em corrente alternada (tomada ou wallbox de casa). 7 kW é o comum; 11 kW ou 22 kW carregam mais rápido."
-      : "Recarga rápida em corrente contínua, de eletroposto. Acima de 100 kW o carro recupera boa parte da bateria em ~30 min.";
-  }
-
   function limpar(){
     $("fTexto").value = "";
-    $("fTipos").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
     $("fPreco").value = $("fPreco").max;
-    ["fAutonomia","fBateria","fPortaMalas","fTela","fRecPot"].forEach((id) => { $(id).value = 0; });
-    $("fRecModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === "qualquer")));
+    ["fAutonomia","fPortaMalas"].forEach((id) => { $(id).value = 0; });
     $("fAutModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === "eletrica")));
     document.querySelectorAll("input[data-equip]").forEach((el) => { el.checked = false; });
     document.querySelectorAll("input[data-adas]").forEach((el) => { el.checked = false; });
@@ -1185,12 +1114,11 @@
     $("swLacuna").checked = false;
 
     Object.assign(estado, {
-      texto:"", tipos:[], precoMax:null, autModo:"eletrica", autonomiaMin:0, bateriaMin:0,
-      recModo:"qualquer", recPotMin:0, portaMalasMin:0, telaMin:0,
+      texto:"", tipos:[], precoMax:null, autModo:"eletrica", autonomiaMin:0, portaMalasMin:0,
       equip:{teto:false,banco:false,mala:false,hud:false}, estepe:"qualquer", adas:[], adasModo:"qualquer", incluirLacuna:false,
     });
-    ajustarEscalaRecarga();
-    ["outAutonomia","outBateria","outPortaMalas","outTela","outRecPot"].forEach((id) => {
+    marcarTipos();
+    ["outAutonomia","outPortaMalas"].forEach((id) => {
       $(id).textContent = "qualquer"; $(id).classList.add("off");
     });
     $("outPreco").textContent = "sem limite"; $("outPreco").classList.add("off");
@@ -1199,8 +1127,7 @@
 
   // ---- Compartilhar a busca pela URL ------------------------------------
   const URL_MAP = [
-    ["q","texto"],["aut","autonomiaMin"],["autm","autModo"],["bat","bateriaMin"],
-    ["rec","recModo"],["recp","recPotMin"],["pm","portaMalasMin"],["tela","telaMin"],
+    ["q","texto"],["aut","autonomiaMin"],["autm","autModo"],["pm","portaMalasMin"],
     ["ord","ordem"],["adasm","adasModo"],["est","estepe"],
   ];
   function salvarNaURL(){
@@ -1251,23 +1178,15 @@
     if (p.get("q")) { $("fTexto").value = p.get("q"); estado.texto = p.get("q"); }
     if (p.get("tipo")) {
       estado.tipos = p.get("tipo").split(",");
-      $("fTipos").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(estado.tipos.indexOf(b.dataset.tipo) !== -1)));
+      marcarTipos();
     }
     if (p.get("preco")) { $("fPreco").value = p.get("preco"); $("fPreco").dispatchEvent(new Event("input", { bubbles: true })); }
     if (p.get("autm")) {
       estado.autModo = p.get("autm");
       $("fAutModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === estado.autModo)));
     }
-    if (p.get("rec")) {
-      estado.recModo = p.get("rec");
-      $("fRecModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === estado.recModo)));
-      ajustarEscalaRecarga();
-    }
     setSlider("fAutonomia", p.get("aut"), "autonomiaMin");
-    setSlider("fBateria", p.get("bat"), "bateriaMin");
     setSlider("fPortaMalas", p.get("pm"), "portaMalasMin");
-    setSlider("fTela", p.get("tela"), "telaMin");
-    setSlider("fRecPot", p.get("recp"), "recPotMin");
     if (p.get("eq")) {
       p.get("eq").split(",").forEach((k) => {
         const el = document.querySelector('input[data-equip="' + k + '"]');
@@ -1292,7 +1211,6 @@
 
   // ---- Início ------------------------------------------------------------
   ligarControles();
-  ajustarEscalaRecarga();
   carregar().then(() => {
     preencherContagens();
     restaurarFiltrosDaSessao();
