@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJH5F1B7GS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJH5F1B7GS');
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparar carros elétricos e híbridos lado a lado | BuscaElétrico</title>
+<!-- SEO -->
+<meta name="description" content="Compare até 4 carros elétricos e híbridos lado a lado: preço, FIPE, custo real, manutenção, autonomia, bateria, recarga, dimensões e equipamentos.">
+<link rel="canonical" href="https://www.buscaeletrico.com.br/comparar.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BuscaElétrico">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Comparar carros elétricos e híbridos lado a lado | BuscaElétrico">
+<meta property="og:description" content="Compare até 4 carros elétricos e híbridos lado a lado: preço, FIPE, custo real, manutenção, autonomia, bateria, recarga, dimensões e equipamentos.">
+<meta property="og:url" content="https://www.buscaeletrico.com.br/comparar.html">
+<meta property="og:image" content="https://www.buscaeletrico.com.br/img/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="theme-color" content="#0a3e91">
+<!-- /SEO -->
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --panel:#ffffff;
+    --panel-2:#eef4fa;
+    --border:#d9e4ef;
+    --text:#0b2036;
+    --muted:#64778c;
+    --orange:#1264d8;
+    --orange-dim:#0a3e91;
+    --green:#1f9d67;
+    --blue:#12a8d8;
+    --purple:#7A4FD1;
+    --red:#c53d48;
+    --radius:20px;
+    --ink:#0b2036; --line:#d9e4ef; --surface:#fff; --surface-2:#eef4fa; --surface-3:#e8f0f8;
+    --brand:#1264d8; --brand-2:#0a3e91; --brand-soft:#e9f2ff; --cyan:#12a8d8;
+    --green-soft:#eaf8f1; --amber-soft:#fff6df; --red-soft:#fff0f1;
+    --shadow:0 18px 55px rgba(20,50,85,.10); --shadow-sm:0 8px 24px rgba(20,50,85,.08);
+    --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+
+  header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  header .logo{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(135deg,var(--orange),var(--orange-dim));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:18px;
+    flex:none;
+  }
+  header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+  header a.back{margin-left:auto;color:var(--muted);font-size:12.5px;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:7px 12px;white-space:nowrap;}
+  header a.back:hover{color:var(--text);border-color:var(--orange);}
+
+  .search-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px;position:relative;
+  }
+  .search-box{position:relative;}
+  .search-box input{
+    width:100%;padding:13px 44px 13px 16px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:15px;outline:none;transition:border-color .15s;
+  }
+  .search-box input:focus{border-color:var(--orange);}
+  .search-box .icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px;padding-left:2px;}
+
+  .results{
+    margin-top:10px;max-height:340px;overflow-y:auto;border-radius:10px;
+    border:1px solid var(--border);display:none;background:var(--panel-2);
+  }
+  .results.open{display:block;}
+  .result-item{
+    padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .result-item:last-child{border-bottom:none;}
+  .result-item:hover, .result-item.active{background:rgba(18,63,130,0.08);}
+  .result-item .ri-main{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .result-item .ri-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .result-item .ri-sub{font-size:12px;color:var(--muted);}
+  .badge{
+    font-size:10.5px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;letter-spacing:.02em;flex:none;
+  }
+  .badge.BEV{background:rgba(30,138,92,.12);color:var(--green);}
+  .badge.HEV{background:rgba(47,111,228,.12);color:var(--blue);}
+  .badge.PHEV{background:rgba(122,79,209,.12);color:var(--purple);}
+
+  .empty-state{
+    text-align:center;color:var(--muted);padding:70px 20px;font-size:14px;
+  }
+  .empty-state .big{font-size:34px;margin-bottom:10px;}
+
+  #content{display:none;margin-top:22px;}
+  #content.open{display:block;}
+  #groupHeading{font-size:15px;color:var(--muted);margin:0 0 14px;}
+  #groupHeading strong{color:var(--text);}
+
+  .cards{display:flex;flex-direction:column;gap:16px;}
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;
+  }
+  .card.highlight{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange) inset;}
+  .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .card-title{font-size:17px;font-weight:700;margin:0;}
+  .card-sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .card-price{text-align:right;flex:none;}
+  .card-price .value{font-size:22px;font-weight:800;color:var(--orange);}
+  .card-price .label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+
+  .spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:6px;}
+  .spec-section{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+  .spec-section h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--orange);font-weight:700;}
+  .spec-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;border-bottom:1px dashed var(--border);}
+  .spec-row:last-child{border-bottom:none;}
+  .spec-row .k{color:var(--muted);}
+  .spec-row .v{font-weight:600;text-align:right;}
+
+  .equip-section{margin-top:14px;}
+  .equip-section > h4{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--orange);font-weight:700;}
+  .equip-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+  .equip-cat{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+  .equip-cat h5{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;}
+  .equip-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;}
+  .equip-list li{font-size:12.5px;display:flex;align-items:flex-start;gap:6px;line-height:1.4;}
+  .equip-list li .ei{flex:none;font-size:12px;line-height:1.5;color:var(--green);}
+  .equip-list li.ind{color:var(--muted);}
+  .equip-list li.ind .ei{color:var(--muted);}
+  .equip-tag{font-size:9.5px;padding:1px 7px;border-radius:20px;font-weight:700;letter-spacing:.02em;margin-left:2px;white-space:nowrap;}
+  .equip-tag.opcional{background:rgba(122,79,209,.14);color:var(--purple);}
+  .equip-tag.pacote{background:rgba(47,111,228,.14);color:var(--blue);}
+
+  .note-box{
+    margin-top:14px;background:rgba(18,63,130,.06);border:1px solid rgba(18,63,130,.30);
+    border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text);line-height:1.55;
+  }
+  .note-box .nb-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--orange);font-weight:700;margin-bottom:4px;}
+
+  .sources{margin-top:12px;font-size:12px;color:var(--muted);}
+  .sources a{color:var(--blue);margin-right:10px;white-space:nowrap;}
+  .card-foot{margin-top:12px;font-size:11px;color:var(--muted);}
+
+  .footer-note{color:var(--muted);font-size:11.5px;margin-top:26px;line-height:1.6;text-align:center;}
+  a{color:var(--blue);}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#c7d3e2;border-radius:20px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  /* Menu hambúrguer — navegação entre páginas */
+  .hb-btn{position:fixed;top:18px;left:18px;z-index:300;width:44px;height:44px;border-radius:14px;border:1px solid #c4d4e3;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:var(--shadow-sm);transition:.2s}.hb-btn:hover{transform:translateY(-1px)}.hb-btn span{display:block;width:19px;height:2px;background:var(--ink);border-radius:3px}.hb-overlay{position:fixed;inset:0;background:rgba(5,18,32,.48);z-index:290;opacity:0;pointer-events:none;transition:.2s}.hb-overlay.open{opacity:1;pointer-events:auto}.hb-drawer{position:fixed;top:0;left:0;bottom:0;width:290px;max-width:86vw;background:#fff;z-index:295;transform:translateX(-100%);transition:transform .24s ease;display:flex;flex-direction:column;padding:22px 0;box-shadow:18px 0 50px rgba(5,25,50,.16)}.hb-drawer.open{transform:translateX(0)}.hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 22px 18px;border-bottom:1px solid var(--line);margin-bottom:10px}.hb-drawer-title{font-weight:900;font-size:14px;letter-spacing:.06em;text-transform:uppercase}.hb-close{background:none;border:0;color:var(--muted);font-size:26px}.hb-link{display:flex;align-items:center;gap:10px;padding:14px 22px;color:var(--ink);text-decoration:none;font-size:14px;border-left:4px solid transparent}.hb-link:hover{background:var(--surface-2)}.hb-link.active{border-left-color:var(--brand);color:var(--brand-2);font-weight:800;background:var(--brand-soft)}
+
+  /* ---- design system compartilhado (topbar + hambúrguer) ---- */
+  .topbar{height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px;position:relative;z-index:10;flex-wrap:wrap}.brand-mini{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}.brand-mini img{height:42px;width:auto;filter:drop-shadow(0 7px 12px rgba(18,100,216,.18))}.brand-mini strong{font-size:15px}.brand-mini span{display:block;color:var(--muted);font-size:11px;margin-top:1px}.top-actions{display:flex;gap:10px}.top-pill{border:1px solid var(--line);background:rgba(255,255,255,.78);backdrop-filter:blur(12px);border-radius:999px;padding:8px 13px;font-size:11px;font-weight:700;color:var(--muted)}@media (max-width:900px){.topbar{height:auto;padding:10px 0 10px 54px;}.top-pill{display:none}}
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5861836196723250"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+<script src="comparar.js"></script>
+<button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="hb-overlay" id="hbOverlay" onclick="hbClose()"></div>
+<nav class="hb-drawer" id="hbDrawer">
+  <div class="hb-drawer-head">
+    <span class="hb-drawer-title">BuscaElétrico</span>
+    <button class="hb-close" onclick="hbClose()" aria-label="Fechar menu">&times;</button>
+  </div>
+  <a href="CustoReal.html" class="hb-link">⚡ Custo Real</a>
+  <a href="pesquisa.html" class="hb-link">⌕ Busca por Equipamentos</a>
+  <a href="fipe-historico.html" class="hb-link">◷ Histórico FIPE</a>
+  <a href="vendas.html" class="hb-link">▥ Ranking de Vendas</a>
+  <a href="especificacoes.html" class="hb-link">◈ Especificações</a>
+  <a href="noticias.html" class="hb-link">◉ Notícias</a>
+  <a href="forum.html" class="hb-link">◌ Fórum</a>
+</nav>
+<script>
+  function hbToggle(){
+    document.getElementById('hbDrawer').classList.toggle('open');
+    document.getElementById('hbOverlay').classList.toggle('open');
+  }
+  function hbClose(){
+    document.getElementById('hbDrawer').classList.remove('open');
+    document.getElementById('hbOverlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') hbClose(); });
+</script>
+<div class="wrap">
+<header class="topbar"><a class="brand-mini" href="CustoReal.html"><img src="img/logo.png" width="46" height="42" alt="BuscaElétrico"><div><strong>BuscaElétrico</strong><span>Decisão baseada em dados</span></div></a><div class="top-actions"><div class="top-pill">⚡ BEV</div><div class="top-pill">🔌 PHEV</div><div class="top-pill">♻️ HEV</div></div></header>
+<style>
+  /* ---- Comparar carros ---- */
+  .cmp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:6px 0 16px}
+  .cmp-head h1{font-size:24px;margin:0;letter-spacing:-.02em}
+  .cmp-head p{margin:4px 0 0;color:var(--muted);font-size:13.5px;max-width:620px;line-height:1.5}
+  .cmp-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .cmp-tool{appearance:none;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--brand-2);border-radius:999px;padding:8px 13px;display:inline-flex;align-items:center;gap:7px}
+  .cmp-tool:hover{border-color:var(--brand)}
+  .cmp-tool[disabled]{opacity:.5;cursor:default}
+  .cmp-switch{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;user-select:none;padding:6px 4px}
+  .cmp-switch input{width:16px;height:16px;accent-color:var(--brand)}
+
+  .cmp-add{position:relative;margin-bottom:14px}
+  .cmp-add input{width:100%;padding:12px 40px 12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:15px;outline:none}
+  .cmp-add input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(18,100,216,.12)}
+  .cmp-add .icon{position:absolute;right:14px;top:22px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+  .cmp-add .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .cmp-results{position:absolute;left:0;right:0;top:48px;z-index:30;max-height:330px;overflow-y:auto;border-radius:12px;border:1px solid var(--border);background:#fff;box-shadow:var(--shadow);display:none}
+  .cmp-results.open{display:block}
+  .cmp-ri{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .cmp-ri:last-child{border-bottom:0}
+  .cmp-ri:hover,.cmp-ri.active{background:var(--brand-soft)}
+  .cmp-ri .t{font-size:14px;font-weight:600}
+  .cmp-ri .s{font-size:12px;color:var(--muted);margin-top:2px}
+  .cmp-ri.dis{opacity:.5;cursor:default}
+
+  .cmp-warn{background:var(--amber-soft);border:1px solid #f1d58a;border-radius:12px;padding:10px 13px;font-size:12.5px;line-height:1.5;margin-bottom:12px}
+
+  .cmp-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow-sm)}
+  table.cmp{border-collapse:separate;border-spacing:0;width:100%;min-width:100%;font-size:13px;table-layout:fixed;--lblw:170px;--colw:185px;min-width:calc(var(--lblw) + var(--ncol,1) * var(--colw))}
+  table.cmp th,table.cmp td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+  table.cmp .lbl{position:sticky;left:0;z-index:2;background:#fff;color:var(--muted);font-weight:600;width:170px;min-width:170px;max-width:170px;border-right:1px solid var(--line)}
+  table.cmp td.v{min-width:170px;font-weight:600;color:var(--text)}
+  table.cmp td.v.nd{color:#a3b1c0;font-weight:500}
+  table.cmp td.v.best{background:var(--green-soft);color:#126a45}
+  table.cmp td.v.best .val::after{content:" ★";font-size:10px;color:var(--green)}
+  table.cmp td.v .sub{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
+  table.cmp thead th{position:sticky;top:0;background:#fff;z-index:3;border-bottom:2px solid var(--line);vertical-align:top}
+  table.cmp thead th.lbl{z-index:4;vertical-align:bottom;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  .car-h{display:flex;flex-direction:column;gap:6px;min-width:150px}
+  .car-h .top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+  .car-h .marca{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--brand)}
+  .car-h .nome{font-size:15px;font-weight:800;color:var(--text);line-height:1.25}
+  .car-h .ver{font-size:12px;color:var(--muted);font-weight:500;line-height:1.35}
+  .car-h .rm{appearance:none;border:1px solid var(--border);background:#fff;color:var(--muted);width:28px;height:28px;border-radius:999px;cursor:pointer;font-size:16px;line-height:1;flex:none}
+  .car-h .rm:hover{color:var(--red);border-color:var(--red)}
+  .car-h .links{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;font-weight:600}
+  .car-h .links a{color:var(--brand-2);text-decoration:none}
+  .car-h .links a:hover{text-decoration:underline}
+  .car-h .aprox{font-size:11px;color:#8a6200;background:var(--amber-soft);border-radius:8px;padding:4px 7px;font-weight:600;line-height:1.35}
+  .badge{font-size:10.5px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:700;letter-spacing:.02em;align-self:flex-start}
+  .badge.BEV{background:rgba(30,138,92,.12);color:var(--green)}
+  .badge.HEV{background:rgba(47,111,228,.12);color:#1f5fd0}
+  .badge.PHEV{background:rgba(122,79,209,.12);color:var(--purple)}
+  .add-col{min-width:150px}
+  .add-col button{appearance:none;width:100%;min-height:92px;border:1.5px dashed var(--border-strong,#b9d4f4);border-radius:12px;background:var(--surface-2);color:var(--brand-2);font:inherit;font-weight:800;font-size:13px;cursor:pointer}
+  .add-col button:hover{border-color:var(--brand);background:var(--brand-soft)}
+  table.cmp tr.sec th{background:var(--surface-2);color:var(--brand-2);font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:800;padding:0;border-bottom:1px solid var(--line)}
+  table.cmp tr.sec th button{appearance:none;border:0;background:transparent;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit;cursor:pointer;padding:10px 12px;display:flex;align-items:center;gap:8px;position:sticky;left:0}
+  table.cmp tr.sec th button .ch{display:inline-block;transition:transform .15s}
+  table.cmp tr.sec[aria-expanded="false"] th button .ch{transform:rotate(-90deg)}
+  table.cmp tr.sec th .nota{font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11.5px}
+  table.cmp tr.hide{display:none}
+  .eq-s{color:var(--green)} .eq-o{color:var(--purple)} .eq-p{color:#1f5fd0} .eq-n{color:#a3b1c0}
+  .calc-crit{font-size:11px;font-weight:500;color:var(--muted);line-height:1.4}
+
+  .cmp-empty{text-align:center;background:#fff;border:1px dashed var(--border);border-radius:16px;padding:46px 20px;color:var(--muted);font-size:14px;line-height:1.6}
+  .cmp-empty .big{font-size:34px;margin-bottom:8px}
+  .cmp-empty strong{color:var(--text)}
+  .cmp-legend{font-size:12px;color:var(--muted);margin:10px 2px 0;line-height:1.6}
+  .scroll-hint{display:none;font-size:12px;color:var(--muted);margin:0 2px 8px}
+  @media (max-width:640px){
+    .cmp-head h1{font-size:20px}
+    table.cmp{font-size:12.5px}
+    table.cmp{--lblw:112px;--colw:150px}
+    table.cmp .lbl{width:112px;min-width:112px;max-width:112px;padding:8px 9px;font-size:12px}
+    table.cmp td.v,.car-h,.add-col{min-width:142px}
+    table.cmp th,table.cmp td{padding:8px 9px}
+    .car-h .nome{font-size:14px}
+    .scroll-hint{display:block}
+  }
+</style>
+
+  <div class="cmp-head">
+    <div>
+      <h1>Comparar carros</h1>
+      <p>Até 4 carros lado a lado, um por coluna. Adicione pelo botão <strong>+ Comparar</strong> no Custo Real, na Busca por Equipamentos, na Ficha Técnica ou no Histórico FIPE, ou busque aqui embaixo.</p>
+    </div>
+    <div class="cmp-tools">
+      <label class="cmp-switch"><input type="checkbox" id="soDif"> Só diferenças</label>
+      <button type="button" class="cmp-tool" id="btnLink">🔗 Copiar link</button>
+      <button type="button" class="cmp-tool" id="btnLimpar">Limpar</button>
+    </div>
+  </div>
+
+  <div class="cmp-add">
+    <input id="busca" type="text" placeholder="Adicionar carro: digite marca, modelo ou versão…" autocomplete="off" aria-label="Buscar carro para adicionar à comparação">
+    <span class="icon">⌕</span>
+    <div class="cmp-results" id="resultados" role="listbox"></div>
+    <div class="hint" id="hint">Carregando catálogo…</div>
+  </div>
+
+  <div id="avisos"></div>
+  <p class="scroll-hint" id="scrollHint">⇆ Deslize para os lados para ver todos os carros.</p>
+  <div id="area"></div>
+  <p class="cmp-legend" id="legenda" hidden>★ melhor valor da linha. “—” = dado ainda não coletado para essa versão (não significa que o carro não tem). Especificações e equipamentos coletados via pesquisa web, sem verificação humana — confirme na concessionária.</p>
+
+<script>
+(function () {
+  "use strict";
+  const SUPABASE_URL = "https://hyadsuasvuwsjcrhgmwc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5YWRzdWFzdnV3c2pjcmhnbXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwOTM1MDUsImV4cCI6MjEwMjY2OTUwNX0.X2SJ0upEYQ0M9SJCgCEeVikdumSSgQXShKPK07Qu6HE";
+  const REST = SUPABASE_URL + "/rest/v1";
+  const HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY };
+  const C = window.BEComparar;
+  const norm = C.normalize;
+  const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  const nf = (v, suf) => Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + (suf || "");
+  const esc = (s) => (s == null ? "" : String(s)).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  const tokens = (s) => norm(s).replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+  const num = (v) => (v === null || v === undefined || v === "" || isNaN(Number(v)) ? null : Number(v));
+  const CAT_LABEL = { BEV: "Elétrico (BEV)", PHEV: "Híbrido plug-in (PHEV)", HEV: "Híbrido (HEV)" };
+
+  const els = {
+    busca: document.getElementById("busca"), resultados: document.getElementById("resultados"),
+    hint: document.getElementById("hint"), area: document.getElementById("area"),
+    avisos: document.getElementById("avisos"), legenda: document.getElementById("legenda"),
+    soDif: document.getElementById("soDif"), btnLimpar: document.getElementById("btnLimpar"),
+    btnLink: document.getElementById("btnLink"), scrollHint: document.getElementById("scrollHint"),
+  };
+
+  // ---- Dados ---------------------------------------------------------------
+  let carregado = false;
+  let specs = [], specPorId = {}, specsPorFipe = {};
+  let mercado = [], mercPorFipe = {};
+  let manutPorFipe = {};
+  let opcPorVersao = {};
+  let catalogo = [];
+
+  async function getJSON(path) {
+    const resp = await fetch(REST + path, { headers: HEADERS });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    return resp.json();
+  }
+
+  async function carregar() {
+    const [sp, me, ma, op] = await Promise.allSettled([
+      getJSON("/especificacoes_tecnicas?select=*&order=marca.asc,modelo.asc,preco_tabela.asc"),
+      getJSON("/mercado_completo?select=codigo_fipe,marca_nome,modelo_nome,categoria,preco_fipe_atual,mes_referencia,depreciacao_anual_pct,confianca&order=marca_nome.asc,modelo_nome.asc"),
+      getJSON("/manutencao_estimada?select=codigo_fipe,custo_revisao_estimado,custo_revisao_min,custo_revisao_max,intervalo_km,intervalo_meses,n_revisoes_gratuitas,anos_cobertura_gratuita,custo_manutencao_anual_estimado,metodo,percentual_sobre_preco"),
+      getJSON("/especificacoes_opcionais?select=marca,modelo,versao,ano_modelo,categoria,item,disponibilidade,pacote_nome&order=categoria.asc,item.asc"),
+    ]);
+    if (sp.status === "fulfilled") specs = sp.value;
+    if (me.status === "fulfilled") mercado = me.value;
+    if (ma.status === "fulfilled") ma.value.forEach((m) => { if (m.codigo_fipe) manutPorFipe[m.codigo_fipe.trim()] = m; });
+    if (op.status === "fulfilled") op.value.forEach((o) => {
+      const k = C.idSpec(o.marca, o.modelo, o.versao, o.ano_modelo);
+      (opcPorVersao[k] = opcPorVersao[k] || []).push(o);
+    });
+    if (sp.status === "rejected" && me.status === "rejected") throw sp.reason;
+
+    specs.forEach((s) => {
+      s._id = C.idSpec(s.marca, s.modelo, s.versao, s.ano_modelo);
+      s._tok = tokens(s.modelo);
+      specPorId[s._id] = s;
+      if (s.codigo_fipe) (specsPorFipe[s.codigo_fipe.trim()] = specsPorFipe[s.codigo_fipe.trim()] || []).push(s);
+    });
+    mercado.forEach((m) => { if (m.codigo_fipe) mercPorFipe[m.codigo_fipe.trim()] = m; });
+
+    // Catálogo da busca: cada versão da ficha técnica + cada carro do mercado
+    // FIPE que não tem ficha própria (para não aparecer duas vezes).
+    catalogo = specs.map((s) => ({
+      item: itemDeSpec(s),
+      busca: norm([s.marca, s.modelo, s.versao, s.ano_modelo, s.tipo_motorizacao].join(" ")),
+      titulo: s.marca + " " + s.modelo + " " + s.versao,
+      sub: [s.ano_modelo ? "ano-modelo " + s.ano_modelo : "", s.preco_tabela ? brl.format(s.preco_tabela) : ""].filter(Boolean).join(" · "),
+      cat: s.tipo_motorizacao,
+    })).concat(mercado.filter((m) => m.codigo_fipe && !specsPorFipe[m.codigo_fipe.trim()]).map((m) => ({
+      item: itemDeMercado(m),
+      busca: norm([m.marca_nome, m.modelo_nome, m.categoria].join(" ")),
+      titulo: m.marca_nome + " " + m.modelo_nome,
+      sub: [m.preco_fipe_atual ? "FIPE " + brl.format(m.preco_fipe_atual) : "", "código " + m.codigo_fipe].filter(Boolean).join(" · "),
+      cat: m.categoria,
+    })));
+    carregado = true;
+  }
+
+  function itemDeSpec(s) {
+    return { id: s._id || C.idSpec(s.marca, s.modelo, s.versao, s.ano_modelo), nome: s.marca + " " + s.modelo + " " + s.versao,
+      marca: s.marca, modelo: s.modelo, versao: s.versao, ano: s.ano_modelo, cat: s.tipo_motorizacao,
+      fipe: s.codigo_fipe || null, origem: "comparar" };
+  }
+  function itemDeMercado(m) {
+    return { id: C.idFipe(m.codigo_fipe), nome: m.marca_nome + " " + m.modelo_nome,
+      marca: m.marca_nome, modelo: m.modelo_nome, cat: m.categoria, fipe: m.codigo_fipe, origem: "comparar" };
+  }
+
+  // Liga cada carro da lista aos dados das tabelas.
+  function resolver(item) {
+    const r = { item, spec: null, specAprox: false, merc: null, manut: null, opc: null };
+    if (item.id.indexOf("s:") === 0) r.spec = specPorId[item.id] || null;
+    const fipe = (item.fipe || (r.spec && r.spec.codigo_fipe) || "").trim();
+    if (fipe) { r.merc = mercPorFipe[fipe] || null; r.manut = manutPorFipe[fipe] || null; }
+    if (!r.spec) {
+      const preco = r.merc ? num(r.merc.preco_fipe_atual) : null;
+      const pertoDoPreco = (lista) => lista.slice().sort((a, b) =>
+        Math.abs((num(a.preco_tabela) || 0) - (preco || 0)) - Math.abs((num(b.preco_tabela) || 0) - (preco || 0)))[0];
+      if (fipe && specsPorFipe[fipe]) {
+        r.spec = pertoDoPreco(specsPorFipe[fipe]);
+      } else if (item.marca && item.modelo) {
+        // Sem ficha com o mesmo código FIPE: usa a ficha do mesmo modelo
+        // (mesma regra do link "Especificações" do Custo Real), sinalizada.
+        const mt = tokens(item.modelo), marcaN = norm(item.marca);
+        let melhorLen = 0, cands = [];
+        specs.forEach((s) => {
+          if (norm(s.marca) !== marcaN || !s._tok.length || s._tok.length > mt.length) return;
+          for (let i = 0; i < s._tok.length; i++) if (s._tok[i] !== mt[i]) return;
+          if (s._tok.length > melhorLen) { melhorLen = s._tok.length; cands = [s]; }
+          else if (s._tok.length === melhorLen) cands.push(s);
+        });
+        const mesmaCat = item.cat ? cands.filter((s) => s.tipo_motorizacao === item.cat) : cands;
+        if (mesmaCat.length) { r.spec = pertoDoPreco(mesmaCat); r.specAprox = true; }
+      }
+    }
+    if (r.spec) {
+      const k = C.idSpec(r.spec.marca, r.spec.modelo, r.spec.versao, r.spec.ano_modelo);
+      r.opc = opcPorVersao[k] || null;
+    }
+    return r;
+  }
+
+  // ---- Linhas da tabela ----------------------------------------------------
+  // best: "min" | "max" | null — a melhor célula da linha ganha destaque.
+  function precoTabela(r) { return r.spec && num(r.spec.preco_tabela) != null ? num(r.spec.preco_tabela) : (r.merc ? num(r.merc.preco_fipe_atual) : null); }
+  const fBRL = (v) => brl.format(v);
+  const S = (campo) => (r) => (r.spec ? num(r.spec[campo]) : null);
+  const T = (campo) => (r) => (r.spec && r.spec[campo] ? r.spec[campo] : null);
+  // Sem plano de revisão coletado, usa a média da categoria (percentual do
+  // preço por ano) — mesma regra do Custo Real.
+  function manutAnual(r) {
+    if (!r.manut) return null;
+    const v = num(r.manut.custo_manutencao_anual_estimado);
+    if (r.manut.metodo === "cotacao_especifica" && v != null) return v;
+    const pct = num(r.manut.percentual_sobre_preco), preco = r.merc ? num(r.merc.preco_fipe_atual) : precoTabela(r);
+    return pct != null && preco != null ? pct * preco : null;
+  }
+  const CALC = (campo) => (r) => (r.item.calc ? num(r.item.calc[campo]) : null);
+
+  function secoes(res) {
+    const temCalc = res.some((r) => r.item.calc);
+    const out = [
+      { titulo: "Preço", linhas: [
+        { label: "Motorização", get: (r) => r.item.cat || (r.spec && r.spec.tipo_motorizacao) || (r.merc && r.merc.categoria) || null, fmt: (v) => CAT_LABEL[v] || v },
+        { label: "Preço de tabela", get: precoTabela, fmt: fBRL, best: "min" },
+        { label: "Preço FIPE atual", get: (r) => (r.merc ? num(r.merc.preco_fipe_atual) : null), fmt: fBRL, best: "min" },
+        { label: "Perda de valor por ano", get: (r) => (r.merc ? num(r.merc.depreciacao_anual_pct) : null), fmt: (v) => nf(v * 100, "%"), best: "min",
+          sub: (r) => (r.merc && r.merc.confianca ? "estimativa: " + r.merc.confianca.toLowerCase() : "") },
+      ]},
+    ];
+    if (temCalc) {
+      out.push({ titulo: "Custo real", nota: "do seu último cálculo no Custo Real", linhas: [
+        { label: "Custo real no período", get: CALC("custoReal"), fmt: fBRL, best: "min",
+          sub: (r) => (r.item.calc ? r.item.calc.anos + (r.item.calc.anos === 1 ? " ano" : " anos") + (r.item.calc.isPcd ? " · preço PCD" : "") : "") },
+        { label: "Perda de valor", get: CALC("perdaValor"), fmt: fBRL, best: "min" },
+        { label: "Energia / combustível", get: CALC("custoEnergiaPeriodo"), fmt: fBRL, best: "min",
+          sub: (r) => (r.item.calc && r.item.calc.custoEnergiaMes != null ? fBRL(r.item.calc.custoEnergiaMes) + "/mês" : "") },
+        { label: "Manutenção / revisões", get: CALC("custoManutencaoPeriodo"), fmt: fBRL, best: "min" },
+        { label: "IPVA", get: CALC("ipvaPeriodo"), fmt: fBRL, best: "min" },
+        { label: "Preço de compra usado", get: CALC("precoCompra"), fmt: fBRL, best: "min" },
+      ]});
+    }
+    out.push(
+      { titulo: "Manutenção", linhas: [
+        { label: "Manutenção por ano", get: manutAnual, fmt: fBRL, best: "min",
+          sub: (r) => (!r.manut ? "" : r.manut.metodo === "cotacao_especifica" && num(r.manut.custo_manutencao_anual_estimado) != null ? "plano de revisões coletado"
+            : "média da categoria: " + nf(num(r.manut.percentual_sobre_preco) * 100, "% do preço/ano")) },
+        { label: "Revisão (média)", get: (r) => (r.manut ? num(r.manut.custo_revisao_estimado) : null), fmt: fBRL, best: "min",
+          sub: (r) => (r.manut && num(r.manut.custo_revisao_min) != null && num(r.manut.custo_revisao_max) != null ? fBRL(num(r.manut.custo_revisao_min)) + " a " + fBRL(num(r.manut.custo_revisao_max)) : "") },
+        { label: "Revisões gratuitas", get: (r) => (r.manut ? num(r.manut.n_revisoes_gratuitas) : null), fmt: (v) => nf(v), best: "max" },
+        { label: "Intervalo de revisão", get: (r) => {
+            if (!r.manut) return null;
+            const p = [];
+            if (r.manut.intervalo_km) p.push(nf(r.manut.intervalo_km, " km"));
+            if (r.manut.intervalo_meses) p.push(r.manut.intervalo_meses + " meses");
+            return p.length ? p.join(" ou ") : null;
+          } },
+      ]},
+      { titulo: "Desempenho", linhas: [
+        { label: "Potência", get: S("potencia_motor_cv"), fmt: (v) => nf(v, " cv"), best: "max" },
+        { label: "Torque", get: S("torque_nm"), fmt: (v) => nf(v, " Nm"), best: "max" },
+        { label: "0–100 km/h", get: S("aceleracao_0_100_s"), fmt: (v) => nf(v, " s"), best: "min" },
+        { label: "Velocidade máxima", get: S("velocidade_max_kmh"), fmt: (v) => nf(v, " km/h"), best: "max" },
+        { label: "Tração", get: T("tracao") },
+      ]},
+      { titulo: "Bateria e autonomia", linhas: [
+        { label: "Bateria", get: S("capacidade_bateria_kwh"), fmt: (v) => nf(v, " kWh"), best: "max" },
+        { label: "Autonomia elétrica", get: S("autonomia_eletrica_km"), fmt: (v) => nf(v, " km"), best: "max" },
+        { label: "Autonomia total", get: S("autonomia_total_km"), fmt: (v) => nf(v, " km"), best: "max" },
+        { label: "Tanque", get: S("capacidade_tanque_litros"), fmt: (v) => nf(v, " L") },
+        { label: "Garantia da bateria", get: T("garantia_bateria") },
+      ]},
+      { titulo: "Recarga", linhas: [
+        { label: "Recarga AC", get: S("potencia_carregamento_ac_kw"), fmt: (v) => nf(v, " kW"), best: "max" },
+        { label: "Recarga DC", get: S("potencia_carregamento_dc_kw"), fmt: (v) => nf(v, " kW"), best: "max" },
+        { label: "Tempo de recarga", get: T("tempo_recarga_resumo") },
+      ]},
+      { titulo: "Dimensões", linhas: [
+        { label: "Comprimento", get: S("comprimento_mm"), fmt: (v) => nf(v, " mm") },
+        { label: "Largura", get: S("largura_mm"), fmt: (v) => nf(v, " mm") },
+        { label: "Altura", get: S("altura_mm"), fmt: (v) => nf(v, " mm") },
+        { label: "Entre-eixos", get: S("entre_eixos_mm"), fmt: (v) => nf(v, " mm"), best: "max" },
+        { label: "Porta-malas", get: S("porta_malas_litros"), fmt: (v) => nf(v, " L"), best: "max" },
+        { label: "Peso", get: S("peso_kg"), fmt: (v) => nf(v, " kg") },
+        { label: "Estepe", get: T("estepe") },
+      ]}
+    );
+
+    // Equipamentos: união dos itens coletados de todos os carros, por categoria.
+    const ORDEM = ["Conforto", "Segurança", "ADAS/Assistência ao motorista", "Multimídia/Conectividade", "Exterior", "Interior/Acabamento"];
+    const porCat = {};
+    res.forEach((r, i) => (r.opc || []).forEach((o) => {
+      const cat = o.categoria || "Outros", k = norm(o.item);
+      porCat[cat] = porCat[cat] || {};
+      const linha = porCat[cat][k] = porCat[cat][k] || { label: o.item, por: {} };
+      linha.por[i] = o;
+    }));
+    const cats = ORDEM.filter((c) => porCat[c]).concat(Object.keys(porCat).filter((c) => ORDEM.indexOf(c) === -1).sort());
+    cats.forEach((cat) => {
+      const linhas = Object.keys(porCat[cat]).sort().map((k) => {
+        const L = porCat[cat][k];
+        return { label: L.label, equip: true, get: (r, i) => {
+          if (!r.opc) return null;               // versão sem equipamentos coletados
+          const o = L.por[i];
+          if (!o) return "nao_consta";
+          return o.disponibilidade || "serie";
+        }, pacote: (i) => (L.por[i] && L.por[i].pacote_nome) || "" };
+      });
+      out.push({ titulo: cat, nota: "equipamentos", fechada: true, linhas });
+    });
+    return out;
+  }
+
+  function celulaEquip(v, pacote) {
+    if (v === null) return { html: "—", nd: true, txt: "" };
+    if (v === "serie") return { html: '<span class="eq-s">✓ de série</span>', txt: "serie" };
+    if (v === "opcional") return { html: '<span class="eq-o">✓ opcional</span>', txt: "opcional" };
+    if (v === "pacote") return { html: '<span class="eq-p">✓ pacote' + (pacote ? ": " + esc(pacote) : "") + "</span>", txt: "pacote" };
+    if (v === "indisponivel") return { html: '<span class="eq-n">✕ não tem</span>', txt: "nao" };
+    return { html: '<span class="eq-n">não consta</span>', txt: "nc" };
+  }
+
+  // ---- Render ---------------------------------------------------------------
+  const fechadas = {};   // título da seção -> true/false (estado do usuário)
+
+  function render() {
+    const lista = C.list();
+    sincronizarURL(lista);
+    els.btnLimpar.disabled = !lista.length;
+    els.btnLink.disabled = !lista.length;
+
+    if (!lista.length) {
+      els.avisos.innerHTML = "";
+      els.legenda.hidden = true;
+      els.scrollHint.style.display = "none";
+      els.area.innerHTML = '<div class="cmp-empty"><div class="big">⇄</div><strong>Nenhum carro na comparação ainda.</strong><br>' +
+        "Toque em <strong>+ Comparar</strong> nas outras páginas do site, ou busque um carro no campo acima.</div>";
+      return;
+    }
+    if (!carregado) {
+      els.area.innerHTML = '<div class="cmp-empty">Carregando dados dos carros…</div>';
+      return;
+    }
+
+    const res = lista.map(resolver);
+    const soDif = els.soDif.checked;
+
+    // Avisos
+    const avisos = [];
+    const crits = res.filter((r) => r.item.calc).map((r) => r.item.calc.criterio || "");
+    if (crits.length > 1 && crits.some((c) => c !== crits[0])) {
+      avisos.push("Os custos reais foram calculados com critérios diferentes (período, km, estado ou preço PCD). Para comparar de forma justa, recalcule no Custo Real — os carros da comparação são atualizados automaticamente.");
+    }
+    els.avisos.innerHTML = avisos.map((a) => '<div class="cmp-warn">' + esc(a) + "</div>").join("");
+
+    let h = '<div class="cmp-scroll"><table class="cmp" style="--ncol:' + (lista.length + (lista.length < C.MAX ? 1 : 0)) + '"><thead><tr><th class="lbl" scope="col">' + lista.length + " de " + C.MAX + " carros</th>";
+    res.forEach((r) => { h += '<th scope="col">' + cabecalho(r) + "</th>"; });
+    if (lista.length < C.MAX) h += '<th class="add-col"><button type="button" data-acao="add">＋ Adicionar carro</button></th>';
+    h += "</tr></thead>";
+
+    const ncol = lista.length + (lista.length < C.MAX ? 1 : 0);
+    secoes(res).forEach((sec) => {
+      const fechada = fechadas[sec.titulo] !== undefined ? fechadas[sec.titulo] : !!sec.fechada;
+      let corpo = "", visiveis = 0;
+      sec.linhas.forEach((L) => {
+        const cel = res.map((r, i) => {
+          const v = L.get(r, i);
+          if (L.equip) { const c = celulaEquip(v, L.pacote(i)); return { v, html: c.html, nd: c.nd, cmp: c.txt }; }
+          if (v === null || v === undefined || v === "") return { v: null, html: "—", nd: true, cmp: "" };
+          const sub = L.sub ? L.sub(r) : "";
+          return { v, html: '<span class="val">' + esc(L.fmt ? L.fmt(v) : v) + "</span>" + (sub ? '<span class="sub">' + esc(sub) + "</span>" : ""), cmp: L.fmt ? L.fmt(v) : String(v) };
+        });
+        const comDado = cel.filter((c) => !c.nd);
+        if (!comDado.length) return;                         // ninguém tem esse dado
+        if (soDif && res.length > 1 && cel.every((c) => c.cmp === cel[0].cmp)) return;
+        let best = null;
+        if (L.best) {
+          const nums = cel.filter((c) => typeof c.v === "number").map((c) => c.v);
+          if (nums.length >= 2 && Math.min.apply(null, nums) !== Math.max.apply(null, nums)) {
+            best = L.best === "min" ? Math.min.apply(null, nums) : Math.max.apply(null, nums);
+          }
+        }
+        visiveis++;
+        corpo += '<tr class="r' + (fechada ? " hide" : "") + '"><th class="lbl" scope="row">' + esc(L.label) + "</th>" +
+          cel.map((c) => '<td class="v' + (c.nd ? " nd" : "") + (best !== null && c.v === best ? " best" : "") + '"' +
+            (c.nd ? ' title="Dado ainda não coletado"' : "") + ">" + c.html + "</td>").join("") +
+          (lista.length < C.MAX ? "<td></td>" : "") + "</tr>";
+      });
+      if (!visiveis) return;
+      h += '<tbody><tr class="sec" aria-expanded="' + !fechada + '"><th colspan="' + (ncol + 1) + '"><button type="button" data-sec="' + esc(sec.titulo) + '">' +
+        '<span class="ch">▾</span>' + esc(sec.titulo) + (sec.nota ? ' <span class="nota">· ' + esc(sec.nota) + (fechada ? " (" + visiveis + ")" : "") + "</span>" : (fechada ? ' <span class="nota">(' + visiveis + ")</span>" : "")) +
+        "</button></th></tr>" + corpo + "</tbody>";
+    });
+    h += "</table></div>";
+    els.area.innerHTML = h;
+    els.legenda.hidden = false;
+    els.scrollHint.style.display = "";
+  }
+
+  function cabecalho(r) {
+    const it = r.item, s = r.spec;
+    const marca = it.marca || (s && s.marca) || "";
+    let nome, ver;
+    if (it.id.indexOf("s:") === 0 && s) { nome = s.modelo; ver = s.versao + (s.ano_modelo ? " · " + s.ano_modelo : ""); }
+    else { nome = it.modelo || it.nome; ver = it.fipe ? "FIPE " + it.fipe : ""; }
+    const cat = it.cat || (s && s.tipo_motorizacao) || (r.merc && r.merc.categoria) || "";
+    const links = [];
+    if (s) links.push('<a href="especificacoes.html?marca=' + encodeURIComponent(s.marca) + "&modelo=" + encodeURIComponent(s.modelo) +
+      "&versao=" + encodeURIComponent(s.versao) + "&categoria=" + encodeURIComponent(s.tipo_motorizacao || "") + '" target="_blank" rel="noopener">Ficha técnica ↗</a>');
+    const fipe = it.fipe || (s && s.codigo_fipe);
+    if (fipe) links.push('<a href="fipe-historico.html?codigo_fipe=' + encodeURIComponent(fipe) + "&marca=" + encodeURIComponent(marca) +
+      "&modelo=" + encodeURIComponent(it.modelo || (s && s.modelo) || "") + '" target="_blank" rel="noopener">Histórico FIPE ↗</a>');
+    return '<div class="car-h"><div class="top"><div><div class="marca">' + esc(marca) + '</div><div class="nome">' + esc(nome) + "</div></div>" +
+      '<button type="button" class="rm" data-rm="' + esc(it.id) + '" aria-label="Remover ' + esc(it.nome || nome) + ' da comparação" title="Remover">×</button></div>' +
+      (ver ? '<div class="ver">' + esc(ver) + "</div>" : "") +
+      (cat ? '<span class="badge ' + esc(cat) + '">' + esc(cat) + "</span>" : "") +
+      (r.specAprox ? '<div class="aprox">Ficha técnica aproximada: versão ' + esc(s.versao) + " (sem ficha desta versão exata)</div>" : "") +
+      (!s && !r.merc ? '<div class="aprox">Ainda não temos dados deste carro no catálogo.</div>' : "") +
+      (!s && r.merc ? '<div class="aprox">Ficha técnica ainda não coletada — só preço e custos.</div>' : "") +
+      (links.length ? '<div class="links">' + links.join("") + "</div>" : "") + "</div>";
+  }
+
+  els.area.addEventListener("click", (e) => {
+    const rm = e.target.closest("[data-rm]");
+    if (rm) { C.remove(rm.getAttribute("data-rm")); return; }
+    const sec = e.target.closest("[data-sec]");
+    if (sec) {
+      const t = sec.getAttribute("data-sec");
+      const tr = sec.closest("tr");
+      fechadas[t] = tr.getAttribute("aria-expanded") === "true";
+      render();
+      return;
+    }
+    if (e.target.closest('[data-acao="add"]')) { els.busca.focus(); els.busca.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  });
+  els.soDif.addEventListener("change", render);
+  els.btnLimpar.addEventListener("click", () => { if (confirm("Remover todos os carros da comparação?")) C.clear(); });
+
+  // ---- Link compartilhável (?c=id&c=id) -------------------------------------
+  function urlCompartilhavel(lista) {
+    const base = (window.self === window.top ? location.origin + location.pathname : location.origin + location.pathname.replace(/tab-comparar\.html$/, "comparar.html"));
+    const p = new URLSearchParams();
+    lista.forEach((x) => p.append("c", x.id));
+    return base + (lista.length ? "?" + p.toString() : "");
+  }
+  function sincronizarURL(lista) {
+    // Só depois de carregar: antes disso um link compartilhado (?c=...) ainda
+    // não foi aplicado e seria apagado da barra de endereço.
+    if (!carregado || !history.replaceState || window.self !== window.top) return;
+    const alvo = urlCompartilhavel(lista);
+    if (alvo !== location.href) history.replaceState(null, "", alvo);
+  }
+  els.btnLink.addEventListener("click", async () => {
+    const url = urlCompartilhavel(C.list());
+    try { await navigator.clipboard.writeText(url); C.toast("Link da comparação copiado."); }
+    catch (e) { prompt("Copie o link da comparação:", url); }
+  });
+
+  // Abriu um link compartilhado: monta a lista a partir dos ids.
+  function aplicarURL() {
+    const ids = new URLSearchParams(location.search).getAll("c").filter(Boolean).slice(0, C.MAX);
+    if (!ids.length) return;
+    const atual = C.list();
+    if (ids.join(",") === atual.map((x) => x.id).join(",")) return;
+    const porId = {};
+    atual.forEach((x) => (porId[x.id] = x));
+    catalogo.forEach((c) => { if (!porId[c.item.id]) porId[c.item.id] = c.item; });
+    const novos = ids.map((id) => {
+      if (porId[id]) return porId[id];
+      if (id.indexOf("f:") === 0 && mercPorFipe[id.slice(2)]) return itemDeMercado(mercPorFipe[id.slice(2)]);
+      return null;
+    }).filter(Boolean);
+    if (novos.length) C.set(novos);
+  }
+
+  // ---- Busca para adicionar -------------------------------------------------
+  let achados = [], ativo = -1;
+  function buscar(q) {
+    const t = norm(q).split(/\s+/).filter(Boolean);
+    if (!t.length) return [];
+    return catalogo.filter((c) => t.every((x) => c.busca.indexOf(x) !== -1)).slice(0, 30);
+  }
+  function mostrarAchados() {
+    if (!achados.length) {
+      els.resultados.classList.toggle("open", !!els.busca.value.trim());
+      els.resultados.innerHTML = els.busca.value.trim() ? '<div class="cmp-ri dis"><div class="s">Nenhum carro encontrado.</div></div>' : "";
+      return;
+    }
+    els.resultados.innerHTML = achados.map((c, i) => {
+      const ja = C.has(c.item.id);
+      return '<div class="cmp-ri' + (ja ? " dis" : "") + (i === ativo ? " active" : "") + '" data-i="' + i + '" role="option">' +
+        '<div><div class="t">' + esc(c.titulo) + '</div><div class="s">' + esc(c.sub) + (ja ? " · já está na comparação" : "") + "</div></div>" +
+        (c.cat ? '<span class="badge ' + esc(c.cat) + '">' + esc(c.cat) + "</span>" : "") + "</div>";
+    }).join("");
+    els.resultados.classList.add("open");
+  }
+  function escolher(i) {
+    const c = achados[i];
+    if (!c || C.has(c.item.id)) return;
+    const r = C.add(Object.assign({}, c.item));
+    if (!r.ok && r.motivo === "cheio") { C.toast("A comparação já tem " + C.MAX + " carros. Remova um para adicionar outro."); return; }
+    els.busca.value = "";
+    achados = []; ativo = -1;
+    els.resultados.classList.remove("open");
+  }
+  els.busca.addEventListener("input", () => { achados = carregado ? buscar(els.busca.value) : []; ativo = -1; mostrarAchados(); });
+  els.busca.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" && achados.length) { e.preventDefault(); ativo = Math.min(ativo + 1, achados.length - 1); mostrarAchados(); }
+    else if (e.key === "ArrowUp" && achados.length) { e.preventDefault(); ativo = Math.max(ativo - 1, 0); mostrarAchados(); }
+    else if (e.key === "Enter") { e.preventDefault(); escolher(ativo >= 0 ? ativo : 0); }
+    else if (e.key === "Escape") els.resultados.classList.remove("open");
+  });
+  els.resultados.addEventListener("click", (e) => { const it = e.target.closest("[data-i]"); if (it) escolher(+it.dataset.i); });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".cmp-add")) els.resultados.classList.remove("open"); });
+
+  // ---- Início ---------------------------------------------------------------
+  C.onChange(render);
+  render();
+  carregar().then(() => {
+    els.hint.textContent = catalogo.length.toLocaleString("pt-BR") + " carros e versões no catálogo.";
+    aplicarURL();
+    render();
+  }).catch((err) => {
+    console.error(err);
+    els.hint.textContent = "Não foi possível carregar os dados agora. Verifique sua conexão e recarregue a página.";
+    els.hint.style.color = "var(--red)";
+    els.area.innerHTML = '<div class="cmp-empty">Não foi possível carregar os dados dos carros. Tente recarregar a página.</div>';
+  });
+})();
+</script>
+
+</div>
+<style>.site-footer{max-width:900px;margin:24px auto 0;padding:18px 16px 96px;text-align:center;font-size:13px;line-height:1.7;color:#64778c}.site-footer a{color:#0a3e91;font-weight:600;text-decoration:none}.site-footer a:hover{text-decoration:underline}</style>
+<div class="ad-slot" aria-label="Publicidade"></div>
+<script src="ads-guard.js" defer></script>
+<footer class="site-footer"><a href="sobre.html">Sobre e contato</a> · <a href="politica-privacidade.html">Política de Privacidade</a> · © 2026 BuscaElétrico</footer>
+</body>
+</html>

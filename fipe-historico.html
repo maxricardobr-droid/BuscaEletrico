@@ -205,6 +205,7 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
+<script src="comparar.js"></script>
 <button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
   <span></span><span></span><span></span>
 </button>
@@ -219,6 +220,7 @@
   <a href="fipe-historico.html" class="hb-link active">◷ Histórico FIPE</a>
   <a href="vendas.html" class="hb-link">▥ Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link">◈ Especificações</a>
+  <a href="comparar.html" class="hb-link">⇄ Comparar carros</a>
   <a href="noticias.html" class="hb-link">◉ Notícias</a>
   <a href="forum.html" class="hb-link">◌ Fórum</a>
 </nav>
@@ -462,6 +464,7 @@
         modelo: v.modelo_nome,
         ano: v.ano_modelo,
         motorizacao: v.motorizacao,
+        fipe: v.codigo_fipe || null,
         color: COLORS[selecionados.length % COLORS.length],
         series: null
       };
@@ -486,6 +489,8 @@
       return '<div class="chip' + primary + '" data-id="' + s.id + '">' +
         '<span class="dot" style="background:' + s.color + '"></span>' +
         '<span>' + escapeHtml(s.marca) + " " + escapeHtml(s.modelo) + " (" + anoLabel(s.ano) + ")</span>" +
+        (s.fipe && window.BEComparar ? BEComparar.btn({ id: BEComparar.idFipe(s.fipe), nome: s.marca + " " + s.modelo,
+          marca: s.marca, modelo: s.modelo, cat: s.motorizacao === "eletrico" ? "BEV" : null, fipe: s.fipe, origem: "fipe" }, "be-cmp-mini") : "") +
         '<button data-remove="' + s.id + '" title="Remover">×</button>' +
       '</div>';
     }).join("");

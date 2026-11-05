@@ -181,6 +181,7 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
+<script src="comparar.js"></script>
 <button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
   <span></span><span></span><span></span>
 </button>
@@ -195,6 +196,7 @@
   <a href="fipe-historico.html" class="hb-link">◷ Histórico FIPE</a>
   <a href="vendas.html" class="hb-link">▥ Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link active">◈ Especificações</a>
+  <a href="comparar.html" class="hb-link">⇄ Comparar carros</a>
   <a href="noticias.html" class="hb-link">◉ Notícias</a>
   <a href="forum.html" class="hb-link">◌ Fórum</a>
 </nav>
@@ -478,7 +480,11 @@
           '<h3 class="card-title">' + escapeHtml(v.versao) + '<span class="badge ' + v.tipo_motorizacao + '" style="margin-left:8px;">' + v.tipo_motorizacao + '</span></h3>' +
           '<div class="card-sub">' + escapeHtml(v.marca) + " " + escapeHtml(v.modelo) + (v.ano_modelo ? " · ano-modelo " + escapeHtml(v.ano_modelo) : "") + '</div>' +
         '</div>' +
-        '<div class="card-price"><div class="label">Preço de tabela</div><div class="value">' + (v.preco_tabela ? currencyFmt.format(v.preco_tabela) : "—") + '</div></div>' +
+        '<div class="card-price"><div class="label">Preço de tabela</div><div class="value">' + (v.preco_tabela ? currencyFmt.format(v.preco_tabela) : "—") + '</div>' +
+          (window.BEComparar ? '<div style="margin-top:8px">' + BEComparar.btn({ id: BEComparar.idSpec(v.marca, v.modelo, v.versao, v.ano_modelo),
+            nome: v.marca + " " + v.modelo + " " + v.versao, marca: v.marca, modelo: v.modelo, versao: v.versao,
+            ano: v.ano_modelo, cat: v.tipo_motorizacao, fipe: v.codigo_fipe || null, origem: "ficha" }) + '</div>' : "") +
+        '</div>' +
       '</div>' +
       '<div class="spec-grid">' + sections + '</div>' +
       renderEquipamentos(v) +

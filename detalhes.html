@@ -135,6 +135,7 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
+<script src="comparar.js"></script>
 <button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
   <span></span><span></span><span></span>
 </button>
@@ -149,6 +150,7 @@
   <a href="fipe-historico.html" class="hb-link">◷ Histórico FIPE</a>
   <a href="vendas.html" class="hb-link">▥ Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link">◈ Especificações</a>
+  <a href="comparar.html" class="hb-link">⇄ Comparar carros</a>
   <a href="noticias.html" class="hb-link">◉ Notícias</a>
   <a href="forum.html" class="hb-link">◌ Fórum</a>
 </nav>
@@ -353,7 +355,14 @@
     const html =
       "<header class='hdr'>" +
         "<div><h1>" + esc(D.name) + "</h1>" +
-        "<div class='hdr-sub'><span class='badge badge-cat'>" + esc(D.catLabel || CAT_LABEL[D.cat] || D.cat) + "</span>" + confBadgeHtml(D.confianca, D.motivoOverride) + "</div></div>" +
+        "<div class='hdr-sub'><span class='badge badge-cat'>" + esc(D.catLabel || CAT_LABEL[D.cat] || D.cat) + "</span>" + confBadgeHtml(D.confianca, D.motivoOverride) +
+          (window.BEComparar ? " " + BEComparar.btn({ id: BEComparar.idFipe(D.codigoFipe, D.name, D.cat), nome: D.name, marca: D.marca, modelo: D.modelo,
+            cat: D.cat, fipe: D.codigoFipe || null, origem: "detalhes",
+            calc: { anos: D.anos, custoReal: D.custoReal, perdaValor: D.perdaValor, custoEnergiaPeriodo: D.custoEnergiaPeriodo,
+              custoEnergiaMes: D.custoEnergiaMes, custoManutencaoPeriodo: D.custoManutencaoPeriodo,
+              ipvaPeriodo: D.ipvaAnual != null ? D.ipvaAnual * D.anos : null, precoCompra: D.precoCompra, isPcd: !!D.isPcd,
+              criterio: D.criterio || "", em: new Date().toISOString() } }) : "") +
+        "</div></div>" +
       "</header>" +
       "<div class='hdr-period'>Período escolhido: " + periodoLabel + (D.comparar ? " · comparando com o carro atual" : "") + "</div>" +
       "<div class='summary'>" +

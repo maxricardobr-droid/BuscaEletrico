@@ -373,6 +373,7 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
+<script src="comparar.js"></script>
 <button class="hb-btn" id="hbBtn" onclick="hbToggle()" aria-label="Abrir menu">
   <span></span><span></span><span></span>
 </button>
@@ -387,6 +388,7 @@
   <a href="fipe-historico.html" class="hb-link">◷ Histórico FIPE</a>
   <a href="vendas.html" class="hb-link">▥ Ranking de Vendas</a>
   <a href="especificacoes.html" class="hb-link">◈ Especificações</a>
+  <a href="comparar.html" class="hb-link">⇄ Comparar carros</a>
   <a href="noticias.html" class="hb-link">◉ Notícias</a>
   <a href="forum.html" class="hb-link">◌ Fórum</a>
 </nav>
@@ -906,6 +908,9 @@
       (equipPills.length ? '<div class="pills">' + equipPills.join("") + "</div>" : "") +
       '<div class="rc-foot">' +
         '<a href="' + link + '">Ver ficha completa</a>' +
+        (window.BEComparar ? BEComparar.btn({ id: BEComparar.idSpec(v.marca, v.modelo, v.versao, v.ano_modelo),
+          nome: v.marca + " " + v.modelo + " " + v.versao, marca: v.marca, modelo: v.modelo, versao: v.versao,
+          ano: v.ano_modelo, cat: v.tipo_motorizacao, fipe: v.codigo_fipe || null, origem: "pesquisa" }) : "") +
         (parcial ? '<span class="warn">Entrou na lista porque parte do que você filtrou ainda não foi coletado nessa versão.</span>' : "") +
       "</div>" +
     "</article>";

@@ -346,6 +346,7 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
+<script src="comparar.js"></script>
 <div class="wrap">
 <header class="topbar"><a class="brand-mini" href="CustoReal.html"><img src="img/logo.png" width="46" height="42" alt="BuscaElétrico"><div><strong>BuscaElétrico</strong><span>Decisão baseada em dados</span></div></a><div class="top-actions"><div class="top-pill">⚡ BEV</div><div class="top-pill">🔌 PHEV</div><div class="top-pill">♻️ HEV</div></div></header>
 
@@ -886,6 +887,9 @@
       (equipPills.length ? '<div class="pills">' + equipPills.join("") + "</div>" : "") +
       '<div class="rc-foot">' +
         '<a href="' + link + '">Ver ficha completa</a>' +
+        (window.BEComparar ? BEComparar.btn({ id: BEComparar.idSpec(v.marca, v.modelo, v.versao, v.ano_modelo),
+          nome: v.marca + " " + v.modelo + " " + v.versao, marca: v.marca, modelo: v.modelo, versao: v.versao,
+          ano: v.ano_modelo, cat: v.tipo_motorizacao, fipe: v.codigo_fipe || null, origem: "pesquisa" }) : "") +
         (parcial ? '<span class="warn">Entrou na lista porque parte do que você filtrou ainda não foi coletado nessa versão.</span>' : "") +
       "</div>" +
     "</article>";
@@ -1272,6 +1276,7 @@
     "CustoReal.html": "custoreal", "index.html": "custoreal",
     "especificacoes.html": "especificacoes",
     "pesquisa.html": "pesquisa",
+    "comparar.html": "comparar",
     "fipe-historico.html": "fipe",
     "vendas.html": "vendas",
     "noticias.html": "noticias",

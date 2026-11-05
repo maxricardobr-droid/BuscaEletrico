@@ -154,6 +154,7 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
+<script src="comparar.js"></script>
 <div class="wrap">
 <header class="topbar"><a class="brand-mini" href="CustoReal.html"><img src="img/logo.png" width="46" height="42" alt="BuscaElétrico"><div><strong>BuscaElétrico</strong><span>Decisão baseada em dados</span></div></a><div class="top-actions"><div class="top-pill">⚡ BEV</div><div class="top-pill">🔌 PHEV</div><div class="top-pill">♻️ HEV</div></div></header>
 
@@ -423,7 +424,11 @@
           '<h3 class="card-title">' + escapeHtml(v.versao) + '<span class="badge ' + v.tipo_motorizacao + '" style="margin-left:8px;">' + v.tipo_motorizacao + '</span></h3>' +
           '<div class="card-sub">' + escapeHtml(v.marca) + " " + escapeHtml(v.modelo) + (v.ano_modelo ? " · ano-modelo " + escapeHtml(v.ano_modelo) : "") + '</div>' +
         '</div>' +
-        '<div class="card-price"><div class="label">Preço de tabela</div><div class="value">' + (v.preco_tabela ? currencyFmt.format(v.preco_tabela) : "—") + '</div></div>' +
+        '<div class="card-price"><div class="label">Preço de tabela</div><div class="value">' + (v.preco_tabela ? currencyFmt.format(v.preco_tabela) : "—") + '</div>' +
+          (window.BEComparar ? '<div style="margin-top:8px">' + BEComparar.btn({ id: BEComparar.idSpec(v.marca, v.modelo, v.versao, v.ano_modelo),
+            nome: v.marca + " " + v.modelo + " " + v.versao, marca: v.marca, modelo: v.modelo, versao: v.versao,
+            ano: v.ano_modelo, cat: v.tipo_motorizacao, fipe: v.codigo_fipe || null, origem: "ficha" }) + '</div>' : "") +
+        '</div>' +
       '</div>' +
       '<div class="spec-grid">' + sections + '</div>' +
       renderEquipamentos(v) +
@@ -570,6 +575,7 @@
     "CustoReal.html": "custoreal", "index.html": "custoreal",
     "especificacoes.html": "especificacoes",
     "pesquisa.html": "pesquisa",
+    "comparar.html": "comparar",
     "fipe-historico.html": "fipe",
     "vendas.html": "vendas",
     "noticias.html": "noticias",

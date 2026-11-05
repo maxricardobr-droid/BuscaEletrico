@@ -19,6 +19,7 @@
 </style><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5861836196723250"
      crossorigin="anonymous"></script>
 </head><body>
+<script src="comparar.js"></script>
 <div class="wrap">
 <header class="topbar"><a class="brand-mini" href="#"><img id="logoImg" alt="BuscaElétrico" width="46" height="42"><div><strong>BuscaElétrico</strong><span>Decisão baseada em dados</span></div></a><div class="top-actions"><div class="top-pill">⚡ BEV</div><div class="top-pill">🔌 PHEV</div><div class="top-pill">♻️ HEV</div></div></header>
 <section class="hero"><div class="hero-copy"><div class="eyebrow"><i></i> Comparador inteligente de mobilidade</div><h1>Quanto seu carro <span>realmente</span> custa?</h1><p>Compare elétricos e híbridos considerando preço, depreciação, energia ou combustível, manutenção e IPVA — tudo em um único lugar.</p></div><div class="hero-visual"><div class="energy-card"><div class="energy-icon">⚡</div><b>360°</b><span>VISÃO DO CUSTO</span></div><img class="car-art" src=data:image/svg+xml;charset=UTF-8,%3Csvg%20viewBox%3D%220%200%20720%20380%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23f8fcff%22/%3E%3Cstop%20offset%3D%22.48%22%20stop-color%3D%22%23b8e9ff%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235ec8ef%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id%3D%22w%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%230b1c33%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23183b61%22/%3E%3C/linearGradient%3E%3Cfilter%20id%3D%22s%22%3E%3CfeGaussianBlur%20stdDeviation%3D%228%22/%3E%3C/filter%3E%3C/defs%3E%3Cellipse%20cx%3D%22370%22%20cy%3D%22318%22%20rx%3D%22280%22%20ry%3D%2225%22%20fill%3D%22%2302152b%22%20opacity%3D%22.45%22%20filter%3D%22url%28%23s%29%22/%3E%3Cpath%20d%3D%22M125%20267c8-43%2042-73%2087-83l78-17%2071-68c17-16%2039-25%2062-25h84c24%200%2047%209%2064%2026l52%2053%2048%2014c34%2010%2057%2039%2057%2075v27H125v-2Z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23e8f9ff%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M312%20108l-39%2060h139l45-70h-87c-23%200-43%203-58%2010Zm166-10-43%2070h157l-55-51c-16-13-36-19-59-19Z%22%20fill%3D%22%23153c62%22%20opacity%3D%22.88%22/%3E%3Cpath%20d%3D%22M146%20246h566v19H146z%22%20fill%3D%22%230c2f52%22%20opacity%3D%22.8%22/%3E%3Cpath%20d%3D%22M175%20250h95%22%20stroke%3D%22%2364ddff%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%22245%22%20cy%3D%22276%22%20r%3D%2247%22%20fill%3D%22url%28%23w%29%22%20stroke%3D%22%23d7f3ff%22%20stroke-width%3D%225%22/%3E%3Ccircle%20cx%3D%22245%22%20cy%3D%22276%22%20r%3D%2221%22%20fill%3D%22%237ca0bf%22/%3E%3Ccircle%20cx%3D%22604%22%20cy%3D%22276%22%20r%3D%2247%22%20fill%3D%22url%28%23w%29%22%20stroke%3D%22%23d7f3ff%22%20stroke-width%3D%225%22/%3E%3Ccircle%20cx%3D%22604%22%20cy%3D%22276%22%20r%3D%2221%22%20fill%3D%22%237ca0bf%22/%3E%3Cpath%20d%3D%22M180%20210h74l-11%2020h-76Zm453%200h45l20%2019h-58Z%22%20fill%3D%22%23fff%22%20opacity%3D%22.75%22/%3E%3Ccircle%20cx%3D%22683%22%20cy%3D%22235%22%20r%3D%226%22%20fill%3D%22%2374f0c1%22/%3E%3Ccircle%20cx%3D%22158%22%20cy%3D%22235%22%20r%3D%226%22%20fill%3D%22%2374f0c1%22/%3E%3Cpath%20d%3D%22M96%20299h550%22%20stroke%3D%22%2376e7ff%22%20stroke-width%3D%223%22%20opacity%3D%22.5%22/%3E%3C/svg%3E alt="Ilustração de SUV elétrico futurista"></div></section>
@@ -954,6 +955,7 @@ function calcular() {
         historicoHtml +
         vendasLinkHtml +
         especHtml +
+        cmpBtnHtml(r) +
       "</div></td>" +
       "<td>" + vendasCellHtml(r) + "</td>" +
       "<td><a class='row-whatsapp' target='_blank' rel='noopener' title='Falar no WhatsApp sobre este modelo' href='" + whatsappLinkCompra(r, ufValor) + "'>" + WHATSAPP_ICON_SVG + "</a></td>" +
@@ -962,6 +964,32 @@ function calcular() {
 
   html += "</tbody></table>";
   container.innerHTML = html;
+
+  // Carros que já estão na página "Comparar" recebem o custo deste cálculo.
+  if (window.BEComparar) {
+    const novos = {};
+    rows.forEach((r) => { const it = cmpItem(r); if (BEComparar.has(it.id)) novos[it.id] = it.calc; });
+    BEComparar.updateCalc(novos);
+  }
+}
+
+// ---- Comparar carros: item da lista de comparação a partir de uma linha ----
+function cmpItem(r) {
+  const anos = LAST_CALC ? LAST_CALC.anos : null;
+  const noteEl = document.getElementById("resultsNote");
+  return {
+    id: BEComparar.idFipe(r.codigoFipe, r.name, r.cat), nome: r.name, marca: r.marca, modelo: r.modelo,
+    cat: r.cat, fipe: r.codigoFipe || null, origem: "custoreal",
+    calc: {
+      anos: anos, custoReal: r.custoReal, perdaValor: r.perdaValor, custoEnergiaPeriodo: r.custoEnergiaPeriodo,
+      custoEnergiaMes: r.custoEnergiaMes, custoManutencaoPeriodo: r.custoManutencaoPeriodo,
+      ipvaPeriodo: r.ipvaAnual != null && anos ? r.ipvaAnual * anos : null, precoCompra: r.precoCompra,
+      isPcd: !!(LAST_CALC && LAST_CALC.isPcd), criterio: noteEl ? noteEl.textContent : "", em: new Date().toISOString(),
+    },
+  };
+}
+function cmpBtnHtml(r) {
+  return window.BEComparar ? BEComparar.btn(cmpItem(r)) : "";
 }
 
 // ---- "Detalhes": em vez de modal, guarda a ficha de custo completa da linha
@@ -974,7 +1002,8 @@ function abrirDetalhes(i) {
   const r = LAST_CALC.rows[i];
   if (!r) return;
   const { anos, comparar, showPcdCols, isPcd } = LAST_CALC;
-  const detalhe = Object.assign({}, r, { anos, comparar, showPcdCols, isPcd, catLabel: CAT_LABEL[r.cat] });
+  const detalhe = Object.assign({}, r, { anos, comparar, showPcdCols, isPcd, catLabel: CAT_LABEL[r.cat],
+    criterio: (document.getElementById("resultsNote") || {}).textContent || "" });
   try {
     sessionStorage.setItem("custoRealDetalhe", JSON.stringify(detalhe));
     sessionStorage.setItem(FORM_SCROLL_KEY, String(window.scrollY || 0));
@@ -1094,6 +1123,7 @@ carregarDados().then(data => {
     "CustoReal.html": "custoreal", "index.html": "custoreal",
     "especificacoes.html": "especificacoes",
     "pesquisa.html": "pesquisa",
+    "comparar.html": "comparar",
     "fipe-historico.html": "fipe",
     "vendas.html": "vendas",
     "noticias.html": "noticias",
