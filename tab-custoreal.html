@@ -27,7 +27,7 @@
 <section class="panel"><h2>Seu perfil de compra</h2><div class="pcd-toggle" id="pcdToggleWrap"><label id="labelPcdSim"><input type="radio" name="pcd" id="pcdSim" value="sim"> Sim — usar o preço PCD confirmado</label><label id="labelPcdNao"><input type="radio" name="pcd" id="pcdNao" value="nao" checked> Não — usar preço de tabela</label></div><span class="hint">Somente carros novos (0 km). O modo PCD utiliza preço PCD quando confirmado no catálogo.</span></section>
 <section class="panel"><h2>Faixa de preço</h2><div class="price-slider"><div class="price-slider-values"><span id="precoMinLabel">R$ 100.000</span><span id="precoMaxLabel">R$ 200.000</span></div><div class="price-slider-track"><div class="price-slider-range" id="precoSliderRange"></div><input type="range" id="precoMin" min="80000" max="500000" step="1000" value="100000"><input type="range" id="precoMax" min="80000" max="500000" step="1000" value="200000"></div></div><span class="hint">Arraste as duas alças para definir o intervalo.</span></section>
 <section class="panel"><h2>Compare com seu carro atual</h2><div class="seg-toggle"><label id="labelCompararSim"><input type="radio" name="comparar" id="compararSim" value="sim" checked> Sim — quero visualizar a economia mensal</label><label id="labelCompararNao"><input type="radio" name="comparar" id="compararNao" value="nao"> Não — quero apenas o custo do carro novo</label></div></section>
-<section class="panel"><h2>Seu uso e carro atual</h2><div class="grid"><div class="field"><label for="kmMes">Km rodados por mês</label><input type="number" id="kmMes" value="1500" min="1" step="1"><span class="hint">Quilômetros por mês</span></div><div class="field" id="campoConsumoAtual"><label for="consumoAtual">Consumo do carro atual</label><input type="number" id="consumoAtual" value="10" min="0.1" step="0.1"><span class="hint">km/l</span></div><div class="field" id="campoPrecoGasolina"><label for="precoGasolina">Preço da gasolina</label><input type="number" id="precoGasolina" value="7.00" min="0.1" step="0.01"><span class="hint">R$/litro</span></div><div class="field"><label for="anos">Período de uso previsto</label><input type="number" id="anos" value="2" min="0.5" max="15" step="0.5"><span class="hint">anos</span></div></div></section>
+<section class="panel"><h2>Seu uso e carro atual</h2><div class="grid"><div class="field"><label for="kmMes">Km rodados por mês</label><input type="number" id="kmMes" value="1500" min="1" step="1"><span class="hint">Quilômetros por mês</span></div><div class="field" id="campoConsumoAtual"><label for="consumoAtual">Consumo do carro atual</label><input type="number" id="consumoAtual" value="10" min="0.1" step="0.1"><span class="hint">km/l</span></div><div class="field" id="campoPrecoGasolina"><label for="precoGasolina">Preço da gasolina</label><input type="number" id="precoGasolina" value="7.00" min="0.1" step="0.01"><span class="hint">R$/litro</span></div><div class="field"><label for="anos">Período de uso previsto</label><input type="number" id="anos" value="4" min="0.5" max="15" step="0.5"><span class="hint">anos</span></div></div></section>
 <section class="panel"><h2>Como você recarrega</h2><div class="checks"><label class="check-item"><input type="checkbox" id="carregaCasa" checked> Carrego principalmente em casa</label><label class="check-item charge-block show" id="blocoSolar"><input type="checkbox" id="temSolar"> Tenho energia solar em casa</label></div><details class="advanced"><summary>Ajustar tarifas e custos opcionais</summary><div class="grid"><div class="field"><label for="tarifaSemSolar">Tarifa residencial sem solar</label><input type="number" id="tarifaSemSolar" value="0.85" min="0" step="0.01"><span class="hint">R$/kWh</span></div><div class="field"><label for="tarifaComSolar">Custo com solar</label><input type="number" id="tarifaComSolar" value="0.20" min="0" step="0.01"><span class="hint">R$/kWh</span></div><div class="field"><label for="tarifaRua">Recarga fora de casa</label><input type="number" id="tarifaRua" value="2.00" min="0" step="0.01"><span class="hint">R$/kWh</span></div><div class="field"><label for="manutencaoExtra">Manutenção extra</label><input type="number" id="manutencaoExtra" value="0" step="10"><span class="hint">R$/ano — pneus, desgaste etc.</span></div></div></details></section>
 <section class="panel"><h2>Tipos de motorização</h2><div class="cat-toggle"><label><input type="checkbox" class="catChk" value="BEV" checked> ⚡ Elétrico (BEV)</label><label><input type="checkbox" class="catChk" value="PHEV" checked> 🔌 Híbrido plug-in (PHEV)</label><label><input type="checkbox" class="catChk" value="HEV" checked> ♻️ Híbrido pleno (HEV)</label></div></section>
 <section class="panel"><h2>Marcas de interesse</h2><div class="marcas-fixas" id="marcasFixasWrap"><label><input type="checkbox" class="marcaFixaChk" value="BAIC" checked> BAIC</label><label><input type="checkbox" class="marcaFixaChk" value="BYD" checked> BYD</label><label><input type="checkbox" class="marcaFixaChk" value="Chery" checked> Chery</label><label><input type="checkbox" class="marcaFixaChk" value="GAC" checked> GAC</label><label><input type="checkbox" class="marcaFixaChk" value="Geely" checked> Geely</label><label><input type="checkbox" class="marcaFixaChk" value="GWM" checked> GWM</label><label><input type="checkbox" class="marcaFixaChk" value="Jaecoo" checked> Jaecoo</label><label><input type="checkbox" class="marcaFixaChk" value="Jetour" checked> Jetour</label><label><input type="checkbox" class="marcaFixaChk" value="LeapMotor" checked> LeapMotor</label><label><input type="checkbox" class="marcaFixaChk" value="MG Motors" checked> MG Motors</label><label><input type="checkbox" class="marcaFixaChk" value="Omoda" checked> Omoda</label></div><div class="field marcas-autocomplete" style="margin-top:15px"><label for="marcasFiltro">Adicionar outras marcas</label><div class="marcas-box"><input type="text" id="marcasFiltro" placeholder="Digite para pesquisar…" autocomplete="off"><div id="marcasResults" class="marcas-results"></div></div><div id="marcasChips" class="marcas-chips"></div><span class="hint">As marcas principais já vêm selecionadas. Você pode remover ou adicionar outras.</span></div></section>
@@ -1024,6 +1024,7 @@ function abrirDetalhes(i) {
 var FORM_STATE_KEY = "custoRealCriterios";
 var FORM_CALC_KEY = "custoRealCriteriosCalculo";
 var FORM_SCROLL_KEY = "custoRealScrollVolta";
+var MARCAS_FIXAS_LEGADO = ["BYD", "Chery", "GAC", "Geely", "GWM", "Jaecoo", "LeapMotor", "MG Motors", "Omoda"];
 var CAMPOS_VALOR = ["precoMin", "precoMax", "kmMes", "consumoAtual", "precoGasolina", "anos", "tarifaSemSolar", "tarifaComSolar", "tarifaRua", "manutencaoExtra"];
 var CAMPOS_CHECK = ["carregaCasa", "temSolar"];
 var UF_PENDENTE = "";
@@ -1040,6 +1041,8 @@ function lerCriterios() {
   s.comparar = document.getElementById("compararSim").checked ? "sim" : "nao";
   s.cats = Array.from(document.querySelectorAll(".catChk:checked")).map(c => c.value);
   s.marcasFixas = Array.from(document.querySelectorAll(".marcaFixaChk:checked")).map(c => c.value);
+  s.marcasFixasConhecidas = Array.from(document.querySelectorAll(".marcaFixaChk")).map(c => c.value);
+  s.ver = 2;
   s.marcas = marcasSelecionadas.slice();
   s.uf = document.getElementById("ufSelecionada").value || UF_PENDENTE || "";
   return s;
@@ -1048,12 +1051,19 @@ function aplicarCriterios(s) {
   if (!s) return;
   restaurandoCriterios = true;
   try {
-    CAMPOS_VALOR.forEach(id => { if (s.v && s.v[id] != null) document.getElementById(id).value = s.v[id]; });
+    CAMPOS_VALOR.forEach(id => { if (id === "anos" && !s.ver) return; if (s.v && s.v[id] != null) document.getElementById(id).value = s.v[id]; });
     CAMPOS_CHECK.forEach(id => { if (s.c && typeof s.c[id] === "boolean") document.getElementById(id).checked = s.c[id]; });
     document.getElementById(s.pcd === "sim" ? "pcdSim" : "pcdNao").checked = true;
     document.getElementById(s.comparar === "nao" ? "compararNao" : "compararSim").checked = true;
     if (Array.isArray(s.cats)) document.querySelectorAll(".catChk").forEach(c => { c.checked = s.cats.indexOf(c.value) !== -1; });
-    if (Array.isArray(s.marcasFixas)) document.querySelectorAll(".marcaFixaChk").forEach(c => { c.checked = s.marcasFixas.indexOf(c.value) !== -1; });
+    // Marcas fixas que não existiam quando o estado foi salvo mantêm o padrão (marcadas).
+    if (Array.isArray(s.marcasFixas)) {
+      const conhecidas = Array.isArray(s.marcasFixasConhecidas) ? s.marcasFixasConhecidas : MARCAS_FIXAS_LEGADO;
+      document.querySelectorAll(".marcaFixaChk").forEach(c => {
+        if (conhecidas.indexOf(c.value) === -1) { c.checked = c.defaultChecked; return; }
+        c.checked = s.marcasFixas.indexOf(c.value) !== -1;
+      });
+    }
     if (Array.isArray(s.marcas)) marcasSelecionadas = s.marcas.slice();
     UF_PENDENTE = s.uf || "";
     const elUf = document.getElementById("ufSelecionada");
